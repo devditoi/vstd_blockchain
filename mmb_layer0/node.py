@@ -1,5 +1,5 @@
 # 1 node has 1 blockchain and 1 WorldState
-import json
+
 from rsa import PrivateKey, PublicKey
 from .blockchain.block_processor import BlockProcessor
 from .blockchain.chain.chain import Chain
@@ -8,11 +8,9 @@ from .blockchain.transaction_processor import TransactionProcessor
 from .blockchain.validator import Validator
 from mmb_layer0.blockchain.chain.worldstate import WorldState
 from .config import MMBConfig
-from .node_sync_services import NodeSyncServices
 from .utils.hash import HashUtils
 from rich import print
 from .blockchain.block import Block
-from .utils.serializer import ChainSerializer, NodeSerializer
 
 
 class NodeEvent:
@@ -55,7 +53,7 @@ class Node:
     def fire_event(self, event: NodeEvent):
         for node in self.node_subscribtions:
             if event.origin == node.address:
-                continue    
+                continue
             node.fire_event(event)
 
     def mint(self, address: str, privateKey: PrivateKey):
@@ -65,26 +63,27 @@ class Node:
         sign = HashUtils.sign(tx.to_string(), privateKey)
         self.process_tx(tx, sign, PublicKey.load_pkcs1(open(MMBConfig.MINT_KEY, "rb").read()))
 
-    def sync(self, other_json: str):
-        # sync from another node
-        other_obj = json.loads(other_json)
-        print("node.py:sync: Syncing from " + other_obj["address"])
-        blockchain_data = json.loads(other_obj["blockchain"])
-        # Check height
-        if self.blockchain.get_height() > blockchain_data["length"]:
-            return
+    # def sync(self, other_json: str):
+    #     # sync from another node
+    #     other_obj = json.loads(other_json)
+    #     print("node.py:sync: Syncing from " + other_obj["address"])
+    #     blockchain_data = json.loads(other_obj["blockchain"])
+    #     # Check height
+    #     if self.blockchain.get_height() > blockchain_data["length"]:
+    #         return
 
-        print(blockchain_data)
-        # Sync blocks
-        for i in range(self.blockchain.get_height(), blockchain_data["length"]):
-            print(f"node.py:sync: Syncing block #{i}")
-            block_data = blockchain_data["chain"][i]
-            new_block = self.blockchain.add_block(BlockProcessor.cast_block(block_data))
-            self.execution(new_block)
+        # print(blockchain_data)
+        # # Sync blocks
+        # for i in range(self.blockchain.get_height(), blockchain_data["length"]):
+        #     print(f"node.py:sync: Syncing block #{i}")
+        #     block_data = blockchain_data["chain"][i]
+        #     new_block = self.blockchain.add_block(BlockProcessor.cast_block(block_data))
+        #     self.execution(new_block)
 
-    def check_sync(self, other_json: str):
-        other_node = NodeSerializer.deserialize_node(other_json)
-        return NodeSyncServices.check_sync(self, other_node)
+    # def check_sync(self, other_json: str):
+    #     other_node = NodeSerializer.deserialize_node(other_json)
+    #     return NodeSyncServices.check_sync(self, other_node)
+
     def get_height(self) -> int:
         return self.blockchain.get_height()
 

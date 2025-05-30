@@ -1,8 +1,12 @@
 import time
+from typing import Any
+
 # import json
 from rsa import PublicKey
 # import jsonlight
 from rich import print
+
+from mmb_layer0.blockchain.chain.block_validator import BlockValidator
 # from mmb_layer0.blockchain.block_processor import BlockProcessor
 # from mmb_layer0.blockchain.transaction_processor import TransactionProcessor
 from mmb_layer0.blockchain.validator import Validator
@@ -23,19 +27,9 @@ class Chain:
         print("chain.py:__init__: Set max block size to 2")
         self.max_block_size = 2 # maximum number of transactions in a block
 
-    def add_block(self, block, initially = False) -> Block:
-        if block.index != self.length and not initially:
-            print("chain.py:add_block: Block index does not match chain length")
-            raise Exception("Block index does not match chain length")
-
-        if block.previous_hash != self.get_last_block().hash:
-            print("chain.py:add_block: Block previous hash does not match last block hash")
-            raise Exception("Block previous hash does not match last block hash")
-
-        if block.hash == self.get_last_block().hash:
-            print("chain.py:add_block: Block hash already exists")
-            raise Exception("Block hash already exists")
-
+    def add_block(self, block, initially = False) -> Block | None:
+        if not BlockValidator.validate_block(block, self, initially): # Validate block
+            return None
         # print("chain.py:add_block: Add new block to chain")
         self.chain.append(block)
         # print("chain.py:add_block: Increment chain length")
@@ -69,7 +63,6 @@ class Chain:
 
 
     def process_block(self, callback) -> None:
-
         # Check block
         if not Validator.preblock_validate(self.mempool):
             return
