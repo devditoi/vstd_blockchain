@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg
+*.egg-info/
+dist/
+build/
+
+# VS Code / PyCharm
+.idea/
+.vscode/
+
+# Keys and sensitive
+*.pem
+*.key
+*.pub
+node_ver.txt
+validator_key*
+
+# Logs
+*.log
