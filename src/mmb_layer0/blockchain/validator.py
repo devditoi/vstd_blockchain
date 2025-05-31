@@ -9,7 +9,7 @@ from src.mmb_layer0.blockchain.block import Block
 class Validator:
     @staticmethod
     def onchain_validate(tx: Transaction, signature: bytes, publicKey: PublicKey) -> bool:
-        if not HashUtils.verify(tx.to_string(), signature, publicKey):
+        if not HashUtils.ecdsa_verify(tx.to_string(), signature, publicKey):
             print("validator.py:onchain_validate: Transaction signature is invalid")
             # raise Exception("Transaction signature is invalid")
             return False

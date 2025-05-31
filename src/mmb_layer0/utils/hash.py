@@ -1,5 +1,6 @@
 import hashlib
 import rsa
+from ecdsa import VerifyingKey
 from rsa.key import PublicKey, PrivateKey
 import ecdsa
 # print(hashlib.sha256(b"Nobody inspects the spammish repetition").hexdigest())
@@ -16,6 +17,10 @@ class HashUtils:
     @staticmethod
     def get_address(publicKey: PublicKey) -> str:
         return HashUtils.sha256_nonencode(publicKey.save_pkcs1())
+
+    @staticmethod
+    def get_address_ecdsa(publicKey: VerifyingKey) -> str:
+        return HashUtils.sha256_nonencode(publicKey.to_string())
 
     @staticmethod
     def gen_key() -> tuple[PublicKey, PrivateKey]:

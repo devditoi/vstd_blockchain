@@ -37,7 +37,7 @@ class ProofOfAuthority(IConsensus):
     def is_valid(self, block: Block) -> bool:
         # Use the public key to validate the block signature
         return (
-            HashUtils.verify(block.get_string_for_signature(), block.signature, self.publicKey)
+            HashUtils.ecdsa_verify(block.get_string_for_signature(), block.signature, self.publicKey)
             and block.address == self.hardcoded_validator # Only leader can sign
         )
 
@@ -54,5 +54,5 @@ class ProofOfAuthority(IConsensus):
         return self.address == self.hardcoded_validator
 
     def sign_block(self, block: Block) -> None:
-        block.signature = HashUtils.sign(block.get_string_for_signature(), self.privateKey)
+        block.signature = HashUtils.ecdsa_sign(block.get_string_for_signature(), self.privateKey)
         block.address = self.address # Signer

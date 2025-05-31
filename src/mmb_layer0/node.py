@@ -1,5 +1,7 @@
 # 1 node has 1 blockchain and 1 WorldState
 import time
+
+from ecdsa import SigningKey, VerifyingKey
 from rsa import PrivateKey, PublicKey
 from .blockchain.chain.chain import Chain
 from .blockchain.consensus import ProofOfAuthority
@@ -33,8 +35,8 @@ class Node:
         self.chain_file = "chain.json"
         self.version = open("node_ver.txt", "r").read()
 
-        self.publicKey, self.privateKey = HashUtils.gen_key()
-        self.address = HashUtils.get_address(self.publicKey)
+        self.publicKey, self.privateKey = HashUtils.ecdsa_keygen()
+        self.address = HashUtils.get_address_ecdsa(self.publicKey)
 
         self.node_subscribtions = []
 
@@ -46,10 +48,10 @@ class Node:
 
     def import_key(self, filename: str) -> None:
         with open(filename, "r") as f:
-            self.privateKey = PrivateKey.load_pkcs1(f.read().encode("utf-8"))
+            self.privateKey = SigningKey.from_string(f.read())
         with open(filename + ".pub", "r") as f:
-            self.publicKey = PublicKey.load_pkcs1(f.read().encode("utf-8"))
-        self.address = HashUtils.get_address(self.publicKey)
+            self.publicKey = VerifyingKey.from_string(f.read())
+        self.address = HashUtils.get_address_ecdsa(self.publicKey)
         self.consensus = ProofOfAuthority(self.address, self.privateKey)
         print(f"{self.address[:4]}:node.py:import_key: Imported key " + self.address)
 
@@ -90,7 +92,7 @@ class Node:
         amount = int(100 * MMBConfig.NativeTokenValue)
         tx = MintBurnTransaction(address, amount, self.mintburn_nonce + 1, 100)
         self.mintburn_nonce += 1
-        sign = HashUtils.sign(tx.to_string(), privateKey)
+        sign = HashUtils.ecdsa_sign(tx.to_string(), privateKey)
         self.propose_tx(tx, sign, PublicKey.load_pkcs1(open(MMBConfig.MINT_KEY, "rb").read()))
 
     # def sync(self, other_json: str):
