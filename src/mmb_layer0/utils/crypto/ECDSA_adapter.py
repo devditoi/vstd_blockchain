@@ -11,12 +11,12 @@ class ECDSAAdapter(ICryptoAdapter):
         return HashUtils.ecdsa_keygen()
 
     @staticmethod
-    def sign(message: bytes, privateKey) -> bytes:
-        return HashUtils.ecdsa_sign(message, privateKey)
+    def sign(message: str, privateKey) -> hex:
+        return HashUtils.ecdsa_sign(message, privateKey).hex()
 
     @staticmethod
-    def verify(message: bytes, signature: bytes, publicKey) -> bool:
-        return HashUtils.ecdsa_verify(message, signature, publicKey)
+    def verify(message: str, signature: hex, publicKey) -> bool:
+        return HashUtils.ecdsa_verify(message, bytes.fromhex(signature), publicKey)
 
     @staticmethod
     def save(filename: str, publicKey: any, privateKey: any):

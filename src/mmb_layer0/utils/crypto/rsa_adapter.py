@@ -7,12 +7,12 @@ class RSAAdapter(ICryptoAdapter):
         return HashUtils.gen_key()
 
     @staticmethod
-    def sign(message: str, privateKey: PrivateKey) -> bytes:
-        return HashUtils.sign(message, privateKey)
+    def sign(message: str, privateKey: PrivateKey) -> hex:
+        return HashUtils.sign(message, privateKey).hex()
 
     @staticmethod
-    def verify(message: str, signature: bytes, publicKey: PublicKey) -> bool:
-        return HashUtils.verify(message, signature, publicKey)
+    def verify(message: str, signature: hex, publicKey: PublicKey) -> bool:
+        return HashUtils.verify(message, bytes.fromhex(signature), publicKey)
 
     @staticmethod
     def save(filename: str, publicKey: any, privateKey: any):

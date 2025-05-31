@@ -44,7 +44,7 @@ class HashUtils:
         return vk, sk
 
     @staticmethod
-    def ecdsa_sign(data: str, sk: ecdsa.SigningKey):
+    def ecdsa_sign(data: str, sk: ecdsa.SigningKey) -> bytes:
         return sk.sign(data.encode('utf8'))
 
     @staticmethod
