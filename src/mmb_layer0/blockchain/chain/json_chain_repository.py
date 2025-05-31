@@ -2,9 +2,7 @@
 
 from .chain_repository_interface import IChainRepository
 from .chain import Chain
-import json
-from mmb_layer0.utils.serializer import ChainSerializer
-from ..block_processor import BlockProcessor
+from src.mmb_layer0.utils.serializer import ChainSerializer
 
 
 class JsonChainRepository(IChainRepository):

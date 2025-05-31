@@ -1,6 +1,6 @@
 from .block import Block
 from .transactionType import Transaction, NativeTransaction, MintBurnTransaction
-from mmb_layer0.blockchain.chain.worldstate import WorldState
+from src.mmb_layer0.blockchain.chain.worldstate import WorldState
 import json
 from rich import print
 

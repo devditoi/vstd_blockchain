@@ -4,7 +4,7 @@ import json
 from ..blockchain.block_processor import BlockProcessor
 from ..blockchain.chain.chain import Chain
 from ..node import Node
-from mmb_layer0.blockchain.chain.worldstate import WorldState
+from src.mmb_layer0.blockchain.chain.worldstate import WorldState
 
 
 class ChainSerializer:

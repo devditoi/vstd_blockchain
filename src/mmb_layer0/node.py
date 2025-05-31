@@ -1,12 +1,11 @@
 # 1 node has 1 blockchain and 1 WorldState
 
 from rsa import PrivateKey, PublicKey
-from .blockchain.block_processor import BlockProcessor
 from .blockchain.chain.chain import Chain
 from .blockchain.transactionType import Transaction, MintBurnTransaction
 from .blockchain.transaction_processor import TransactionProcessor
 from .blockchain.validator import Validator
-from mmb_layer0.blockchain.chain.worldstate import WorldState
+from src.mmb_layer0.blockchain.chain.worldstate import WorldState
 from .config import MMBConfig
 from .utils.hash import HashUtils
 from rich import print

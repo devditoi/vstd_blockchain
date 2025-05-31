@@ -1,5 +1,5 @@
-from mmb_layer0.blockchain.chain.chain import Chain
-from mmb_layer0.blockchain.block import Block
+from src.mmb_layer0.blockchain.chain.chain import Chain
+from src.mmb_layer0.blockchain.block import Block
 
 class BlockValidator:
     @staticmethod
