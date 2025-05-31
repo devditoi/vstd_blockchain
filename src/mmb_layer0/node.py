@@ -1,18 +1,18 @@
 # 1 node has 1 blockchain and 1 WorldState
-import time
 
 from ecdsa import SigningKey, VerifyingKey
 from rsa import PrivateKey, PublicKey
-from .blockchain.chain.chain import Chain
-from .blockchain.consensus import ProofOfAuthority
-from .blockchain.transactionType import Transaction, MintBurnTransaction
-from .blockchain.transaction_processor import TransactionProcessor
-from .blockchain.validator import Validator
-from src.mmb_layer0.blockchain.chain.worldstate import WorldState
+from src.mmb_layer0.blockchain.core.chain import Chain
+from src.mmb_layer0.blockchain.consensus.PoA_consensus import ProofOfAuthority
+from src.mmb_layer0.blockchain.core.transactionType import Transaction, MintBurnTransaction
+from src.mmb_layer0.blockchain.processor.transaction_processor import TransactionProcessor
+from src.mmb_layer0.blockchain.core.validator import Validator
+from src.mmb_layer0.blockchain.core.worldstate import WorldState
 from .config import MMBConfig
+from .utils.crypto.signer import SignerFactory
 from .utils.hash import HashUtils
-from rich import print, inspect
-from .blockchain.block import Block
+from rich import print
+from src.mmb_layer0.blockchain.core.block import Block
 
 
 class NodeEvent:
@@ -35,8 +35,10 @@ class Node:
         self.chain_file = "chain.json"
         self.version = open("node_ver.txt", "r").read()
 
-        self.publicKey, self.privateKey = HashUtils.ecdsa_keygen()
-        self.address = HashUtils.get_address_ecdsa(self.publicKey)
+        self.signer = SignerFactory().instance.get_signer()
+
+        self.publicKey, self.privateKey = self.signer.gen_key()
+        self.address = self.signer.address(self.publicKey)
 
         self.node_subscribtions = []
 
@@ -47,13 +49,14 @@ class Node:
         self.consensus = ProofOfAuthority(self.address, self.privateKey)
 
     def import_key(self, filename: str) -> None:
-        with open(filename, "r") as f:
-            self.privateKey = SigningKey.from_string(f.read())
-        with open(filename + ".pub", "r") as f:
-            self.publicKey = VerifyingKey.from_string(f.read())
-        self.address = HashUtils.get_address_ecdsa(self.publicKey)
+        self.publicKey, self.privateKey = self.signer.load(filename)
+        self.address = self.signer.address(self.publicKey)
         self.consensus = ProofOfAuthority(self.address, self.privateKey)
         print(f"{self.address[:4]}:node.py:import_key: Imported key " + self.address)
+
+    def export_key(self, filename: str) -> None:
+        self.signer.save(filename, self.publicKey, self.privateKey)
+        print(f"{self.address[:4]}:node.py:export_key: Exported key " + self.address)
 
     def subscribe(self, node):
         if node in self.node_subscribtions:
@@ -87,13 +90,13 @@ class Node:
                 continue
             node.fire_event(event)
 
-    def mint(self, address: str, privateKey: PrivateKey):
+    def mint(self, address: str, privateKey: any, publicKey: any) -> None:
         # print("node.py:faucet: Processing 100 native tokens to address")
         amount = int(100 * MMBConfig.NativeTokenValue)
         tx = MintBurnTransaction(address, amount, self.mintburn_nonce + 1, 100)
         self.mintburn_nonce += 1
-        sign = HashUtils.ecdsa_sign(tx.to_string(), privateKey)
-        self.propose_tx(tx, sign, PublicKey.load_pkcs1(open(MMBConfig.MINT_KEY, "rb").read()))
+        sign = self.signer.sign(tx.to_string(), privateKey)
+        self.propose_tx(tx, sign, publicKey)
 
     # def sync(self, other_json: str):
     #     # sync from another node

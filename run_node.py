@@ -1,6 +1,7 @@
 from src.mmb_layer0.node import Node
 from src.mmb_layer0.node_sync_services import NodeSyncServices
-from src.mmb_layer0.wallet import Wallet
+from src.mmb_layer0.utils.crypto.signer import SignerFactory
+from src.mmb_layer0.wallet.wallet import Wallet
 import rsa
 from rich import print
 
@@ -32,8 +33,8 @@ leader.import_key("validator_key")
 node.subscribe(leader) # and backwards
 
 wallet = Wallet(node)
-privateK = rsa.PrivateKey.load_pkcs1(open("private_key.pem", "rb").read())
-node.mint(wallet.address, privateK)
+pmint_key, mint_key = SignerFactory().get_signer().load("mint_key")
+node.mint(wallet.address, mint_key, pmint_key)
 
 node.debug()
 leader.debug()

@@ -1,10 +1,10 @@
 import jsonlight
 import json
 
-from ..blockchain.block_processor import BlockProcessor
-from ..blockchain.chain.chain import Chain
+from src.mmb_layer0.blockchain.processor.block_processor import BlockProcessor
+from src.mmb_layer0.blockchain.core.chain import Chain
 from ..node import Node
-from src.mmb_layer0.blockchain.chain.worldstate import WorldState
+from src.mmb_layer0.blockchain.core.worldstate import WorldState
 
 
 class ChainSerializer:

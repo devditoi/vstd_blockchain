@@ -1,10 +1,11 @@
 from rsa import PublicKey
-from src.mmb_layer0.blockchain.transactionType import Transaction
-from src.mmb_layer0.blockchain.chain.worldstate import WorldState
+from src.mmb_layer0.blockchain.core.transactionType import Transaction
+from src.mmb_layer0.blockchain.core.worldstate import WorldState
 from src.mmb_layer0.config import MMBConfig
+from src.mmb_layer0.utils.crypto.signer import SignerFactory
 from src.mmb_layer0.utils.hash import HashUtils
 from rich import print
-from src.mmb_layer0.blockchain.block import Block
+from src.mmb_layer0.blockchain.core.block import Block
 
 class Validator:
     @staticmethod
@@ -14,8 +15,7 @@ class Validator:
             # raise Exception("Transaction signature is invalid")
             return False
 
-        if not HashUtils.sha256_nonencode(
-                publicKey.save_pkcs1()) == tx.sender and tx.Txtype != "mintburn":
+        if not SignerFactory().get_signer().address(publicKey) == tx.sender and tx.Txtype != "mintburn":
             print("validator.py:onchain_validate: Transaction sender is invalid")
             # raise Exception("Transaction sender is invalid")
             return False
@@ -51,11 +51,11 @@ class Validator:
             if tx.Txtype == "mintburn":
                 # privileged transaction
                 continue
-            if not HashUtils.verify(tx.to_string(), tx.signature, tx.publicKey):
+            if not SignerFactory().get_signer().verify(tx.to_string(), tx.signature, tx.publicKey):
                 print("chain.py:process_block: Transaction signature is invalid")
                 return False
 
-            if not HashUtils.sha256_nonencode(tx.publicKey.save_pkcs1()) == tx.sender:
+            if not SignerFactory().get_signer().address(tx.publicKey) == tx.sender:
                 print("chain.py:process_block: Transaction sender is invalid")
                 return False
 

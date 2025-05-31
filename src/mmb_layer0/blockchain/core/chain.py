@@ -5,11 +5,10 @@ from rsa import PublicKey
 # import jsonlight
 from rich import print
 
-from src.mmb_layer0.blockchain.consensus import IConsensus
 # from mmb_layer0.blockchain.transaction_processor import TransactionProcessor
-from src.mmb_layer0.blockchain.validator import Validator
-from src.mmb_layer0.blockchain.block import Block
-from src.mmb_layer0.blockchain.transactionType import Transaction
+from src.mmb_layer0.blockchain.core.validator import Validator
+from src.mmb_layer0.blockchain.core.block import Block
+from src.mmb_layer0.blockchain.core.transactionType import Transaction
 class Chain:
     def __init__(self) -> None:
         print("chain.py:__init__: Initializing Chain")

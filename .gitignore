@@ -16,6 +16,7 @@ build/
 *.pub
 node_ver.txt
 validator_key*
+mint_key*
 
 # Logs
 *.log
