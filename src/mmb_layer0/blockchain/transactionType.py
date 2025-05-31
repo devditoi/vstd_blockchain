@@ -3,6 +3,9 @@ import jsonlight
 from rsa import PublicKey
 from rich import print
 
+from src.mmb_layer0.utils.hash import HashUtils
+
+
 class ITransaction(ABC):
     @abstractmethod
     def to_string(self) -> str:
@@ -17,6 +20,7 @@ class Transaction(ITransaction):
         self.transactionData: dict = {}
         self.gasPrice = gasPrice
         self.nonce = nonce
+        self.hash = HashUtils.sha256(self.to_string()) # Hash id of each transaction
         
     def to_string(self) -> str:
         return jsonlight.dumps({

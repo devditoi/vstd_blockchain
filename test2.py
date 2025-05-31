@@ -1,4 +1,6 @@
-from src.mmb_layer0 import Wallet
+from src.mmb_layer0.node import Node
 
-validator = Wallet(None)
-validator.export_key("validator_key")
+validator = Node()
+validator.import_key("validator_key")
+
+validator.debug()

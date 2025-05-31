@@ -5,34 +5,36 @@ from rsa import PublicKey
 # import jsonlight
 from rich import print
 
-from src.mmb_layer0.blockchain.chain.block_validator import BlockValidator
-# from mmb_layer0.blockchain.block_processor import BlockProcessor
+from src.mmb_layer0.blockchain.consensus import IConsensus
 # from mmb_layer0.blockchain.transaction_processor import TransactionProcessor
 from src.mmb_layer0.blockchain.validator import Validator
 from src.mmb_layer0.blockchain.block import Block
 from src.mmb_layer0.blockchain.transactionType import Transaction
 class Chain:
     def __init__(self) -> None:
-        print("chain.py:__init__: Create genesis block")
+        print("chain.py:__init__: Initializing Chain")
         genesis_tx = Transaction("0x0", "genesis", 0, 0)
         genesis_block: Block = Block(0, "0", 0, [genesis_tx])
-        print("chain.py:__init__: Add genesis block to chain")
         self.chain = [genesis_block]
-        print("chain.py:__init__: Set chain length to 1")
         self.length = 1
-        print("chain.py:__init__: Create mempool")
         self.mempool: list[Transaction] = []
+        self.mempool_tx_id: set[str] = set()
         # self.interval = 10 # 10 seconds before try to send and validate
-        print("chain.py:__init__: Set max block size to 2")
-        self.max_block_size = 2 # maximum number of transactions in a block
+        self.max_block_size = 1 # maximum number of transactions in a block
 
-    def add_block(self, block, initially = False) -> Block | None:
-        if not BlockValidator.validate_block(block, self, initially): # Validate block
+    def add_block(self, block: Block, initially = False) -> Block | None:
+        if not Validator.validate_block(block, self, initially): # Validate block
             return None
-        # print("chain.py:add_block: Add new block to chain")
+        print("chain.py:add_block: Block valid, add to chain")
+        print(block)
         self.chain.append(block)
         # print("chain.py:add_block: Increment chain length")
         self.length += 1
+        # Clear tx in mempool
+        for tx in block.data:
+            self.mempool.remove(tx)
+            self.mempool_tx_id.remove(tx.hash)
+
         return block
 
     def get_block(self, index) -> Block:
@@ -48,33 +50,60 @@ class Chain:
 
     def get_height(self) -> int:
         # print("chain.py:get_height: Return chain length")
+        if self.length != len(self.chain):
+            print("chain.py:get_height: Chain length does not match length")
+            raise Exception("Chain length does not match length")
         return self.length
 
-    def add_transaction(self, transaction: Transaction, signature: bytes, publicKey: PublicKey, execution_callback) -> None:
+    def contain_transaction(self, transaction: Transaction) -> bool:
+        return transaction.hash in self.mempool_tx_id
+
+    def temporary_add_to_mempool(self, transaction: Transaction) -> None:
+        self.mempool_tx_id.add(transaction.hash)
+
+    def add_transaction(self, transaction: Transaction, signature: bytes, publicKey: PublicKey, execution_callback, consensus, broadcast_callback) -> None:
         if not Validator.onchain_validate(transaction, signature, publicKey): # Validate transaction
             return
-        print("chain.py:add_transaction: Add new transaction to mempool")
+
+        print("chain.py:add_transaction: Transaction valid, add to mempool")
         print(transaction)
         self.mempool.append(transaction)
+        # Add transaction ID (hash) to set for check it later
+        # self.mempool_tx_id.add(transaction.hash)
+
+        if not consensus.is_leader():
+            print("chain.py:add_transaction: Not leader, return")
+            return
+
         if len(self.mempool) >= self.max_block_size:
             # print("chain.py:add_transaction: Process block")
-            self.process_block(execution_callback)
+            self.process_block(execution_callback, consensus, broadcast_callback)
 
 
-    def process_block(self, callback) -> None:
+    def process_block(self, callback, consensus, broadcast_callback) -> None:
         # Check block
         if not Validator.preblock_validate(self.mempool):
             return
 
-        print("chain.py:process_block: Process block")
+        # PoA validation
+
+        print("chain.py:process_block: Mempool valid, create block")
         # print(block)
         data = self.mempool
         block = Block(self.length, self.get_last_block().hash, time.time(), data)
+
+        # Sign block
+        consensus.sign_block(block)
+
         # print("chain.py:process_block: Add new block to chain")
-        self.add_block(block)
-        print(block)
+        # self.add_block(block)
+        # print(block)
         # print("chain.py:process_block: Clear mempool")
-        self.mempool = []
+        # self.mempool = []
+
+        # Broadcast block
+        broadcast_callback(block)
+
         callback(block)
 
     #

@@ -4,6 +4,7 @@ from src.mmb_layer0.blockchain.chain.worldstate import WorldState
 from src.mmb_layer0.config import MMBConfig
 from src.mmb_layer0.utils.hash import HashUtils
 from rich import print
+from src.mmb_layer0.blockchain.block import Block
 
 class Validator:
     @staticmethod
@@ -64,5 +65,22 @@ class Validator:
 
             # if tx.sender not in pre_nonce_check:
             pre_nonce_check[tx.sender] = tx.nonce
+
+        return True
+
+    @staticmethod
+    def validate_block(block: Block, chain, initially=False) -> bool:
+        if block.index != chain.get_height() and not initially:
+            print("chain.py:add_block: Block index does not match chain length of " + str(chain.length))
+            print(chain.chain)
+            return False
+
+        if block.previous_hash != chain.get_last_block().hash:
+            print("chain.py:add_block: Block previous hash does not match last block hash")
+            return False
+
+        if block.hash == chain.get_last_block().hash:
+            print("chain.py:add_block: Block hash already exists")
+            return False
 
         return True

@@ -1,25 +1,41 @@
-from src.mmb_layer0 import Node
-from src.mmb_layer0 import NodeSyncServices
-from src.mmb_layer0 import Wallet
+from src.mmb_layer0.node import Node
+from src.mmb_layer0.node_sync_services import NodeSyncServices
+from src.mmb_layer0.wallet import Wallet
 import rsa
 from rich import print
 
+
+# Test 1
+# node = Node()
+# node.debug()
+# node2 = Node()
+# # node2.sync(NodeSerializer.to_json(node))
+# node.subscribe(node2)
+# w1 = Wallet(node)
+# privateK = rsa.PrivateKey.load_pkcs1(open("private_key.pem", "rb").read())
+# # # # print(privateK)
+# node.mint(w1.address, privateK)
+# node.mint(w1.address, privateK)
+#
+# print(NodeSyncServices.check_sync(node2, node))
+# node.debug()
+# node2.debug()
+
+
+# Test 2
 node = Node()
 node.debug()
-node2 = Node()
-# node2.sync(NodeSerializer.to_json(node))
 
-# node.subscribe(node2)
-w1 = Wallet(node)
-#
-#
+leader = Node()
+leader.import_key("validator_key")
+
+node.subscribe(leader) # and backwards
+
+wallet = Wallet(node)
 privateK = rsa.PrivateKey.load_pkcs1(open("private_key.pem", "rb").read())
-# # # print(privateK)
-node.mint(w1.address, privateK)
-node.mint(w1.address, privateK)
+node.mint(wallet.address, privateK)
 
-print(NodeSyncServices.check_sync(node2, node))
+node.debug()
+leader.debug()
 
-NodeSyncServices.sync(node2, node)
-
-print(NodeSyncServices.check_sync(node2, node))
+print(NodeSyncServices.check_sync(leader, node))

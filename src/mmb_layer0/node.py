@@ -1,14 +1,15 @@
 # 1 node has 1 blockchain and 1 WorldState
-
+import time
 from rsa import PrivateKey, PublicKey
 from .blockchain.chain.chain import Chain
+from .blockchain.consensus import ProofOfAuthority
 from .blockchain.transactionType import Transaction, MintBurnTransaction
 from .blockchain.transaction_processor import TransactionProcessor
 from .blockchain.validator import Validator
 from src.mmb_layer0.blockchain.chain.worldstate import WorldState
 from .config import MMBConfig
 from .utils.hash import HashUtils
-from rich import print
+from rich import print, inspect
 from .blockchain.block import Block
 
 
@@ -22,26 +23,35 @@ class Node:
     def __init__(self) -> None:
         print("node.py:__init__: Initializing Node")
         self.blockchain: Chain = Chain()
-        print("node.py:__init__: Initialized blockchain")
+
         self.worldState: WorldState = WorldState()
-        print("node.py:__init__: Initialized worldState")
+
         self.worldState.get_eoa("0x0")
-        print("node.py:__init__: Added EOAs for address 0x0")
+
         self.nativeTokenSupply = int(MMBConfig.NativeTokenValue * MMBConfig.NativeTokenQuantity)
-        print(f"node.py:__init__: Set native token supply to {self.nativeTokenSupply}")
-        # Set faucet balance
-        # self.faucetKeyPair = HashUtils.gen_key()
-        # self.worldState.get_eoa(MMBConfig.FaucetAddress).balance = nativeTokenSupply
 
         self.chain_file = "chain.json"
         self.version = open("node_ver.txt", "r").read()
 
         self.publicKey, self.privateKey = HashUtils.gen_key()
         self.address = HashUtils.get_address(self.publicKey)
-        # if os.path.exists(self.chain_file):
-        #     self.load_chain()
 
         self.node_subscribtions = []
+
+        self.mintburn_nonce = 1
+
+        print(f"{self.address[:4]}:node.py:__init__: Initialized node")
+
+        self.consensus = ProofOfAuthority(self.address, self.privateKey)
+
+    def import_key(self, filename: str) -> None:
+        with open(filename, "r") as f:
+            self.privateKey = PrivateKey.load_pkcs1(f.read().encode("utf-8"))
+        with open(filename + ".pub", "r") as f:
+            self.publicKey = PublicKey.load_pkcs1(f.read().encode("utf-8"))
+        self.address = HashUtils.get_address(self.publicKey)
+        self.consensus = ProofOfAuthority(self.address, self.privateKey)
+        print(f"{self.address[:4]}:node.py:import_key: Imported key " + self.address)
 
     def subscribe(self, node):
         if node in self.node_subscribtions:
@@ -49,18 +59,39 @@ class Node:
         self.node_subscribtions.append(node)
         node.subscribe(self)
 
+    def process_event(self, event: NodeEvent) -> bool:
+        print(f"{self.address[:4]}:node.py:process_event: Node {self.address} received event {event.eventType}")
+        # inspect(event)
+        if event.eventType == "tx":
+            if self.blockchain.contain_transaction(event.data["tx"]): # Already processed
+                return False
+            self.blockchain.temporary_add_to_mempool(event.data["tx"])
+            print(f"{self.address[:4]}:node.py:process_event: Processing transaction")
+            self.process_tx(event.data["tx"], event.data["signature"], event.data["publicKey"])
+            return True
+        elif event.eventType == "block":
+            if not self.consensus.is_valid(event.data["block"]): # Not a valid block
+                return False
+            return True if self.blockchain.add_block(event.data["block"]) else False
+        return False # don't send unknown events
+
     def fire_event(self, event: NodeEvent):
+        # time.sleep(1)
+        if not self.process_event(event): # Already processed and broadcast
+            return
         for node in self.node_subscribtions:
-            if event.origin == node.address:
+            # time.sleep(1)
+            if node.address == event.origin:
                 continue
             node.fire_event(event)
 
     def mint(self, address: str, privateKey: PrivateKey):
-        print("node.py:faucet: Processing 100 native tokens to address")
+        # print("node.py:faucet: Processing 100 native tokens to address")
         amount = int(100 * MMBConfig.NativeTokenValue)
-        tx = MintBurnTransaction(address, amount, 0, 100)
+        tx = MintBurnTransaction(address, amount, self.mintburn_nonce + 1, 100)
+        self.mintburn_nonce += 1
         sign = HashUtils.sign(tx.to_string(), privateKey)
-        self.process_tx(tx, sign, PublicKey.load_pkcs1(open(MMBConfig.MINT_KEY, "rb").read()))
+        self.propose_tx(tx, sign, PublicKey.load_pkcs1(open(MMBConfig.MINT_KEY, "rb").read()))
 
     # def sync(self, other_json: str):
     #     # sync from another node
@@ -95,16 +126,29 @@ class Node:
     def get_nonce(self, address: str) -> int:
         return self.worldState.get_eoa(address).nonce
 
+    def propose_tx(self, tx: Transaction, signature, publicKey):
+        self.fire_event(NodeEvent("tx", {
+            "tx": tx,
+            "signature": signature,
+            "publicKey": publicKey
+        }, self.address))
+
     def process_tx(self, tx: Transaction, signature, publicKey):
-        print("node.py:process_tx: Processing " + tx.Txtype + " transaction")
+        print(f"{self.address[:4]}:node.py:process_tx: Processing " + tx.Txtype + " transaction")
+
+        # self.blockchain.temporary_add_to_mempool(tx)
 
         if not Validator.offchain_validate(tx, self.worldState): # Validate transaction
             return
 
-        print("node.py:process_tx: Give transaction to blockchain nonce: " + str(tx.nonce))
-        self.blockchain.add_transaction(tx, signature, publicKey, self.execution)
+        print(f"{self.address[:4]}:node.py:process_tx: Give transaction to blockchain nonce: " + str(tx.nonce))
+        # print(tx, signature, publicKey)
+        self.blockchain.add_transaction(tx, signature, publicKey, self.execution, self.consensus, self.propose_block)
 
-
+    def propose_block(self, block: Block):
+        self.fire_event(NodeEvent("block", {
+            "block": block
+        }, self.address))
 
     def execution(self, block: Block):
         # Block execution only happend after block is processed
@@ -133,16 +177,10 @@ class Node:
         # self.blockchain.build_mempool(chain_data)
         # print("node.py:load_chain: Loaded chain")
 
-    def import_key(self, filename: str) -> None:
-        with open(filename, "r") as f:
-            self.privateKey = PrivateKey.load_pkcs1(f.read().encode("utf-8"))
-        with open(filename + ".pub", "r") as f:
-            self.publicKey = PublicKey.load_pkcs1(f.read().encode("utf-8"))
-        self.address = HashUtils.get_address(self.publicKey)
-
 
     def debug(self):
-        print("node.py:debug:-------------------------------Debug node----------------------")
+        print(f"{self.address[:4]}:node.py:debug:-------------------------------Debug node----------------------")
         self.blockchain.debug_chain()
         print(self.worldState)
-        print("node.py:debug:-------------------------------Debug node----------------------")
+        print(self.address, self.publicKey, self.privateKey)
+        print(f"{self.address[:4]}:node.py:debug:-------------------------------Debug node----------------------")
