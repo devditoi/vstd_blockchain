@@ -4,7 +4,7 @@ import typing
 from src.mmb_layer0.blockchain.processor.block_processor import BlockProcessor
 from src.mmb_layer0.blockchain.core.chain import Chain
 if typing.TYPE_CHECKING:
-    from ..node import Node
+    from src.mmb_layer0.node.node import Node
 from src.mmb_layer0.blockchain.core.worldstate import WorldState
 
 

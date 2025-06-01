@@ -1,26 +1,24 @@
 # 1 node has 1 blockchain and 1 WorldState
 
-from rsa import PrivateKey, PublicKey
 from src.mmb_layer0.blockchain.core.chain import Chain
 from src.mmb_layer0.blockchain.consensus.PoA_consensus import ProofOfAuthority
 from src.mmb_layer0.blockchain.core.transactionType import Transaction, MintBurnTransaction
+from src.mmb_layer0.blockchain.processor.block_processor import BlockProcessor
 from src.mmb_layer0.blockchain.processor.transaction_processor import TransactionProcessor
 from src.mmb_layer0.blockchain.core.validator import Validator
 from src.mmb_layer0.blockchain.core.worldstate import WorldState
-from .config import MMBConfig
-from .node_sync_services import NodeSyncServices
-from .utils.crypto.signer import SignerFactory
-from .utils.hash import HashUtils
-from rich import print
+from src.mmb_layer0.config import MMBConfig
+import typing
+
+from src.mmb_layer0.node.node_event_handler import NodeEventHandler
+
+if typing.TYPE_CHECKING:
+    from src.mmb_layer0.p2p.peer_type.remote_peer import RemotePeer
+    from src.mmb_layer0.p2p.peer import Peer
+    from src.mmb_layer0.node.node_event_handler import NodeEvent
+from src.mmb_layer0.utils.crypto.signer import SignerFactory
+from rich import print, inspect
 from src.mmb_layer0.blockchain.core.block import Block
-from random import choice
-
-
-class NodeEvent:
-    def __init__(self, eventType, data, origin) -> None:
-        self.eventType = eventType
-        self.data = data
-        self.origin = origin
 
 class Node:
     def __init__(self) -> None:
@@ -41,63 +39,45 @@ class Node:
         self.publicKey, self.privateKey = self.signer.gen_key()
         self.address = self.signer.address(self.publicKey)
 
-        self.node_subscribtions = []
+        # self.node_subscribtions = []
+        # self.peers: list["Peer"] = []
 
         self.mintburn_nonce = 1
 
         print(f"{self.address[:4]}:node.py:__init__: Initialized node")
 
+        self.node_event_handler = NodeEventHandler(self)
+
         # TODO: Refactor this shit right here
         self.consensus = ProofOfAuthority(self.address, self.privateKey)
-        self.blockchain.set_callbacks(self.consensus, self.execution, self.propose_block)
+        self.blockchain.set_callbacks(self.consensus, self.execution, self.node_event_handler.propose_block)
+
+
 
     def import_key(self, filename: str) -> None:
         self.publicKey, self.privateKey = self.signer.load(filename)
         self.address = self.signer.address(self.publicKey)
         self.consensus = ProofOfAuthority(self.address, self.privateKey)
-        self.blockchain.set_callbacks(self.consensus, self.execution, self.propose_block)
+        self.blockchain.set_callbacks(self.consensus, self.execution, self.node_event_handler.propose_block)
         print(f"{self.address[:4]}:node.py:import_key: Imported key " + self.address)
 
     def export_key(self, filename: str) -> None:
         self.signer.save(filename, self.publicKey, self.privateKey)
         print(f"{self.address[:4]}:node.py:export_key: Exported key " + self.address)
 
-    def subscribe(self, node):
-        if node in self.node_subscribtions:
-            return
-        self.node_subscribtions.append(node)
-        node.subscribe(self)
 
-    def process_event(self, event: NodeEvent) -> bool:
-        print(f"{self.address[:4]}:node.py:process_event: Node {self.address} received event {event.eventType}")
-        # inspect(event)
-        if event.eventType == "tx":
-            if self.blockchain.contain_transaction(event.data["tx"]): # Already processed
-                return False
-            self.blockchain.temporary_add_to_mempool(event.data["tx"])
-            print(f"{self.address[:4]}:node.py:process_event: Processing transaction")
-            self.process_tx(event.data["tx"], event.data["signature"], event.data["publicKey"])
-            return True
-        elif event.eventType == "block":
-            if not self.consensus.is_valid(event.data["block"]): # Not a valid block
-                return False
+    # EVENT MANAGER
+    def subscribe(self, peer: "Peer"):
+        self.node_event_handler.subscribe(peer)
 
-            block = self.blockchain.add_block(event.data["block"])
+    def broadcast(self, event: "NodeEvent"):
+        self.node_event_handler.broadcast(event)
 
-            # NodeSyncServices.check_sync(self, choice(self.node_subscribtions))
+    def fire_to(self, peer: "RemotePeer", event: "NodeEvent"):
+        self.node_event_handler.fire_to(peer, event)
 
-            return True if block else False
-        return False # don't send unknown events
-
-    def fire_event(self, event: NodeEvent):
-        # time.sleep(1)
-        if not self.process_event(event): # Already processed and broadcast
-            return
-        for node in self.node_subscribtions:
-            # time.sleep(1)
-            if node.address == event.origin:
-                continue
-            node.fire_event(event)
+    def process_event(self, event: "NodeEvent") -> bool:
+        return self.node_event_handler.process_event(event)
 
     def mint(self, address: str, privateKey: any, publicKey: any) -> None:
         # print("node.py:faucet: Processing 100 native tokens to address")
@@ -141,7 +121,7 @@ class Node:
         return self.worldState.get_eoa(address).nonce
 
     def propose_tx(self, tx: Transaction, signature, publicKey):
-        self.fire_event(NodeEvent("tx", {
+        self.broadcast(NodeEvent("tx", {
             "tx": tx,
             "signature": signature,
             "publicKey": publicKey
@@ -158,11 +138,6 @@ class Node:
         print(f"{self.address[:4]}:node.py:process_tx: Give transaction to blockchain nonce: " + str(tx.nonce))
         # print(tx, signature, publicKey)
         self.blockchain.add_transaction(tx, signature, publicKey)
-
-    def propose_block(self, block: Block):
-        self.fire_event(NodeEvent("block", {
-            "block": block
-        }, self.address))
 
     def execution(self, block: Block):
         # Block execution only happend after block is processed

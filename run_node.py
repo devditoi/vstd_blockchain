@@ -1,10 +1,8 @@
 from src.mmb_layer0.config import MMBConfig
-from src.mmb_layer0.node import Node
-from src.mmb_layer0.node_sync_services import NodeSyncServices
+from src.mmb_layer0.node.node import Node
+from src.mmb_layer0.p2p.peer_type.local_peer import LocalPeer
 from src.mmb_layer0.utils.crypto.signer import SignerFactory
-from src.mmb_layer0.utils.serializer import NodeSerializer
 from src.mmb_layer0.wallet.wallet import Wallet
-import rsa
 from rich import print
 import time
 
@@ -27,33 +25,57 @@ import time
 
 
 # Test 2
+# node = Node()
+# node.debug()
+#
+# leader = Node()
+# leader.import_key("validator_key")
+#
+# node.subscribe(leader) # and backwards
+#
+# wallet = Wallet(node)
+# wallet2 = Wallet(leader)
+# pmint_key, mint_key = SignerFactory().get_signer().load("mint_key")
+# node.mint(wallet.address, mint_key, pmint_key)
+# #
+# # node.debug()
+# # leader.debug()
+# #
+# # i = 0
+# # # Leader block creation in the background
+# # while i < 15:
+# #     time.sleep(2)
+# #     # NodeSyncServices.check_sync(node, leader)
+# #     if wallet.get_balance() > int(0.01 * MMBConfig.NativeTokenValue):
+# #         wallet.pay(int(0.01 * MMBConfig.NativeTokenValue), wallet2.address)
+# #     print(wallet2.get_balance())
+# #     i += 1
+# #
+# # node.debug()
+# # leader.debug()
+# # print(wallet.get_balance())
+# # print(wallet2.get_balance())
+
+
+# Test 3
 node = Node()
 node.debug()
 
 leader = Node()
 leader.import_key("validator_key")
 
-node.subscribe(leader) # and backwards
+leader_peer = LocalPeer(leader)
+node_peer = LocalPeer(node)
+
+node.subscribe(leader_peer) # and backwards
+leader.subscribe(node_peer)
 
 wallet = Wallet(node)
-wallet2 = Wallet(leader)
 pmint_key, mint_key = SignerFactory().get_signer().load("mint_key")
 node.mint(wallet.address, mint_key, pmint_key)
 
-node.debug()
-leader.debug()
-
-i = 0
-# Leader block creation in the background
-while i < 15:
-    time.sleep(2)
-    # NodeSyncServices.check_sync(node, leader)
-    if wallet.get_balance() > int(0.01 * MMBConfig.NativeTokenValue):
-        wallet.pay(int(0.01 * MMBConfig.NativeTokenValue), wallet2.address)
-    print(wallet2.get_balance())
-    i += 1
-
-node.debug()
-leader.debug()
-print(wallet.get_balance())
-print(wallet2.get_balance())
+while True:
+    time.sleep(15)
+    node.debug()
+    leader.debug()
+    pass
