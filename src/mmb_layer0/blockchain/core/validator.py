@@ -28,19 +28,14 @@ class Validator:
 
     @staticmethod
     def offchain_validate(tx: Transaction, worldState: WorldState) -> bool:
-        if tx.gasPrice < MMBConfig.MinimumGasPrice:
-            print("Validator.py:offchain_validate: Transaction gasPrice is below minimum")
-            return False
+        # TODO For debug
+        # if tx.gasPrice < MMBConfig.MinimumGasPrice:
+        #     print("Validator.py:offchain_validate: Transaction gasPrice is below minimum")
+        #     return False
 
         if worldState.get_eoa(tx.sender).balance < tx.gasPrice and tx.Txtype != "mintburn":
             print("Validator.py:offchain_validate: Transaction sender does not have enough balance")
             return False
-
-        # if tx.nonce != worldState.get_eoa(tx.sender).nonce + 1 and tx.Txtype != "mintburn":
-        #     print("Validator.py:offchain_validate: Transaction nonce is not valid")
-        #     print(tx)
-        #     print(worldState.get_eoa(tx.sender))
-        #     return False
 
         return True
 

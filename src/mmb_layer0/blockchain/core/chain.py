@@ -4,11 +4,15 @@ import time
 from rsa import PublicKey
 # import jsonlight
 from rich import print
-
+import threading
+from src.mmb_layer0.blockchain.consensus.consensus_processor import ConsensusProcessor
 # from mmb_layer0.blockchain.transaction_processor import TransactionProcessor
 from src.mmb_layer0.blockchain.core.validator import Validator
 from src.mmb_layer0.blockchain.core.block import Block
 from src.mmb_layer0.blockchain.core.transactionType import Transaction
+# from src.mmb_layer0.node_sync_services import NodeSyncServices
+
+
 class Chain:
     def __init__(self) -> None:
         print("chain.py:__init__: Initializing Chain")
@@ -18,8 +22,23 @@ class Chain:
         self.length = 1
         self.mempool: list[Transaction] = []
         self.mempool_tx_id: set[str] = set()
-        # self.interval = 10 # 10 seconds before try to send and validate
-        self.max_block_size = 1 # maximum number of transactions in a block
+        self.interval = 10 # 10 seconds before try to send and validate
+        self.max_block_size = 10 # maximum number of transactions in a block
+        self.last_block_time = time.time()
+
+        self.consensus = None
+        self.execution_callback = None
+        self.broadcast_callback = None
+
+        self.thread = threading.Thread(target=self.__process_block_thread, daemon=True)
+        self.thread.start()
+
+        self.mempool_lock = threading.Lock()
+
+    def set_callbacks(self, consensus, execution_callback, broadcast_callback):
+        self.consensus = consensus
+        self.execution_callback = execution_callback
+        self.broadcast_callback = broadcast_callback
 
     def add_block(self, block: Block, initially = False) -> Block | None:
         if not Validator.validate_block(block, self, initially): # Validate block
@@ -27,12 +46,18 @@ class Chain:
         print("chain.py:add_block: Block valid, add to chain")
         print(block)
         self.chain.append(block)
-        # print("chain.py:add_block: Increment chain length")
         self.length += 1
-        # Clear tx in mempool
+
+        # Execute block
+        self.execution_callback(block)
+
+        # Remove transactions from mempool
         for tx in block.data:
-            self.mempool.remove(tx)
-            self.mempool_tx_id.remove(tx.hash)
+            for tx2 in self.mempool:
+                if tx.hash == tx2.hash:
+                    self.mempool.remove(tx2)
+                    self.mempool_tx_id.remove(tx2.hash)
+
 
         return block
 
@@ -60,50 +85,67 @@ class Chain:
     def temporary_add_to_mempool(self, transaction: Transaction) -> None:
         self.mempool_tx_id.add(transaction.hash)
 
-    def add_transaction(self, transaction: Transaction, signature: bytes, publicKey: PublicKey, execution_callback, consensus, broadcast_callback) -> None:
+    def add_transaction(self, transaction: Transaction, signature: bytes, publicKey: PublicKey) -> None:
         if not Validator.onchain_validate(transaction, signature, publicKey): # Validate transaction
+            self.mempool_lock.release()
             return
 
         print("chain.py:add_transaction: Transaction valid, add to mempool")
         print(transaction)
-        self.mempool.append(transaction)
-        # Add transaction ID (hash) to set for check it later
-        # self.mempool_tx_id.add(transaction.hash)
 
-        if not consensus.is_leader():
+        self.mempool_lock.acquire()
+        self.mempool.append(transaction)
+        self.mempool_lock.release()
+
+        if not self.consensus.is_leader():
             print("chain.py:add_transaction: Not leader, return")
             return
 
-        if len(self.mempool) >= self.max_block_size:
-            # print("chain.py:add_transaction: Process block")
-            self.process_block(execution_callback, consensus, broadcast_callback)
+    def __process_block_thread(self):
+        # Check some conditions
+        while True:
+            if self.consensus is None or self.broadcast_callback is None:
+                print(
+                    "chain.py:__process_block_thread: Consensus or execution callback or broadcast callback is not set, return")
+                time.sleep(1)
+            else:
+                break
 
-
-    def process_block(self, callback, consensus, broadcast_callback) -> None:
-        # Check block
-        if not Validator.preblock_validate(self.mempool):
+        # Check if leader
+        if not self.consensus.is_leader():
+            print("chain.py:__process_block_thread: Not leader, return")
             return
 
-        # PoA validation
+        # Process block loop
+        while True:
+            if len(self.mempool) >= self.max_block_size or float(time.time() - self.last_block_time) >= self.interval:
+                print("chain.py:__process_block_thread: Process block")
+                self.last_block_time = time.time()
+                if len(self.mempool) == 0:
+                    # Create filling block
+                    ConsensusProcessor.process_block([], self.get_last_block(), self.consensus, self.broadcast_callback)
+                    continue
 
-        print("chain.py:process_block: Mempool valid, create block")
-        # print(block)
-        data = self.mempool
-        block = Block(self.length, self.get_last_block().hash, time.time(), data)
+                self.mempool_lock.acquire()
 
-        # Sign block
-        consensus.sign_block(block)
+                block_to_process = min(len(self.mempool), self.max_block_size)
+                pool = self.mempool[:block_to_process]
+                self.mempool = self.mempool[block_to_process:]
 
-        # print("chain.py:process_block: Add new block to chain")
-        # self.add_block(block)
-        # print(block)
-        # print("chain.py:process_block: Clear mempool")
-        # self.mempool = []
+                block = ConsensusProcessor.process_block(pool, self.get_last_block(), self.consensus, self.broadcast_callback)
+                if block:
+                    print("chain.py:__process_block_thread: Block processed, delete transactions from mempool")
+                    # for tx in block.data:
+                    #     print(f"chain.py:__process_block_thread: Delete transaction " + tx.hash + " from mempool")
+                        # for mtx in self.mempool:
+                        #     if mtx.hash == tx.hash:
+                        #         self.mempool.remove(mtx)
+                        #         break
+                        # self.mempool_tx_id.remove(tx.hash)
 
-        # Broadcast block
-        broadcast_callback(block)
+                self.mempool_lock.release()
 
-        callback(block)
+            time.sleep(1)
 
     #
     # def check_sync(self, other) -> bool:

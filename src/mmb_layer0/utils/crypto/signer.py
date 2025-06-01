@@ -28,4 +28,4 @@ class SignerFactory(object):
         return cls.instance
 
 signer = SignerFactory("ecdsa")
-inspect(signer)
+# inspect(signer)

@@ -62,6 +62,11 @@ class TransactionProcessor:
         self.worldState.set_eoa(receiver, neoa)
 
     def process_native_transaction(self, transaction: NativeTransaction) -> None:
+
+        if transaction.sender == transaction.transactionData["receiver"]:
+            print(f"[Skip] Tx {transaction.hash[:8]} is noop (sender == receiver)")
+            return # No op
+
         print("TransactionProcessor:process_native_transaction: Process native transaction, gas fee: " + str(transaction.gasPrice))
 
         # Update world state

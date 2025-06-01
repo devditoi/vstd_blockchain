@@ -1,6 +1,5 @@
 # 1 node has 1 blockchain and 1 WorldState
 
-from ecdsa import SigningKey, VerifyingKey
 from rsa import PrivateKey, PublicKey
 from src.mmb_layer0.blockchain.core.chain import Chain
 from src.mmb_layer0.blockchain.consensus.PoA_consensus import ProofOfAuthority
@@ -9,10 +8,12 @@ from src.mmb_layer0.blockchain.processor.transaction_processor import Transactio
 from src.mmb_layer0.blockchain.core.validator import Validator
 from src.mmb_layer0.blockchain.core.worldstate import WorldState
 from .config import MMBConfig
+from .node_sync_services import NodeSyncServices
 from .utils.crypto.signer import SignerFactory
 from .utils.hash import HashUtils
 from rich import print
 from src.mmb_layer0.blockchain.core.block import Block
+from random import choice
 
 
 class NodeEvent:
@@ -46,12 +47,15 @@ class Node:
 
         print(f"{self.address[:4]}:node.py:__init__: Initialized node")
 
+        # TODO: Refactor this shit right here
         self.consensus = ProofOfAuthority(self.address, self.privateKey)
+        self.blockchain.set_callbacks(self.consensus, self.execution, self.propose_block)
 
     def import_key(self, filename: str) -> None:
         self.publicKey, self.privateKey = self.signer.load(filename)
         self.address = self.signer.address(self.publicKey)
         self.consensus = ProofOfAuthority(self.address, self.privateKey)
+        self.blockchain.set_callbacks(self.consensus, self.execution, self.propose_block)
         print(f"{self.address[:4]}:node.py:import_key: Imported key " + self.address)
 
     def export_key(self, filename: str) -> None:
@@ -77,7 +81,12 @@ class Node:
         elif event.eventType == "block":
             if not self.consensus.is_valid(event.data["block"]): # Not a valid block
                 return False
-            return True if self.blockchain.add_block(event.data["block"]) else False
+
+            block = self.blockchain.add_block(event.data["block"])
+
+            # NodeSyncServices.check_sync(self, choice(self.node_subscribtions))
+
+            return True if block else False
         return False # don't send unknown events
 
     def fire_event(self, event: NodeEvent):
@@ -93,7 +102,7 @@ class Node:
     def mint(self, address: str, privateKey: any, publicKey: any) -> None:
         # print("node.py:faucet: Processing 100 native tokens to address")
         amount = int(100 * MMBConfig.NativeTokenValue)
-        tx = MintBurnTransaction(address, amount, self.mintburn_nonce + 1, 100)
+        tx = MintBurnTransaction(address, amount, self.mintburn_nonce + 1, 0)
         self.mintburn_nonce += 1
         sign = self.signer.sign(tx.to_string(), privateKey)
         self.propose_tx(tx, sign, publicKey)
@@ -148,7 +157,7 @@ class Node:
 
         print(f"{self.address[:4]}:node.py:process_tx: Give transaction to blockchain nonce: " + str(tx.nonce))
         # print(tx, signature, publicKey)
-        self.blockchain.add_transaction(tx, signature, publicKey, self.execution, self.consensus, self.propose_block)
+        self.blockchain.add_transaction(tx, signature, publicKey)
 
     def propose_block(self, block: Block):
         self.fire_event(NodeEvent("block", {

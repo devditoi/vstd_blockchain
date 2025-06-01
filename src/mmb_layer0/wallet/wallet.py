@@ -16,11 +16,11 @@ class Wallet:
         
     def pay(self, amount: any, payee_address: str) -> None:
         amount = int(amount)
-        tx: Transaction = NativeTransaction(self.address, payee_address, amount, self.nonce + 1, 100)
+        tx: Transaction = NativeTransaction(self.address, payee_address, amount, self.nonce + 1, 0)
         self.nonce += 1
         sign: bytes = self.signer.sign(tx.to_string(), self.privateKey)
 
-        self.node.process_tx(tx, sign, self.publicKey)
+        self.node.propose_tx(tx, sign, self.publicKey)
 
     def get_balance(self) -> int:
         return self.node.get_balance(self.address)

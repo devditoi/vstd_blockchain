@@ -24,5 +24,5 @@ class ChainSyncServices:
         # Sync blocks
         for block in chain2.chain[1:]:
             print("chain.py:sync_chain: Syncing block", block.index)
-            chain1.add_block(block)
+            chain1.add_block(block, initially=True)
             executionFunction(block)

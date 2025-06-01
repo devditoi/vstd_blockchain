@@ -1,9 +1,10 @@
 import jsonlight
 import json
-
+import typing
 from src.mmb_layer0.blockchain.processor.block_processor import BlockProcessor
 from src.mmb_layer0.blockchain.core.chain import Chain
-from ..node import Node
+if typing.TYPE_CHECKING:
+    from ..node import Node
 from src.mmb_layer0.blockchain.core.worldstate import WorldState
 
 
@@ -46,18 +47,19 @@ class WorldStateSerializer:
 
 class NodeSerializer:
     @staticmethod
-    def to_json(node: Node):
+    def to_json(node: "Node"):
         return jsonlight.dumps({
-            "blockchain": jsonlight.dumps(node.blockchain),
+            "blockchain": ChainSerializer.serialize_chain(node.blockchain),
             "worldstate": node.worldState.to_json(),
             "version": node.version,
             "address": node.address,
-            "publicKey": node.publicKey
+            "publicKey": node.publicKey.to_string().hex()
         })
 
     @staticmethod
-    def deserialize_node(node_json: str) -> Node:
+    def deserialize_node(node_json: str) -> "Node":
         data = json.loads(node_json)
+        print(data["publicKey"])
         node = Node()
         node.blockchain = ChainSerializer.deserialize_chain(data["blockchain"])
         node.worldState = WorldStateSerializer.deserialize_world_state(data["worldstate"])
