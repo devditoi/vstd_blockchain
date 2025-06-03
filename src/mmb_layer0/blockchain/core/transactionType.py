@@ -3,7 +3,7 @@ import jsonlight
 from rsa import PublicKey
 from rich import print
 
-from src.mmb_layer0.utils.hash import HashUtils
+from mmb_layer0.utils.hash import HashUtils
 
 
 class ITransaction(ABC):

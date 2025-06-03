@@ -1,5 +1,5 @@
-from src.mmb_layer0.blockchain.processor.transaction_processor import TransactionProcessor
-from src.mmb_layer0.blockchain.core.block import Block
+from mmb_layer0.blockchain.processor.transaction_processor import TransactionProcessor
+from mmb_layer0.blockchain.core.block import Block
 import json
 
 class BlockProcessor:

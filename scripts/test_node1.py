@@ -1,6 +1,6 @@
-from src.mmb_layer0.node.node import Node
-from src.mmb_layer0.p2p.peer_type.remote_peer import RemotePeer
-from src.mmb_layer0.p2p.udp_protocol import UDPProtocol
+from mmb_layer0.node.node import Node
+from mmb_layer0.p2p.peer_type.remote_peer import RemotePeer
+from mmb_layer0.p2p.udp_protocol import UDPProtocol
 
 master = Node()
 master.debug()

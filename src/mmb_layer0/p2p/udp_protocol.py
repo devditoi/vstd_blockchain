@@ -3,8 +3,8 @@ import threading
 import json
 import time
 from rich import print
-from src.mmb_layer0.node.node_event_handler import NodeEvent, NodeEventHandler
-from src.mmb_layer0.p2p.protocol import Protocol
+from mmb_layer0.node.node_event_handler import NodeEvent, NodeEventHandler
+from mmb_layer0.p2p.protocol import Protocol
 
 
 class UDPProtocol(Protocol):

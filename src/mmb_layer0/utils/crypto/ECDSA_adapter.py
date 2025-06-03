@@ -1,7 +1,7 @@
 from ecdsa import VerifyingKey, SigningKey
 
-from src.mmb_layer0.utils.crypto.crypto_adapter_interace import ICryptoAdapter
-from src.mmb_layer0.utils.hash import HashUtils
+from mmb_layer0.utils.crypto.crypto_adapter_interace import ICryptoAdapter
+from mmb_layer0.utils.hash import HashUtils
 
 
 class ECDSAAdapter(ICryptoAdapter):

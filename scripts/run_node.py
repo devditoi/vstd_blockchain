@@ -1,10 +1,10 @@
-from src.mmb_layer0.config import MMBConfig
-from src.mmb_layer0.node.node import Node
-from src.mmb_layer0.p2p.peer_type.local_peer import LocalPeer
-from src.mmb_layer0.p2p.peer_type.remote_peer import RemotePeer
-from src.mmb_layer0.p2p.udp_protocol import UDPProtocol
-from src.mmb_layer0.utils.crypto.signer import SignerFactory
-from src.mmb_layer0.wallet.wallet import Wallet
+from mmb_layer0.config import MMBConfig
+from mmb_layer0.node.node import Node
+from mmb_layer0.p2p.peer_type.local_peer import LocalPeer
+from mmb_layer0.p2p.peer_type.remote_peer import RemotePeer
+from mmb_layer0.p2p.udp_protocol import UDPProtocol
+from mmb_layer0.utils.crypto.signer import SignerFactory
+from mmb_layer0.wallet.wallet import Wallet
 from rich import print, inspect
 import time
 

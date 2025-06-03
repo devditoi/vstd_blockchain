@@ -1,11 +1,11 @@
 from rsa import PublicKey
-from src.mmb_layer0.blockchain.core.transactionType import Transaction
-from src.mmb_layer0.blockchain.core.worldstate import WorldState
-from src.mmb_layer0.config import MMBConfig
-from src.mmb_layer0.utils.crypto.signer import SignerFactory
-from src.mmb_layer0.utils.hash import HashUtils
+from mmb_layer0.blockchain.core.transactionType import Transaction
+from mmb_layer0.blockchain.core.worldstate import WorldState
+from mmb_layer0.config import MMBConfig
+from mmb_layer0.utils.crypto.signer import SignerFactory
+from mmb_layer0.utils.hash import HashUtils
 from rich import print
-from src.mmb_layer0.blockchain.core.block import Block
+from mmb_layer0.blockchain.core.block import Block
 
 class Validator:
     @staticmethod

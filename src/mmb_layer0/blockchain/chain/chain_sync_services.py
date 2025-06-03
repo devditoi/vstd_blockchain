@@ -1,4 +1,4 @@
-from src.mmb_layer0.blockchain.core.chain import Chain
+from mmb_layer0.blockchain.core.chain import Chain
 
 class ChainSyncServices:
     @staticmethod

@@ -2,9 +2,9 @@ import socket
 import jsonlight
 import typing
 if typing.TYPE_CHECKING:
-    from src.mmb_layer0.node.node_event_handler import NodeEvent
+    from mmb_layer0.node.node_event_handler import NodeEvent
 from rich import print
-from src.mmb_layer0.p2p.peer import Peer
+from mmb_layer0.p2p.peer import Peer
 
 class RemotePeer(Peer):
     def __init__(self, ip: str, port: int):

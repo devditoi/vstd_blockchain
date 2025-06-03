@@ -1,4 +1,4 @@
-from src.mmb_layer0.node import Node
+from mmb_layer0.node import Node
 
 validator = Node()
 validator.debug()

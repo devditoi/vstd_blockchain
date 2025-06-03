@@ -1,4 +1,4 @@
-from src.mmb_layer0.blockchain.core.worldstate import WorldState
+from mmb_layer0.blockchain.core.worldstate import WorldState
 
 
 class WorldStateSyncServices:
