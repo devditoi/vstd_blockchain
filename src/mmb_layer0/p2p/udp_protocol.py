@@ -4,6 +4,8 @@ import json
 import time
 from rich import print
 from mmb_layer0.node.node_event_handler import NodeEvent, NodeEventHandler
+from mmb_layer0.p2p.background_sync.chain_sync_job import ChainSyncJob
+from mmb_layer0.p2p.background_sync.peer_sync_job import PeerSyncJob
 from mmb_layer0.p2p.protocol import Protocol
 
 
@@ -17,26 +19,14 @@ class UDPProtocol(Protocol):
         self.listen_thread = threading.Thread(target=self.listen_loop, daemon=True)
         self.listen_thread.start()
 
-        initial_thread = threading.Thread(target=self.__initial_event, daemon=True)
-        initial_thread.start()
+        peer_sync_job = PeerSyncJob(self.event_handler)
+        peer_sync_job.run()
 
-    def __initial_event(self):
-        print(f"[UDPProtocol] {self.event_handler.node.origin}: Waiting for peers")
-        while not self.event_handler.peers:
-            time.sleep(1)
+        chain_sync_job = ChainSyncJob(self.event_handler)
+        chain_sync_job.run()
 
-        while True:
-            # Checking connections every 15 seconds
-            self.initial_event()
-            time.sleep(15)
 
-    def initial_event(self):
-        # Send peers discovery event to all peers
-        event = NodeEvent("peer_discovery", {}, self.event_handler.node.origin)
-        # Select random peer to send event to
 
-        print(f"[UDPProtocol] {self.event_handler.node.origin}: Sending peer_discovery event to all peers")
-        self.event_handler.ask(event)
 
     def listen_loop(self):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)

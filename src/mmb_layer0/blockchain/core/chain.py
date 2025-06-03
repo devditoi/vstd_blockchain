@@ -1,24 +1,28 @@
 import time
 
+from ecdsa import VerifyingKey
 # import json
 from rsa import PublicKey
 # import jsonlight
-from rich import print
+from rich import print, inspect
 import threading
 from mmb_layer0.blockchain.consensus.consensus_processor import ConsensusProcessor
 # from mmb_layer0.blockchain.transaction_processor import TransactionProcessor
 from mmb_layer0.blockchain.core.validator import Validator
 from mmb_layer0.blockchain.core.block import Block
-from mmb_layer0.blockchain.core.transactionType import Transaction
+from mmb_layer0.blockchain.core.transaction_type import Transaction
+from mmb_layer0.utils.crypto.signer import SignerFactory
+
+
 # from mmb_layer0.node_sync_services import NodeSyncServices
 
 
 class Chain:
-    def __init__(self) -> None:
+    def __init__(self, dummy = True) -> None:
         print("chain.py:__init__: Initializing Chain")
-        genesis_tx = Transaction("0x0", "genesis", 0, 0)
-        genesis_block: Block = Block(0, "0", 0, [genesis_tx])
-        self.chain = [genesis_block]
+        self.genesis_tx = Transaction("0x0", "genesis", 0, 0)
+        self.genesis_block: Block = Block(0, "0", 0, [self.genesis_tx])
+        self.chain = []
         self.length = 1
         self.mempool: list[Transaction] = []
         self.mempool_tx_id: set[str] = set()
@@ -30,26 +34,37 @@ class Chain:
         self.execution_callback = None
         self.broadcast_callback = None
 
-        self.thread = threading.Thread(target=self.__process_block_thread, daemon=True)
-        self.thread.start()
+        self.reset_chain()
+        if not dummy:
+            self.thread = threading.Thread(target=self.__process_block_thread, daemon=True)
+            self.thread.start()
 
         self.mempool_lock = threading.Lock()
+
+    def is_genesis(self):
+        return self.length == 1
+
+    def reset_chain(self):
+        self.chain = [self.genesis_block]
 
     def set_callbacks(self, consensus, execution_callback, broadcast_callback):
         self.consensus = consensus
         self.execution_callback = execution_callback
         self.broadcast_callback = broadcast_callback
 
+        print("chain.py:set_callbacks: Set callbacks")
+
     def add_block(self, block: Block, initially = False) -> Block | None:
         if not Validator.validate_block(block, self, initially): # Validate block
             return None
-        print("chain.py:add_block: Block valid, add to chain")
-        print(block)
+        print(f"chain.py:add_block: Block #{block.index} valid, add to chain")
+        # print(block)
         self.chain.append(block)
         self.length += 1
 
-        # Execute block
-        self.execution_callback(block)
+        if self.execution_callback:
+            # Execute block
+            self.execution_callback(block)
 
         # Remove transactions from mempool
         for tx in block.data:
@@ -85,13 +100,16 @@ class Chain:
     def temporary_add_to_mempool(self, transaction: Transaction) -> None:
         self.mempool_tx_id.add(transaction.hash)
 
-    def add_transaction(self, transaction: Transaction, signature: bytes, publicKey: PublicKey) -> None:
-        if not Validator.onchain_validate(transaction, signature, publicKey): # Validate transaction
+    def add_transaction(self, transaction: Transaction, signature: bytes, publicKey: str) -> None:
+        # TODO REALLY NEEDED TO FIX THIS THING
+        # THE PUBLICKEY NEED SOME FACTORIES BROOOOOOOOOOOOOOOO
+
+        if not Validator.onchain_validate(transaction, signature, VerifyingKey.from_string(bytes.fromhex(publicKey))): # Validate transaction
             self.mempool_lock.release()
             return
 
         print("chain.py:add_transaction: Transaction valid, add to mempool")
-        print(transaction)
+        # print(transaction)
 
         self.mempool_lock.acquire()
         self.mempool.append(transaction)
@@ -106,7 +124,7 @@ class Chain:
         while True:
             if self.consensus is None or self.broadcast_callback is None:
                 print(
-                    "chain.py:__process_block_thread: Consensus or execution callback or broadcast callback is not set, return")
+                    "chain.py:__process_block_thread: Consensus or  broadcast callback is not set, return")
                 time.sleep(1)
             else:
                 break
@@ -116,7 +134,7 @@ class Chain:
             # print("chain.py:__process_block_thread: Not leader, return")
             return
 
-        return # Testing purposes
+        # return # Testing purposes
 
         # Process block loop
         while True:

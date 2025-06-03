@@ -12,9 +12,9 @@ from mmb_layer0.blockchain.core.worldstate import WorldState
 
 class ChainSerializer:
     @staticmethod
-    def serialize_chain(chain: Chain) -> str:
+    def serialize_chain(chain: Chain, exclude_genesis=False) -> str:
         return jsonlight.dumps({
-            "chain": chain.chain,
+            "chain": chain.chain[1:] if exclude_genesis else chain.chain,
             "length": chain.length,
             "mempool": chain.mempool,
             "max_block_size": chain.max_block_size
@@ -26,7 +26,7 @@ class ChainSerializer:
         chain = Chain()
         data = json.loads(chain_json)
         chain.max_block_size = data["max_block_size"]
-        for block in data["chain"][1:]:
+        for block in data["chain"]:
             chain.add_block(BlockProcessor.cast_block(block), initially=True)
         return chain
 

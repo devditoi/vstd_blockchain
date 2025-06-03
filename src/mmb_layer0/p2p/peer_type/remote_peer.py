@@ -19,7 +19,7 @@ class RemotePeer(Peer):
             "origin": event.origin
         }
 
-        print(f"[RemotePeer] {event.origin}: Sending event to {self.ip}:{self.port} - event type: [bold red]{event.eventType}[/bold red]")
+        # print(f"[RemotePeer] Relay event from {event.origin} to {self.ip}:{self.port} - event type: [bold red]{event.eventType}[/bold red]")
 
         try:
             message = jsonlight.dumps(data).encode()

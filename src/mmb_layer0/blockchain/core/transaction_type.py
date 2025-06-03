@@ -20,9 +20,20 @@ class Transaction(ITransaction):
         self.transactionData: dict = {}
         self.gasPrice = gasPrice
         self.nonce = nonce
-        self.hash = HashUtils.sha256(self.to_string()) # Hash id of each transaction
+        self.hash = HashUtils.sha256(self.to_verifiable_string()) # Hash id of each transaction
         
     def to_string(self) -> str:
+        return jsonlight.dumps({
+            "sender": self.sender,
+            "Txtype": self.Txtype,
+            "nonce": self.nonce,
+            "gasPrice": self.gasPrice,
+            "data": self.transactionData,
+            "signature": self.signature,
+            "publicKey": self.publicKey
+        })
+
+    def to_verifiable_string(self) -> str:
         return jsonlight.dumps({
             "sender": self.sender,
             "Txtype": self.Txtype,
