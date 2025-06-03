@@ -27,10 +27,10 @@ class UDPProtocol(Protocol):
 
         while True:
             # Checking connections every 15 seconds
-            self.intiial_event()
+            self.initial_event()
             time.sleep(15)
 
-    def intiial_event(self):
+    def initial_event(self):
         # Send peers discovery event to all peers
         event = NodeEvent("peer_discovery", {}, self.event_handler.node.origin)
         # Select random peer to send event to
