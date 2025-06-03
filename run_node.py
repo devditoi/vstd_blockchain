@@ -58,24 +58,24 @@ import time
 
 
 # Test 3
-node = Node()
-node.debug()
-
-leader = Node()
-leader.import_key("validator_key")
-
-leader_peer = LocalPeer(leader)
-node_peer = LocalPeer(node)
-
-node.subscribe(leader_peer) # and backwards
-leader.subscribe(node_peer)
-
-wallet = Wallet(node)
-pmint_key, mint_key = SignerFactory().get_signer().load("mint_key")
-node.mint(wallet.address, mint_key, pmint_key)
-
-while True:
-    time.sleep(15)
-    node.debug()
-    leader.debug()
-    pass
+# node = Node()
+# node.debug()
+#
+# leader = Node()
+# leader.import_key("validator_key")
+#
+# leader_peer = LocalPeer(leader)
+# node_peer = LocalPeer(node)
+#
+# node.subscribe(leader_peer) # and backwards
+# leader.subscribe(node_peer)
+#
+# wallet = Wallet(node)
+# pmint_key, mint_key = SignerFactory().get_signer().load("mint_key")
+# node.mint(wallet.address, mint_key, pmint_key)
+#
+# while True:
+#     time.sleep(15)
+#     node.debug()
+#     leader.debug()
+#     pass

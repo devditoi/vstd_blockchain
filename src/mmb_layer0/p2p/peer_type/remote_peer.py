@@ -1,6 +1,8 @@
 import socket
 import jsonlight
-from src.mmb_layer0.node.node_event_handler import NodeEvent
+import typing
+if typing.TYPE_CHECKING:
+    from src.mmb_layer0.node.node_event_handler import NodeEvent
 from src.mmb_layer0.p2p.peer import Peer
 
 class RemotePeer(Peer):
@@ -10,7 +12,7 @@ class RemotePeer(Peer):
         # self.origin = f"{ip}:{port}"
         super().__init__(None, f"{ip}:{port}")  # Không cần node gắn vào
 
-    def fire(self, event: NodeEvent):
+    def fire(self, event: "NodeEvent"):
         data = {
             "eventType": event.eventType,
             "data": event.data,

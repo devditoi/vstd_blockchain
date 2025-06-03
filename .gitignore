@@ -20,3 +20,6 @@ mint_key*
 
 # Logs
 *.log
+
+# Poetry
+poetry.lock

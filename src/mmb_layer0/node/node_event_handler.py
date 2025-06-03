@@ -2,6 +2,8 @@ from rich import inspect
 import typing
 from src.mmb_layer0.blockchain.core.block import Block
 from src.mmb_layer0.p2p.peer import Peer
+from ..utils.serializer import PeerSerializer
+import time
 if typing.TYPE_CHECKING:
     from .node import Node
     from src.mmb_layer0.p2p.peer_type.remote_peer import RemotePeer
@@ -17,6 +19,7 @@ class NodeEventHandler:
     def __init__(self, node: "Node"):
         self.node = node
         self.peers: list["Peer"] = []
+        self.peer_timer: dict[str, int] = {}
 
     # EVENT MANAGER
     def subscribe(self, peer: "Peer"):
@@ -35,9 +38,17 @@ class NodeEventHandler:
                 continue
             peer.fire(event)
 
-    @staticmethod
-    def fire_to(peer: "RemotePeer", event: NodeEvent):
-        peer.fire(event)
+    # @staticmethod
+    def fire_to(self, peer_origin: any, event: NodeEvent):
+        # peer.fire(event)
+        # Find peer by origin
+        self.find_peer_by_address(peer_origin).fire(event)
+
+    def find_peer_by_address(self, origin: str):
+        for peer in self.peers:
+            if peer.address == origin:
+                return peer
+        return None
 
     def process_event(self, event: NodeEvent) -> bool:
         print(f"{self.node.address[:4]}:node.py:process_event: Node {self.node.address} received event {event.eventType}")
@@ -63,6 +74,41 @@ class NodeEventHandler:
             # NodeSyncServices.check_sync(self, choice(self.node_subscribtions))
 
             return True if block else False
+        elif event.eventType == "peer_discovery":
+            self.fire_to(event.origin, NodeEvent("peer_discovered",
+        {
+                "peers": PeerSerializer.to_json(self.peers.copy())
+            },
+            self.node.address))
+        elif event.eventType == "peer_discovered":
+            for peer_data in event.data["peers"]:
+                peer = PeerSerializer.deserialize_peer(peer_data)
+                if peer in self.peers:
+                    continue
+                if peer.address == self.node.origin: # Don't subscribe to yourself lol
+                    continue
+                self.subscribe(peer)
+        elif event.eventType == "ping":
+            self.fire_to(event.origin, NodeEvent("pong", {}, self.node.address))
+        elif event.eventType == "pong":
+            # check this peer is alive
+            peer = self.find_peer_by_address(event.origin)
+            if peer is None:
+                return False
+            self.peer_timer[peer.address] = int(time.time())
+
+            for p in self.peers:
+                if self.peer_timer[p.address] is None:
+                    # Send ping
+                    self.fire_to(p, NodeEvent("ping", {}, self.node.origin))
+                    self.peer_timer[p.address] = int(time.time())
+                    continue
+                if time.time() - self.peer_timer[p.address] > 10:
+                    self.peers.remove(p)
+                    self.peer_timer.pop(p.address)
+
+
+            pass
         return False  # don't send unknown events
 
     def propose_block(self, block: Block):

@@ -3,6 +3,8 @@ import json
 import typing
 from src.mmb_layer0.blockchain.processor.block_processor import BlockProcessor
 from src.mmb_layer0.blockchain.core.chain import Chain
+from src.mmb_layer0.p2p.peer_type.remote_peer import RemotePeer
+
 if typing.TYPE_CHECKING:
     from src.mmb_layer0.node.node import Node
 from src.mmb_layer0.blockchain.core.worldstate import WorldState
@@ -67,3 +69,17 @@ class NodeSerializer:
         node.address = data["address"]
         node.publicKey = data["publicKey"]
         return node
+
+class PeerSerializer:
+    @staticmethod
+    def to_json(peer):
+        return json.dumps({
+            "ip": peer.ip,
+            "port": peer.port
+        })
+
+    @staticmethod
+    def deserialize_peer(peer_json):
+        data = json.loads(peer_json)
+        peer = RemotePeer(data["ip"], data["port"])
+        return peer

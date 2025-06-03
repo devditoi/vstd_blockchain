@@ -7,7 +7,7 @@ master.import_key("validator_key")
 master.debug()
 
 protocol = UDPProtocol(master, 5001)
-
+master.set_origin("127.0.0.1:5001")
 other = RemotePeer("127.0.0.1", 5000)
 master.subscribe(other)
 

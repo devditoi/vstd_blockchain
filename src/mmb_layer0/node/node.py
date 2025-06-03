@@ -52,6 +52,10 @@ class Node:
         self.consensus = ProofOfAuthority(self.address, self.privateKey)
         self.blockchain.set_callbacks(self.consensus, self.execution, self.node_event_handler.propose_block)
 
+        self.origin = ""
+
+    def set_origin(self, origin: str) -> None:
+        self.origin = origin
 
 
     def import_key(self, filename: str) -> None:
