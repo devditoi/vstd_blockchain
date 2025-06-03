@@ -1,7 +1,7 @@
 from ..peer import Peer
 import typing
 if typing.TYPE_CHECKING:
-    from src.mmb_layer0.node.node import Node, NodeEvent
+    from mmb_layer0.node.node import Node, NodeEvent
 
 
 class LocalPeer(Peer):

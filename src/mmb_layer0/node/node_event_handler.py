@@ -2,14 +2,14 @@ from random import choice
 
 from rich import inspect, print
 import typing
-from src.mmb_layer0.blockchain.core.block import Block
-from src.mmb_layer0.p2p.peer import Peer
+from mmb_layer0.blockchain.core.block import Block
+from mmb_layer0.p2p.peer import Peer
 from ..utils.network_utils import is_valid_origin
 from ..utils.serializer import PeerSerializer
 import time
 if typing.TYPE_CHECKING:
     from .node import Node
-from src.mmb_layer0.p2p.peer_type.remote_peer import RemotePeer
+from mmb_layer0.p2p.peer_type.remote_peer import RemotePeer
 from ..blockchain.processor.block_processor import BlockProcessor
 
 class NodeEvent:

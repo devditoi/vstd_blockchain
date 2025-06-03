@@ -1,0 +1,28 @@
+[project]
+name = "blockchainnetwork"
+version = "0.1.0"
+description = "mmb blockchain network"
+authors = [
+    {name = "Lee Min Waan",email = "100744636+plsgivemeachane@users.noreply.github.com"}
+]
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = ">=3.10,<4"
+dependencies = [
+    "rsa (>=4.9.1,<5.0.0)",
+    "ecdsa (>=0.19.1,<0.20.0)",
+    "jsonlight (>=0.0.7,<0.0.8)",
+    "rich (>=14.0.0,<15.0.0)",
+    "streamlit (>=1.45.1,<2.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "mmb_layer0"
+
+[tool.poetry.packages]
+mmb_layer0 = { from = "src" }

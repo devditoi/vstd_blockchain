@@ -1,8 +1,8 @@
-from src.mmb_layer0.blockchain.chain.chain_sync_services import ChainSyncServices
-from src.mmb_layer0.blockchain.worldstate.worldstate_sync_services import WorldStateSyncServices
+from mmb_layer0.blockchain.chain.chain_sync_services import ChainSyncServices
+from mmb_layer0.blockchain.worldstate.worldstate_sync_services import WorldStateSyncServices
 import typing
 if typing.TYPE_CHECKING:
-    from src.mmb_layer0.node.node import Node
+    from mmb_layer0.node.node import Node
 from rich import print
 
 class NodeSyncServices:

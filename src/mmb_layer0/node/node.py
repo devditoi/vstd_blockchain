@@ -1,24 +1,24 @@
 # 1 node has 1 blockchain and 1 WorldState
 
-from src.mmb_layer0.blockchain.core.chain import Chain
-from src.mmb_layer0.blockchain.consensus.PoA_consensus import ProofOfAuthority
-from src.mmb_layer0.blockchain.core.transactionType import Transaction, MintBurnTransaction
-from src.mmb_layer0.blockchain.processor.block_processor import BlockProcessor
-from src.mmb_layer0.blockchain.processor.transaction_processor import TransactionProcessor
-from src.mmb_layer0.blockchain.core.validator import Validator
-from src.mmb_layer0.blockchain.core.worldstate import WorldState
-from src.mmb_layer0.config import MMBConfig
+from mmb_layer0.blockchain.core.chain import Chain
+from mmb_layer0.blockchain.consensus.PoA_consensus import ProofOfAuthority
+from mmb_layer0.blockchain.core.transactionType import Transaction, MintBurnTransaction
+from mmb_layer0.blockchain.processor.block_processor import BlockProcessor
+from mmb_layer0.blockchain.processor.transaction_processor import TransactionProcessor
+from mmb_layer0.blockchain.core.validator import Validator
+from mmb_layer0.blockchain.core.worldstate import WorldState
+from mmb_layer0.config import MMBConfig
 import typing
 
-from src.mmb_layer0.node.node_event_handler import NodeEventHandler
+from mmb_layer0.node.node_event_handler import NodeEventHandler
 
 if typing.TYPE_CHECKING:
-    from src.mmb_layer0.p2p.peer_type.remote_peer import RemotePeer
-    from src.mmb_layer0.p2p.peer import Peer
-from src.mmb_layer0.node.node_event_handler import NodeEvent
-from src.mmb_layer0.utils.crypto.signer import SignerFactory
+    from mmb_layer0.p2p.peer_type.remote_peer import RemotePeer
+    from mmb_layer0.p2p.peer import Peer
+from mmb_layer0.node.node_event_handler import NodeEvent
+from mmb_layer0.utils.crypto.signer import SignerFactory
 from rich import print, inspect
-from src.mmb_layer0.blockchain.core.block import Block
+from mmb_layer0.blockchain.core.block import Block
 
 class Node:
     def __init__(self) -> None:
