@@ -1,8 +1,9 @@
 # 1 node has 1 blockchain and 1 WorldState
+import ecdsa
 
 from mmb_layer0.blockchain.core.chain import Chain
-from mmb_layer0.blockchain.consensus.PoA_consensus import ProofOfAuthority
-from mmb_layer0.blockchain.core.transactionType import Transaction, MintBurnTransaction
+from mmb_layer0.blockchain.consensus.poa_consensus import ProofOfAuthority
+from mmb_layer0.blockchain.core.transaction_type import Transaction, MintBurnTransaction
 from mmb_layer0.blockchain.processor.block_processor import BlockProcessor
 from mmb_layer0.blockchain.processor.transaction_processor import TransactionProcessor
 from mmb_layer0.blockchain.core.validator import Validator
@@ -23,7 +24,7 @@ from mmb_layer0.blockchain.core.block import Block
 class Node:
     def __init__(self) -> None:
         print("node.py:__init__: Initializing Node")
-        self.blockchain: Chain = Chain()
+        self.blockchain: Chain = Chain(False)
 
         self.worldState: WorldState = WorldState()
 
@@ -50,9 +51,12 @@ class Node:
 
         # TODO: Refactor this shit right here
         self.consensus = ProofOfAuthority(self.address, self.privateKey)
-        self.blockchain.set_callbacks(self.consensus, self.execution, self.node_event_handler.propose_block)
+        self.blockchain.set_callbacks(self.consensus, self.execution, self.propose_block)
 
         self.origin = ""
+
+    def propose_block(self, block: Block):
+        self.node_event_handler.propose_block(block)
 
     def set_origin(self, origin: str) -> None:
         self.origin = origin
@@ -90,8 +94,9 @@ class Node:
         amount = int(100 * MMBConfig.NativeTokenValue)
         tx = MintBurnTransaction(address, amount, self.mintburn_nonce + 1, 0)
         self.mintburn_nonce += 1
-        sign = self.signer.sign(tx.to_string(), privateKey)
+        sign = self.signer.sign(tx.to_verifiable_string(), privateKey)
         self.propose_tx(tx, sign, publicKey)
+
 
     # def sync(self, other_json: str):
     #     # sync from another node
@@ -126,15 +131,19 @@ class Node:
     def get_nonce(self, address: str) -> int:
         return self.worldState.get_eoa(address).nonce
 
-    def propose_tx(self, tx: Transaction, signature, publicKey):
-        self.broadcast(NodeEvent("tx", {
+    def propose_tx(self, tx: Transaction, signature, publicKey: ecdsa.VerifyingKey):
+        # TODO REALLY NEEDED TO FIX THIS THING
+        # ! Really need to check the publickey to see if it rsa or ecdsa
+        self.node_event_handler.broadcast(NodeEvent("tx", {
             "tx": tx,
             "signature": signature,
-            "publicKey": publicKey
+            "publicKey": publicKey.to_string().hex()
         }, self.address))
 
+        print(publicKey.to_string().hex())
+
     def process_tx(self, tx: Transaction, signature, publicKey):
-        print(f"{self.address[:4]}:node.py:process_tx: Processing " + tx.Txtype + " transaction")
+        print(f"{self.address[:4]}:node.py:process_tx: Add pool " + tx.Txtype + " transaction")
 
         # self.blockchain.temporary_add_to_mempool(tx)
 
@@ -143,6 +152,8 @@ class Node:
 
         print(f"{self.address[:4]}:node.py:process_tx: Give transaction to blockchain nonce: " + str(tx.nonce))
         # print(tx, signature, publicKey)
+
+
         self.blockchain.add_transaction(tx, signature, publicKey)
 
     def execution(self, block: Block):

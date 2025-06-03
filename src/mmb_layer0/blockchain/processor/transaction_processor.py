@@ -1,5 +1,5 @@
 from mmb_layer0.blockchain.core.block import Block
-from mmb_layer0.blockchain.core.transactionType import Transaction, NativeTransaction, MintBurnTransaction
+from mmb_layer0.blockchain.core.transaction_type import Transaction, NativeTransaction, MintBurnTransaction
 from mmb_layer0.blockchain.core.worldstate import WorldState
 import json
 from rich import print
@@ -11,8 +11,8 @@ class TransactionProcessor:
         self.worldState = worldState
 
     def process(self) -> None:
-        print("TransactionProcessor:process: Process block")
-        print(self.block)
+        print(f"TransactionProcessor:process: Process block #{self.block.index}")
+        # print(self.block)
         for tx in self.block.data:
             print("TransactionProcessor:process: Process " + tx.Txtype + " transaction")
             if isinstance(tx, NativeTransaction):
@@ -33,14 +33,21 @@ class TransactionProcessor:
         transaction = json.loads(transaction_raw)
         # print(transaction)
         transaction_data = transaction["data"]
-        # print(transaction_data)
-        match transaction["Txtype"]:
-            case "mintburn":
-                return MintBurnTransaction(transaction_data["receiver"], transaction_data["amount"], transaction["nonce"], transaction["gasPrice"])
-            case "native":
-                return NativeTransaction(transaction["sender"], transaction_data["receiver"], transaction_data["amount"], transaction["nonce"], transaction["gasPrice"])
-            case _:
-                raise Exception("Transaction type is not supported")
+        # print(transaction)
+        def cast_raw_transaction():
+            match transaction["Txtype"]:
+                case "mintburn":
+                    return MintBurnTransaction(transaction_data["receiver"], transaction_data["amount"], transaction["nonce"], transaction["gasPrice"])
+                case "native":
+                    return NativeTransaction(transaction["sender"], transaction_data["receiver"], transaction_data["amount"], transaction["nonce"], transaction["gasPrice"])
+                case _:
+                    raise Exception("Transaction type is not supported")
+
+        tx = cast_raw_transaction()
+        tx.signature = transaction["signature"]
+        tx.publicKey = transaction["publicKey"]
+
+        return tx
 
 
     def process_mint_burn_transaction(self, transaction: Transaction) -> None:
