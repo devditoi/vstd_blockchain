@@ -29,7 +29,7 @@ class ProofOfAuthority(IConsensus):
         # pass
 
     def is_leader(self) -> bool:
-        print(self.address, self.hardcoded_validator)
+        # print(self.address, self.hardcoded_validator)
         return self.address == self.hardcoded_validator
 
     def sign_block(self, block: Block) -> None:

@@ -1,9 +1,11 @@
 from src.mmb_layer0.config import MMBConfig
 from src.mmb_layer0.node.node import Node
 from src.mmb_layer0.p2p.peer_type.local_peer import LocalPeer
+from src.mmb_layer0.p2p.peer_type.remote_peer import RemotePeer
+from src.mmb_layer0.p2p.udp_protocol import UDPProtocol
 from src.mmb_layer0.utils.crypto.signer import SignerFactory
 from src.mmb_layer0.wallet.wallet import Wallet
-from rich import print
+from rich import print, inspect
 import time
 
 
@@ -63,19 +65,43 @@ import time
 #
 # leader = Node()
 # leader.import_key("validator_key")
-#
-# leader_peer = LocalPeer(leader)
-# node_peer = LocalPeer(node)
-#
-# node.subscribe(leader_peer) # and backwards
-# leader.subscribe(node_peer)
-#
-# wallet = Wallet(node)
-# pmint_key, mint_key = SignerFactory().get_signer().load("mint_key")
-# node.mint(wallet.address, mint_key, pmint_key)
-#
-# while True:
-#     time.sleep(15)
-#     node.debug()
-#     leader.debug()
-#     pass
+
+
+# Test 4
+import multiprocessing
+def start_node(port: int):
+    node = Node()
+    node.debug()
+    node.set_origin(f"127.0.0.1:{port}")
+    __other = RemotePeer("127.0.0.1", 5000)
+    # inspect(__other)
+    node.node_event_handler.subscribe(__other)
+    __protocol = UDPProtocol(node.node_event_handler, port)  # auto listen in background
+
+
+    while True:
+        pass
+
+if __name__ == '__main__':
+    master = Node()
+    master.import_key("validator_key")
+    master.debug()
+
+    protocol = UDPProtocol(master.node_event_handler, 5000)
+    master.set_origin("127.0.0.1:5000")
+    # other = RemotePeer("127.0.0.1", 5000)
+    # master.subscribe(other)
+
+    # p1 = multiprocessing.Process(target=start_node, args=(5001,))
+    # p2 = multiprocessing.Process(target=start_node, args=(5002,))
+    # p1.start()
+    # p2.start()
+
+    peers_test = 10
+    for i in range(peers_test):
+        port = 5001 + i
+        p = multiprocessing.Process(target=start_node, args=(port,))
+        p.start()
+
+    while True:
+        pass

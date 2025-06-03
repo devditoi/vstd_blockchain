@@ -77,9 +77,18 @@ class PeerSerializer:
             "ip": peer.ip,
             "port": peer.port
         })
-
     @staticmethod
     def deserialize_peer(peer_json):
+        # print(peer_json)
         data = json.loads(peer_json)
         peer = RemotePeer(data["ip"], data["port"])
         return peer
+
+    @staticmethod
+    def serialize_multi_peers(peers):
+        return json.dumps([PeerSerializer.to_json(peer) for peer in peers])
+
+    @staticmethod
+    def deserialize_multi_peers(peers_json):
+        peers_data = json.loads(peers_json)
+        return [PeerSerializer.deserialize_peer(peer) for peer in peers_data]

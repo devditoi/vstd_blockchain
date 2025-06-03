@@ -15,7 +15,7 @@ from src.mmb_layer0.node.node_event_handler import NodeEventHandler
 if typing.TYPE_CHECKING:
     from src.mmb_layer0.p2p.peer_type.remote_peer import RemotePeer
     from src.mmb_layer0.p2p.peer import Peer
-    from src.mmb_layer0.node.node_event_handler import NodeEvent
+from src.mmb_layer0.node.node_event_handler import NodeEvent
 from src.mmb_layer0.utils.crypto.signer import SignerFactory
 from rich import print, inspect
 from src.mmb_layer0.blockchain.core.block import Block
@@ -71,17 +71,19 @@ class Node:
 
 
     # EVENT MANAGER
-    def subscribe(self, peer: "Peer"):
-        self.node_event_handler.subscribe(peer)
-
-    def broadcast(self, event: "NodeEvent"):
-        self.node_event_handler.broadcast(event)
-
-    def fire_to(self, peer: "RemotePeer", event: "NodeEvent"):
-        self.node_event_handler.fire_to(peer, event)
-
-    def process_event(self, event: "NodeEvent") -> bool:
-        return self.node_event_handler.process_event(event)
+    # def subscribe(self, peer: "Peer"):
+    #     # print(f"{self.origin}:node.py:subscribe: Subscribed to {peer.address}")
+    #     # inspect(peer)
+    #     self.node_event_handler.subscribe(peer)
+    #
+    # def broadcast(self, event: "NodeEvent"):
+    #     self.node_event_handler.broadcast(event)
+    #
+    # def fire_to(self, peer: "RemotePeer", event: "NodeEvent"):
+    #     self.node_event_handler.fire_to(peer, event)
+    #
+    # def process_event(self, event: "NodeEvent") -> bool:
+    #     return self.node_event_handler.process_event(event)
 
     def mint(self, address: str, privateKey: any, publicKey: any) -> None:
         # print("node.py:faucet: Processing 100 native tokens to address")

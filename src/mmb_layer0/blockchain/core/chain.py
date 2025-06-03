@@ -98,7 +98,7 @@ class Chain:
         self.mempool_lock.release()
 
         if not self.consensus.is_leader():
-            print("chain.py:add_transaction: Not leader, return")
+            # print("chain.py:add_transaction: Not leader, return")
             return
 
     def __process_block_thread(self):
@@ -113,8 +113,10 @@ class Chain:
 
         # Check if leader
         if not self.consensus.is_leader():
-            print("chain.py:__process_block_thread: Not leader, return")
+            # print("chain.py:__process_block_thread: Not leader, return")
             return
+
+        return # Testing purposes
 
         # Process block loop
         while True:

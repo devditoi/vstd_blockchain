@@ -1,12 +1,15 @@
-from rich import inspect
+from random import choice
+
+from rich import inspect, print
 import typing
 from src.mmb_layer0.blockchain.core.block import Block
 from src.mmb_layer0.p2p.peer import Peer
+from ..utils.network_utils import is_valid_origin
 from ..utils.serializer import PeerSerializer
 import time
 if typing.TYPE_CHECKING:
     from .node import Node
-    from src.mmb_layer0.p2p.peer_type.remote_peer import RemotePeer
+from src.mmb_layer0.p2p.peer_type.remote_peer import RemotePeer
 from ..blockchain.processor.block_processor import BlockProcessor
 
 class NodeEvent:
@@ -26,7 +29,7 @@ class NodeEventHandler:
         if peer in self.peers:
             return
         self.peers.append(peer)
-        # print(f"{self.address[:4]}:node.py:subscribe: Subscribed to {peer.address}")
+        # print(f"{self.node.origin}:node.py:subscribe: Subscribed to {peer.address}")
 
     def broadcast(self, event: NodeEvent):
         # time.sleep(1)
@@ -38,8 +41,18 @@ class NodeEventHandler:
                 continue
             peer.fire(event)
 
+    def ask(self, event: NodeEvent):
+        if not self.peers:
+            return
+        peer = choice(self.peers)
+        # inspect(peer)
+        peer.fire(event)
+
     # @staticmethod
     def fire_to(self, peer_origin: any, event: NodeEvent):
+        if not is_valid_origin(peer_origin):
+            return
+
         # peer.fire(event)
         # Find peer by origin
         self.find_peer_by_address(peer_origin).fire(event)
@@ -50,8 +63,19 @@ class NodeEventHandler:
                 return peer
         return None
 
+    def check_connection(self, origin: str):
+        if not is_valid_origin(origin):
+            return False
+        ip, port = origin.split(":")
+        for peer in self.peers:
+            if ip in peer.ip and port in str(peer.port):
+                return True
+
+        return False
+
+    # return True mean continue to send to other peers, False mean stop
     def process_event(self, event: NodeEvent) -> bool:
-        print(f"{self.node.address[:4]}:node.py:process_event: Node {self.node.address} received event {event.eventType}")
+        print(f"{self.node.address[:4]}:node.py:process_event: Node [bold green]{self.node.origin}[/bold green] received event [bold red]{event.eventType}[/bold red]")
         if event.eventType == "tx":
             if self.node.blockchain.contain_transaction(event.data["tx"]):  # Already processed
                 return False
@@ -64,8 +88,8 @@ class NodeEventHandler:
             if isinstance(block, str):
                 block = BlockProcessor.cast_block(event.data["block"])
 
-            inspect(block)
-
+            # inspect(block)
+            #
             if not self.node.consensus.is_valid(block):  # Not a valid block
                 return False
 
@@ -75,21 +99,46 @@ class NodeEventHandler:
 
             return True if block else False
         elif event.eventType == "peer_discovery":
+            # print(f"[NodeEventHandler] [bold green]{self.node.origin}[/bold green]: Received peer_discovery event")
+            # print(self.peers)
+            if not is_valid_origin(event.origin):
+                return False
+
+            if not self.check_connection(event.origin):
+                data = is_valid_origin(event.origin)
+                if not data:
+                    return False
+                ip, port = data
+                peer = RemotePeer(ip, int(port))
+                # inspect(peer)
+                self.subscribe(peer) # Add connection to this peer
+                return False
+
+            # print(PeerSerializer.to_json(self.peers[0]))
+            # print(PeerSerializer.serialize_multi_peers(self.peers.copy()))
             self.fire_to(event.origin, NodeEvent("peer_discovered",
         {
-                "peers": PeerSerializer.to_json(self.peers.copy())
+                "peers": PeerSerializer.serialize_multi_peers(self.peers.copy())
             },
-            self.node.address))
+            self.node.origin))
         elif event.eventType == "peer_discovered":
-            for peer_data in event.data["peers"]:
-                peer = PeerSerializer.deserialize_peer(peer_data)
-                if peer in self.peers:
+            # print(event.data["peers"])
+            peers = PeerSerializer.deserialize_multi_peers(event.data["peers"])
+            for peer in peers:
+                if self.check_connection(peer.address):
+                    # print(f"[NodeEventHandler] [bold green]{self.node.origin}[/bold green]: Already subscribed to {peer.address}")
                     continue
                 if peer.address == self.node.origin: # Don't subscribe to yourself lol
+                    # print(f"[NodeEventHandler] [bold green]{self.node.origin}[/bold green]: Don't subscribe to yourself")
                     continue
                 self.subscribe(peer)
+
+            print(f"[NodeEventHandler] [bold green]{self.node.origin}[/bold green]: Subscribed to {len(self.peers)} peers")
+            # inspect(self.peers)
+
+            return False # Don't relay
         elif event.eventType == "ping":
-            self.fire_to(event.origin, NodeEvent("pong", {}, self.node.address))
+            self.fire_to(event.origin, NodeEvent("pong", {}, self.node.origin))
         elif event.eventType == "pong":
             # check this peer is alive
             peer = self.find_peer_by_address(event.origin)
@@ -107,9 +156,8 @@ class NodeEventHandler:
                     self.peers.remove(p)
                     self.peer_timer.pop(p.address)
 
-
-            pass
-        return False  # don't send unknown events
+            return False
+        return False  # don't relay unknown events
 
     def propose_block(self, block: Block):
         self.broadcast(NodeEvent("block", {

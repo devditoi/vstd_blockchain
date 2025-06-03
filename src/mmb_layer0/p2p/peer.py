@@ -3,7 +3,9 @@ if typing.TYPE_CHECKING:
     from src.mmb_layer0.node.node import Node, NodeEvent
 
 class Peer:
-    def __init__(self, node: "Node" = None, address: str = None):
+    def __init__(self, node: "Node" = None, address: str = None, ip: str = None, port: int = None):
+        self.port = port
+        self.ip = ip
         self.node = node # Just a dummy node
         self.address = address
 
