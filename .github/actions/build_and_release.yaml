@@ -2,8 +2,10 @@ name: Build and Release
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches:
+      - main
+#    tags:
+#      - 'v*'
 
 jobs:
   build-and-release:
@@ -26,12 +28,12 @@ jobs:
 
       - name: Build package
         run: flit build
-
-      - name: Upload to GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: |
-            dist/*.whl
-            dist/*.tar.gz
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#
+#      - name: Upload to GitHub Release
+#        uses: softprops/action-gh-release@v2
+#        with:
+#          files: |
+#            dist/*.whl
+#            dist/*.tar.gz
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
