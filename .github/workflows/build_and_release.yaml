@@ -24,11 +24,19 @@ jobs:
       - name: Install Flit
         run: pip install flit
 
-#      - name: Cache dependencies
-#        uses: useblacksmith/cache@v5
-
       - name: Build package
         run: flit build
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        if: github.ref_type == 'tag'
+        with:
+          files: |
+            dist/*.whl
+            dist/*.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 #
 #      - name: Upload to GitHub Release
 #        uses: softprops/action-gh-release@v2
