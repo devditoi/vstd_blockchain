@@ -4,7 +4,7 @@ from mmb_layer0.utils.crypto.signer import SignerFactory
 
 class ProofOfAuthority(IConsensus):
     def __init__(self, address, privateKey):
-        self.hardcoded_validator = "b3f83fb8c267d8866c3806fb229ba36c09148d634ab879ab4832f8dbd4f410ad"
+        self.hardcoded_validator = "6d76281a00dcd331628ce71c6a95480a23ff919786ee21fca8d82cfbac135d60"
         self.address = address
         self.privateKey = privateKey
         self.publicKey = None

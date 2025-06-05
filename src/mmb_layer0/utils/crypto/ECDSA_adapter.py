@@ -40,13 +40,13 @@ class ECDSAAdapter(ICryptoAdapter):
 
     @staticmethod
     def save_pub(filename: str, publicKey: VerifyingKey):
-        with open(filename, "wb") as f:
-            f.write(publicKey.to_string())
+        with open(filename, "w") as f:
+            f.write(publicKey.to_string().hex())
 
     @staticmethod
     def save_priv(filename: str, privateKey: SigningKey):
-        with open(filename + ".priv", "wb") as f:
-            f.write(privateKey.to_string())
+        with open(filename + ".priv", "w") as f:
+            f.write(privateKey.to_string().hex())
 
     @staticmethod
     def load(filename: str):
@@ -54,15 +54,15 @@ class ECDSAAdapter(ICryptoAdapter):
 
     @staticmethod
     def load_pub(filename: str):
-        with open(filename, "rb") as f:
-            publicKey = VerifyingKey.from_string(f.read())
+        with open(filename, "r") as f:
+            publicKey = VerifyingKey.from_string(bytes.fromhex(f.read()))
 
         return publicKey
 
     @staticmethod
     def load_priv(filename: str):
-        with open(filename + ".priv", "rb") as f:
-            privateKey = SigningKey.from_string(f.read())
+        with open(filename + ".priv", "r") as f:
+            privateKey = SigningKey.from_string(bytes.fromhex(f.read()))
 
         return privateKey
 
