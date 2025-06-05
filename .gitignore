@@ -14,7 +14,6 @@ build/
 *.pem
 *.key
 *.pub
-node_ver.txt
 validator_key*
 mint_key*
 
