@@ -118,4 +118,3 @@ jobs:
         uses: geekyeggo/delete-artifact@v5
         with:
           name: validator-keys
-          github_token: ${{ secrets.GITHUB_TOKEN }}
