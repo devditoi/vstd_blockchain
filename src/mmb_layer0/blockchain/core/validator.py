@@ -29,7 +29,8 @@ class Validator:
 
         # TODO REALLY NEED TO FIX HERE TOO, WE NEED A FACTORY FOR KEYS
         tx.signature = signature
-        tx.publicKey = publicKey.to_string().hex()
+        # tx.publicKey = publicKey.to_string().hex()
+        tx.publicKey = SignerFactory().get_signer().serialize(publicKey)
 
         return True
 

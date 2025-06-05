@@ -15,6 +15,14 @@ class RSAAdapter(ICryptoAdapter):
         return HashUtils.verify(message, bytes.fromhex(signature), publicKey)
 
     @staticmethod
+    def serialize(publicKey: PublicKey) -> str:
+        return publicKey.save_pkcs1().hex()
+
+    @staticmethod
+    def deserialize(serialized: str):
+        return PublicKey.load_pkcs1(bytes.fromhex(serialized))
+
+    @staticmethod
     def save(filename: str, publicKey: any, privateKey: any):
         RSAAdapter.save_pub(filename, publicKey)
         RSAAdapter.save_priv(filename, privateKey)

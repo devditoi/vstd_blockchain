@@ -7,29 +7,37 @@ from mmb_layer0.utils.hash import HashUtils
 class ECDSAAdapter(ICryptoAdapter):
 
     @staticmethod
-    def gen_key() -> tuple[any, any]:
+    def gen_key() -> tuple[VerifyingKey, SigningKey]:
         return HashUtils.ecdsa_keygen()
 
     @staticmethod
-    def sign(message: str, privateKey) -> hex:
+    def sign(message: str, privateKey: SigningKey) -> hex:
         return HashUtils.ecdsa_sign(message, privateKey).hex()
 
     @staticmethod
-    def verify(message: str, signature: hex, publicKey) -> bool:
+    def verify(message: str, signature: hex, publicKey: VerifyingKey) -> bool:
         return HashUtils.ecdsa_verify(message, bytes.fromhex(signature), publicKey)
 
     @staticmethod
-    def save(filename: str, publicKey: any, privateKey: any):
+    def serialize(publicKey: VerifyingKey) -> str:
+        return publicKey.to_string().hex()
+
+    @staticmethod
+    def deserialize(serialized: str) -> any:
+        return VerifyingKey.from_string(bytes.fromhex(serialized))
+
+    @staticmethod
+    def save(filename: str, publicKey: VerifyingKey, privateKey: SigningKey):
         ECDSAAdapter.save_pub(filename, publicKey)
         ECDSAAdapter.save_priv(filename, privateKey)
 
     @staticmethod
-    def save_pub(filename: str, publicKey: any):
+    def save_pub(filename: str, publicKey: VerifyingKey):
         with open(filename, "wb") as f:
             f.write(publicKey.to_string())
 
     @staticmethod
-    def save_priv(filename: str, privateKey: any):
+    def save_priv(filename: str, privateKey: SigningKey):
         with open(filename + ".priv", "wb") as f:
             f.write(privateKey.to_string())
 
@@ -52,5 +60,5 @@ class ECDSAAdapter(ICryptoAdapter):
         return privateKey
 
     @staticmethod
-    def address(publicKey: any) -> str:
+    def address(publicKey: VerifyingKey) -> str:
         return HashUtils.get_address_ecdsa(publicKey)

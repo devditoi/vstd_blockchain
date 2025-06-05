@@ -41,3 +41,11 @@ class ICryptoAdapter(ABC):
     @staticmethod
     def address(publicKey) -> str:
         pass
+
+    @staticmethod
+    def serialize(publicKey) -> str:
+        pass
+
+    @staticmethod
+    def deserialize(serialized) -> any:
+        pass
