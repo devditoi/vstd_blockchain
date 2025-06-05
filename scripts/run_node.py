@@ -78,7 +78,6 @@ def start_node(port: int):
     node.node_event_handler.subscribe(__other)
     __protocol = UDPProtocol(node.node_event_handler, port)  # auto listen in background
 
-
     while True:
         pass
 

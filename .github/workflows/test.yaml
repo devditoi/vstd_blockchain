@@ -3,7 +3,10 @@ name: Run Tests
 on:
   push: # Every push to every branch
     branches:
-      - *
+      - '*'         # matches every branch that doesn't contain a '/'
+      - '*/*'       # matches every branch containing a single '/'
+      - '**'        # matches every branch
+
 jobs:
   unit-test:
     runs-on: blacksmith-4vcpu-ubuntu-2204
