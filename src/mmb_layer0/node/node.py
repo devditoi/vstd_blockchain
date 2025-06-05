@@ -49,6 +49,7 @@ class Node:
 
         self.node_event_handler = NodeEventHandler(self)
 
+        #
         # TODO: Refactor this shit right here
         self.consensus = ProofOfAuthority(self.address, self.privateKey)
         self.blockchain.set_callbacks(self.consensus, self.execution, self.propose_block)
@@ -131,23 +132,21 @@ class Node:
     def get_nonce(self, address: str) -> int:
         return self.worldState.get_eoa(address).nonce
 
-    def propose_tx(self, tx: Transaction, signature, publicKey: ecdsa.VerifyingKey):
-        # TODO REALLY NEEDED TO FIX THIS THING
-        # ! Really need to check the publickey to see if it rsa or ecdsa
+    def propose_tx(self, tx: Transaction, signature, publicKey: any):
         self.node_event_handler.broadcast(NodeEvent("tx", {
             "tx": tx,
             "signature": signature,
-            "publicKey": publicKey.to_string().hex()
+            "publicKey": SignerFactory().get_signer().serialize(publicKey)
         }, self.address))
 
-        print(publicKey.to_string().hex())
+        print(SignerFactory().get_signer().serialize(publicKey))
 
     def process_tx(self, tx: Transaction, signature, publicKey):
         print(f"{self.address[:4]}:node.py:process_tx: Add pool " + tx.Txtype + " transaction")
 
         # self.blockchain.temporary_add_to_mempool(tx)
 
-        if not Validator.offchain_validate(tx, self.worldState): # Validate transaction
+        if not Validator.validate_transaction_with_worldstate(tx, self.worldState): # Validate transaction
             return
 
         print(f"{self.address[:4]}:node.py:process_tx: Give transaction to blockchain nonce: " + str(tx.nonce))

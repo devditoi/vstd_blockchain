@@ -1,4 +1,4 @@
-from ecdsa import VerifyingKey, SigningKey
+from ecdsa import VerifyingKey, SigningKey, BadSignatureError
 
 from mmb_layer0.utils.crypto.crypto_adapter_interace import ICryptoAdapter
 from mmb_layer0.utils.hash import HashUtils
@@ -16,7 +16,14 @@ class ECDSAAdapter(ICryptoAdapter):
 
     @staticmethod
     def verify(message: str, signature: hex, publicKey: VerifyingKey) -> bool:
-        return HashUtils.ecdsa_verify(message, bytes.fromhex(signature), publicKey)
+        try:
+            return HashUtils.ecdsa_verify(message, bytes.fromhex(signature), publicKey)
+        except TypeError as e: # TypeError: fromhex() argument must be str, not ...
+            print("TypeError")
+            return False
+        except BadSignatureError:
+            print("BadSignatureError")
+            return False
 
     @staticmethod
     def serialize(publicKey: VerifyingKey) -> str:

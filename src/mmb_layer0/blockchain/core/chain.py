@@ -55,7 +55,7 @@ class Chain:
         print("chain.py:set_callbacks: Set callbacks")
 
     def add_block(self, block: Block, initially = False) -> Block | None:
-        if not Validator.validate_block(block, self, initially): # Validate block
+        if not Validator.validate_block_on_chain(block, self, initially): # Validate block
             return None
         print(f"chain.py:add_block: Block #{block.index} valid, add to chain")
         # print(block)
@@ -101,10 +101,7 @@ class Chain:
         self.mempool_tx_id.add(transaction.hash)
 
     def add_transaction(self, transaction: Transaction, signature: bytes, publicKey: str) -> None:
-        # TODO REALLY NEEDED TO FIX THIS THING
-        # THE PUBLICKEY NEED SOME FACTORIES BROOOOOOOOOOOOOOOO
-
-        if not Validator.onchain_validate(transaction, signature, VerifyingKey.from_string(bytes.fromhex(publicKey))): # Validate transaction
+        if not Validator.validate_transaction_with_signature(transaction, signature, SignerFactory().get_signer().deserialize(publicKey)): # Validate transaction
             self.mempool_lock.release()
             return
 

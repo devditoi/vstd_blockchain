@@ -16,18 +16,20 @@ from mmb_layer0.blockchain.core.block import Block
 
 class Validator:
     @staticmethod
-    def onchain_validate(tx: Transaction, signature: bytes, publicKey: any) -> bool:
+    def validate_transaction_with_signature(tx: Transaction, signature: bytes, publicKey: any) -> bool:
+        print(tx.to_verifiable_string())
+        print(signature)
+        print(publicKey)
         if not SignerFactory().get_signer().verify(tx.to_verifiable_string(), signature, publicKey):
-            print("validator.py:onchain_validate: Transaction signature is invalid")
+            print("validator.py:validate_transaction_with_signature: Transaction signature is invalid")
             # raise Exception("Transaction signature is invalid")
             return False
 
         if not SignerFactory().get_signer().address(publicKey) == tx.sender and tx.Txtype != "mintburn":
-            print("validator.py:onchain_validate: Transaction sender is invalid")
+            print("validator.py:validate_transaction_with_signature: Transaction sender is invalid")
             # raise Exception("Transaction sender is invalid")
             return False
 
-        # TODO REALLY NEED TO FIX HERE TOO, WE NEED A FACTORY FOR KEYS
         tx.signature = signature
         # tx.publicKey = publicKey.to_string().hex()
         tx.publicKey = SignerFactory().get_signer().serialize(publicKey)
@@ -36,20 +38,24 @@ class Validator:
 
 
     @staticmethod
-    def offchain_validate(tx: Transaction, worldState: WorldState) -> bool:
-        # TODO For debug
-        # if tx.gasPrice < MMBConfig.MinimumGasPrice:
-        #     print("Validator.py:offchain_validate: Transaction gasPrice is below minimum")
-        #     return False
+    def validate_transaction_with_worldstate(tx: Transaction, worldState: WorldState) -> bool:
+
+        if tx.gasPrice < MMBConfig.MinimumGasPrice:
+            print("Validator.py:offchain_validate: Transaction gasPrice is below minimum")
+            return False
 
         if worldState.get_eoa(tx.sender).balance < tx.gasPrice and tx.Txtype != "mintburn":
             print("Validator.py:offchain_validate: Transaction sender does not have enough balance")
             return False
 
+        if tx.transactionData["amount"] <= 0:
+            print("Validator.py:offchain_validate: Transaction amount is negative")
+            return False
+
         return True
 
     @staticmethod
-    def validate_transaction(tx, pre_nonce_check = None):
+    def validate_transaction_raw(tx, pre_nonce_check = None):
         if tx.Txtype == "mintburn":
             # privileged transaction
             return True
@@ -71,7 +77,7 @@ class Validator:
     def preblock_validate(mempool: list[Transaction]) -> bool:
         pre_nonce_check = {}
         for tx in mempool:
-            if not Validator.validate_transaction(tx):
+            if not Validator.validate_transaction_raw(tx):
                 return False
 
             # if tx.sender not in pre_nonce_check:
@@ -80,7 +86,7 @@ class Validator:
         return True
 
     @staticmethod
-    def validate_block(block: Block, chain, initially=False) -> bool:
+    def validate_block_on_chain(block: Block, chain, initially=False) -> bool:
         if block.index != chain.get_height() and not initially:
             print("chain.py:add_block: Block index does not match chain length of " + str(chain.length))
             print(chain.chain)
@@ -94,10 +100,15 @@ class Validator:
             print("chain.py:add_block: Block hash already exists")
             return False
 
+        for tx in block.data:
+            # inspect(tx)
+            if not Validator.validate_transaction_raw(tx):
+                return False
+
         return True
 
     @staticmethod
-    def validate_block_offchain(block: Block, prev_hash):
+    def validate_block_without_chain(block: Block, prev_hash):
 
         if prev_hash == "0":
             if block.index != 0:
@@ -117,7 +128,7 @@ class Validator:
 
         for tx in block.data:
             # inspect(tx)
-            if not Validator.validate_transaction(tx):
+            if not Validator.validate_transaction_raw(tx):
                 return False
 
         return True
@@ -128,7 +139,7 @@ class Validator:
         for i in range(len(chain.chain)):
             block = chain.chain[i]
 
-            if not Validator.validate_block_offchain(block, prev_hash):
+            if not Validator.validate_block_without_chain(block, prev_hash):
                 return False
 
             if i != 0 and block.timestamp < chain.chain[i - 1].timestamp:

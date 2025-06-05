@@ -116,7 +116,7 @@ class NodeEventHandler:
             if isinstance(block, str):
                 block = BlockProcessor.cast_block(event.data["block"])
 
-            if not Validator.validate_block_offchain(block, self.node.blockchain.get_last_block().hash):  # Not a valid block
+            if not Validator.validate_block_without_chain(block, self.node.blockchain.get_last_block().hash):  # Not a valid block
                 return False
 
             if not self.node.consensus.is_valid(block):  # Not a valid block

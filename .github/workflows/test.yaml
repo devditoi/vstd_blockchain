@@ -1,0 +1,40 @@
+name: Run Tests
+
+on:
+  push: # Every push to every branch
+    branches:
+      - *
+jobs:
+  unit-test:
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: useblacksmith/setup-python@v6
+        with:
+          python-version: '3.10'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install flit
+          python -m flit install
+      - name: Run Unit tests
+        run: |
+          python -m pytest --verbose tests/units
+
+  integration-test:
+    runs-on: blacksmith-2vcpu-ubuntu-2204
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: useblacksmith/setup-python@v6
+        with:
+          python-version: '3.10'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install flit
+          python -m flit install
+      - name: Run Integration tests
+        run: |
+          python -m pytest --verbose tests/integration
