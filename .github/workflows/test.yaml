@@ -8,8 +8,28 @@ on:
       - '**'        # matches every branch
 
 jobs:
+  prepare-keys:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Write validator_key
+        run: |
+          printf "%s" "${{ secrets.VALIDATOR_KEY }}" > validator_key
+          printf "%s" "${{ secrets.VALIDATOR_KEY_PRIV }}" > validator_key.priv
+
+      - name: Upload keys as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: validator-keys
+          path: |
+            validator_key
+            validator_key.priv
+
   unit-test:
     runs-on: blacksmith-4vcpu-ubuntu-2204
+    needs: prepare-keys
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python
@@ -22,12 +42,17 @@ jobs:
           python -m pip install flit
           python -m flit install
           python -m pip install pytest
+      - name: Download keys
+        uses: actions/download-artifact@v4
+        with:
+          name: validator-keys
       - name: Run Unit tests
         run: |
           python -m pytest --verbose tests/units
 
   integration-test:
     runs-on: blacksmith-2vcpu-ubuntu-2204
+    needs: prepare-keys
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python
@@ -40,6 +65,10 @@ jobs:
           python -m pip install flit
           python -m flit install
           python -m pip install pytest
+      - name: Download keys
+        uses: actions/download-artifact@v4
+        with:
+          name: validator-keys
       - name: Run Integration tests
         run: |
           python -m pytest --verbose tests/integration
