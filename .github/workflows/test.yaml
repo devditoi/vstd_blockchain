@@ -115,7 +115,7 @@ jobs:
       actions: write
     steps:
       - name: Delete validator-keys artifact
-        uses: dawidd6/action-delete-artifact@v2
+        uses: geekyeggo/delete-artifact@v5
         with:
           name: validator-keys
           github_token: ${{ secrets.GITHUB_TOKEN }}
