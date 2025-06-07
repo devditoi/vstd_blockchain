@@ -22,3 +22,5 @@ mint_key*
 
 # Poetry
 poetry.lock
+
+.env

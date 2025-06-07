@@ -16,7 +16,7 @@ class UDPProtocol(Protocol):
         self.stop_flag = False
         self.lock = threading.Lock()
         self.sock = None
-        self.listen_thread = threading.Thread(target=self.listen_loop, daemon=True)
+        self.listen_thread = threading.Thread(target=self.listen_loop)
         self.listen_thread.start()
 
         peer_sync_job = PeerSyncJob(self.event_handler)

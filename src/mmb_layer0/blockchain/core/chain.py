@@ -36,7 +36,7 @@ class Chain:
 
         self.reset_chain()
         if not dummy:
-            self.thread = threading.Thread(target=self.__process_block_thread, daemon=True)
+            self.thread = threading.Thread(target=self.__process_block_thread)
             self.thread.start()
 
         self.mempool_lock = threading.Lock()

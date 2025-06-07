@@ -1,6 +1,6 @@
 - [x] Transaction
 - [x] Network - P2P
-- [] Block
+- [?] Block
 - [] Block validation
 - [] Chain
 - [] Serialization

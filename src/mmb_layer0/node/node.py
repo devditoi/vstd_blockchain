@@ -1,6 +1,7 @@
 # 1 node has 1 blockchain and 1 WorldState
 import ecdsa
 
+from mmb_layer0.blockchain.chain.local_saver import ISaver, NotImplementedSaver
 from mmb_layer0.blockchain.core.chain import Chain
 from mmb_layer0.blockchain.consensus.poa_consensus import ProofOfAuthority
 from mmb_layer0.blockchain.core.transaction_type import Transaction, MintBurnTransaction
@@ -10,8 +11,9 @@ from mmb_layer0.blockchain.core.validator import Validator
 from mmb_layer0.blockchain.core.worldstate import WorldState
 from mmb_layer0.config import MMBConfig
 import typing
-
+import os
 from mmb_layer0.node.node_event_handler import NodeEventHandler
+from mmb_layer0.utils.serializer import ChainSerializer
 
 if typing.TYPE_CHECKING:
     from mmb_layer0.p2p.peer_type.remote_peer import RemotePeer
@@ -55,6 +57,21 @@ class Node:
         self.blockchain.set_callbacks(self.consensus, self.execution, self.propose_block)
 
         self.origin = ""
+
+        self.chain_file = f"{self.address}_chain.json"
+
+        self.saver = NotImplementedSaver()
+
+        # self.load_chain_from_disk()
+
+    def set_saver(self, saver: ISaver) -> None:
+        self.saver = saver
+
+    def load_chain_from_disk(self):
+        self.blockchain = self.saver.load_chain()
+
+    def save_chain_to_disk(self):
+        self.saver.save_chain(self.blockchain)
 
     def propose_block(self, block: Block):
         self.node_event_handler.propose_block(block)
@@ -159,6 +176,9 @@ class Node:
         # Block execution only happend after block is processed
         excecutor = TransactionProcessor(block, self.worldState)
         excecutor.process()
+
+        # Save block
+        self.saver.add_block(block)
 
     # def save_chain(self):
     #     print("node.py:save_chain: Saving chain")
