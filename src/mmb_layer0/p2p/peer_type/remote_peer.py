@@ -1,8 +1,6 @@
 import socket
 import jsonlight
-import typing
-if typing.TYPE_CHECKING:
-    from mmb_layer0.node.node_event_handler import NodeEvent
+from mmb_layer0.node.events.node_event import NodeEvent
 from rich import print
 from mmb_layer0.p2p.peer import Peer
 

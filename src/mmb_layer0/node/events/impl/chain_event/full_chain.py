@@ -1,9 +1,7 @@
 from mmb_layer0.blockchain.chain.chain_sync_services import ChainSyncServices
 from mmb_layer0.blockchain.core.validator import Validator
 from mmb_layer0.node.events.EventHandler import EventHandler
-import typing
-if typing.TYPE_CHECKING:
-    from mmb_layer0.node.node_event_handler import NodeEvent
+from mmb_layer0.node.events.node_event import NodeEvent
 from mmb_layer0.utils.serializer import ChainSerializer
 from mmb_layer0.blockchain.core.chain import Chain
 

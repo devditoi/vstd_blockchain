@@ -19,7 +19,7 @@ from mmb_layer0.utils.serializer import ChainSerializer
 if typing.TYPE_CHECKING:
     from mmb_layer0.p2p.peer_type.remote_peer import RemotePeer
     from mmb_layer0.p2p.peer import Peer
-from mmb_layer0.node.node_event_handler import NodeEvent
+from mmb_layer0.node.events.node_event import NodeEvent
 from mmb_layer0.utils.crypto.signer import SignerFactory
 from rich import print, inspect
 from mmb_layer0.blockchain.core.block import Block

@@ -11,15 +11,10 @@ from .events.impl.chain_event.chain_head import ChainHeadEvent, ChainHeadFullfil
 from .events.impl.chain_event.full_chain import FullChainEvent, FullChainFullfilledEvent
 from .events.impl.network_event.ping_event import PingEvent, PongEvent
 from ..utils.network_utils import is_valid_origin
+from .events.node_event import NodeEvent
 
 if typing.TYPE_CHECKING:
     from .node import Node
-
-class NodeEvent:
-    def __init__(self, eventType, data, origin) -> None:
-        self.eventType = eventType
-        self.data = data
-        self.origin = origin
 
 class NodeEventHandler:
     def __init__(self, node: "Node"):

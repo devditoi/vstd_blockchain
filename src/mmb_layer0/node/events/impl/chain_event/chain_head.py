@@ -1,8 +1,6 @@
 from mmb_layer0.blockchain.processor.block_processor import BlockProcessor
 from mmb_layer0.node.events.EventHandler import EventHandler
-import typing
-if typing.TYPE_CHECKING:
-    from mmb_layer0.node.node_event_handler import NodeEvent
+from mmb_layer0.node.events.node_event import NodeEvent
 from mmb_layer0.blockchain.core.block import Block
 
 

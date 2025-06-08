@@ -2,9 +2,7 @@ from mmb_layer0.node.events.EventHandler import EventHandler
 from mmb_layer0.p2p.peer_type.remote_peer import RemotePeer
 from mmb_layer0.utils.network_utils import is_valid_origin
 from mmb_layer0.utils.serializer import PeerSerializer
-import typing
-if typing.TYPE_CHECKING:
-    from mmb_layer0.node.node_event_handler import NodeEvent
+from mmb_layer0.node.events.node_event import NodeEvent
 
 
 class PeerDiscoveryEvent(EventHandler):
@@ -13,7 +11,7 @@ class PeerDiscoveryEvent(EventHandler):
         return "peer_discovery"
 
     def require_field(self):
-        return ["origin"]
+        return []
 
     def handle(self, event: "NodeEvent"):
 

@@ -3,8 +3,8 @@ from mmb_layer0.p2p.peer import Peer
 import time
 import typing
 if typing.TYPE_CHECKING:
-    from mmb_layer0.node.node_event_handler import NodeEvent, NodeEventHandler
-
+    from mmb_layer0.node.node_event_handler import NodeEventHandler
+from mmb_layer0.node.events.node_event import NodeEvent
 
 class PingEvent(EventHandler):
     def require_field(self):

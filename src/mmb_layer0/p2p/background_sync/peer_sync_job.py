@@ -1,4 +1,4 @@
-from mmb_layer0.node.node_event_handler import NodeEvent
+from mmb_layer0.node.events.node_event import NodeEvent
 from mmb_layer0.p2p.background_sync.background_sync_job import BackgroundSyncJob
 import time
 from rich import print
