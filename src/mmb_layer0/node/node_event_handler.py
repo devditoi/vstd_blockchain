@@ -97,6 +97,7 @@ class NodeEventHandler:
     def check_connection(self, origin: str):
         if not is_valid_origin(origin):
             return False
+
         ip, port = origin.split(":")
         for peer in self.peers:
             if ip in peer.ip and port in str(peer.port):

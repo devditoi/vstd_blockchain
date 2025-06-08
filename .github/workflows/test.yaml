@@ -40,6 +40,7 @@ jobs:
   unit-test:
     runs-on: blacksmith-4vcpu-ubuntu-2204
     needs: prepare-keys
+    timeout-minutes: 4 # Shoudn't take this long
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python
@@ -75,6 +76,7 @@ jobs:
   integration-test:
     runs-on: blacksmith-2vcpu-ubuntu-2204
     needs: prepare-keys
+    timeout-minutes: 10 # 10 min is the hecking maximum
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python
