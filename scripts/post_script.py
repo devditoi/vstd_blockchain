@@ -174,7 +174,7 @@ def main():
 
     # --- Step 4: Clean old dist files ---
     console.print(f"\n[step]--- Cleaning '{DIST_DIR}' directory ---[/step]")
-    run_command(["Remove-Item", "-Path", DIST_DIR, "-Recurse", "-Force"])
+    run_command(["Remove-Item", "-Path", DIST_DIR, "-Recurse", "-Force"], shell=True)
     console.print(f"[success]Cleaned '{DIST_DIR}'.[/success]")
 
     # --- Step 5: Build package with Flit ---
