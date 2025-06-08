@@ -52,7 +52,7 @@ class PeerDiscoveryFullfilledEvent(EventHandler):
                 continue
             self.neh.subscribe(peer)
 
-        print(f"[NodeEventHandler] [bold green]{self.neh.node.origin}[/bold green]: Subscribed to {len(self.peers)} peers")
+        print(f"[NodeEventHandler] [bold green]{self.neh.node.origin}[/bold green]: Subscribed to {len(self.neh.peers)} peers")
         # inspect(self.peers)
 
         return False  # Don't relay

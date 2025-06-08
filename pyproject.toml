@@ -4,7 +4,7 @@ build-backend = "flit_core.buildapi"
 
 [project]
 name = "mmb_layer0"
-version = "0.2.0"
+version = "0.2.5"
 description = "MMB blockchain network"
 authors = [{name = "Lee Min Waan", email = "100744636+plsgivemeachane@users.noreply.github.com"}]
 license = {text = "MIT"}
