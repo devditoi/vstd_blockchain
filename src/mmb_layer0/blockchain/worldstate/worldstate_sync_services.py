@@ -44,6 +44,6 @@ class WorldStateSyncServices:
             if key not in w1smartContracts:
                 w1smartContracts[key] = w2smartContracts[key]  # Add missing key to w1smartContracts
             elif key not in w2smartContracts:
-                w2smartContracts[key] = w1smartContracts[key]  # Add missing key to     w2smartContracts
+                w2smartContracts[key] = w1smartContracts[key]  # Add missing key to w2smartContracts
 
         return WorldState(w1eoas, w1smartContracts)

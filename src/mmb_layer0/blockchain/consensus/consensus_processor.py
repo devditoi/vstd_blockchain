@@ -16,6 +16,11 @@ class ConsensusProcessor:
         print("chain.py:process_block: Mempool valid, create block")
         block = Block(last_block.index + 1, last_block.hash, time.time(), data)
 
+        # Validate block
+        if not Validator.validate_block_without_chain(block, last_block.hash):
+            print("chain.py:process_block: Block invalid")
+            return None
+
         # Sign block
         consensus.sign_block(block)
 

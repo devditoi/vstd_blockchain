@@ -26,7 +26,7 @@ class Chain:
         self.length = 1
         self.mempool: list[Transaction] = []
         self.mempool_tx_id: set[str] = set()
-        self.interval = 10 # 10 seconds before try to send and validate
+        self.interval = 3 # 10 seconds before try to send and validate
         self.max_block_size = 10 # maximum number of transactions in a block
         self.last_block_time = time.time()
 
@@ -36,7 +36,7 @@ class Chain:
 
         self.reset_chain()
         if not dummy:
-            self.thread = threading.Thread(target=self.__process_block_thread)
+            self.thread = threading.Thread(target=self.__process_block_thread, daemon=True)
             self.thread.start()
 
         self.mempool_lock = threading.Lock()
@@ -45,6 +45,7 @@ class Chain:
         return self.length == 1
 
     def reset_chain(self):
+        print("chain.py:reset_chain: Reset chain")
         self.chain = [self.genesis_block]
 
     def set_callbacks(self, consensus, execution_callback, broadcast_callback):
@@ -56,6 +57,8 @@ class Chain:
 
     def add_block(self, block: Block, initially = False) -> Block | None:
         if not Validator.validate_block_on_chain(block, self, initially): # Validate block
+            return None
+        if not Validator.validate_block_without_chain(block, self.get_last_block().hash): # Validate block
             return None
         print(f"chain.py:add_block: Block #{block.index} valid, add to chain")
         # print(block)

@@ -6,7 +6,7 @@ class BackgroundSyncJob:
         self.event_handler = event_handler
 
     def run(self):
-        thread = threading.Thread(target=self.__run)
+        thread = threading.Thread(target=self.__run, daemon=True)
         thread.start()
 
     def __run(self):

@@ -1,23 +1,19 @@
 from random import choice
 
-from ecdsa import VerifyingKey
-from rich import inspect, print
 import typing
 from mmb_layer0.blockchain.core.block import Block
-from mmb_layer0.blockchain.core.chain import Chain
 from mmb_layer0.p2p.peer import Peer
-from ..blockchain.chain.chain_sync_services import ChainSyncServices
-from ..blockchain.core.transaction_type import Transaction
-from ..blockchain.core.validator import Validator
-from ..blockchain.processor.transaction_processor import TransactionProcessor
+from .events.EventHandler import EventFactory
+from mmb_layer0.node.events.impl.chain_event.block_event import BlockEvent
+from mmb_layer0.node.events.impl.network_event.peer_discovery_event import PeerDiscoveryEvent, PeerDiscoveryFullfilledEvent
+from mmb_layer0.node.events.impl.chain_event.tx_event import TxEvent
+from .events.impl.chain_event.chain_head import ChainHeadEvent, ChainHeadFullfilledEvent
+from .events.impl.chain_event.full_chain import FullChainEvent, FullChainFullfilledEvent
+from .events.impl.network_event.ping_event import PingEvent, PongEvent
 from ..utils.network_utils import is_valid_origin
-from ..utils.serializer import PeerSerializer, ChainSerializer
-import time
+
 if typing.TYPE_CHECKING:
     from .node import Node
-    from mmb_layer0.p2p.peer_type.local_peer import LocalPeer
-from mmb_layer0.p2p.peer_type.remote_peer import RemotePeer
-from ..blockchain.processor.block_processor import BlockProcessor
 
 class NodeEvent:
     def __init__(self, eventType, data, origin) -> None:
@@ -29,7 +25,25 @@ class NodeEventHandler:
     def __init__(self, node: "Node"):
         self.node = node
         self.peers: list["Peer"] = []
-        self.peer_timer: dict[str, int] = {}
+        self.ef = EventFactory()
+
+        # Register events
+        self.ef.register_event(TxEvent(self))
+        self.ef.register_event(BlockEvent(self))
+
+        self.ef.register_event(PeerDiscoveryEvent(self))
+        self.ef.register_event(PeerDiscoveryFullfilledEvent(self))
+
+        self.ef.register_event(ChainHeadEvent(self))
+        self.ef.register_event(ChainHeadFullfilledEvent(self))
+
+        self.ef.register_event(FullChainEvent(self))
+        self.ef.register_event(FullChainFullfilledEvent(self))
+
+        self.ef.register_event(PingEvent(self))
+        self.ef.register_event(PongEvent(self))
+
+
 
     # EVENT MANAGER
     def subscribe(self, peer: "Peer"):
@@ -51,7 +65,7 @@ class NodeEventHandler:
                 continue
             peer.fire(event)
 
-    def ask(self, event: NodeEvent):
+    def fire_to_random(self, event: NodeEvent):
         if not self.peers:
             return
         peer = choice(self.peers)
@@ -70,7 +84,7 @@ class NodeEventHandler:
         if not peer:
             return
 
-        event.origin = self.node.origin # Just for safety
+        event.origin = self.node.origin # Just in case
 
         peer.fire(event)
 
@@ -90,202 +104,10 @@ class NodeEventHandler:
 
         return False
 
-    # return True mean continue to send to other peers, False mean stop
+    # return True mean continue to send it to other peers, False mean stop
     def process_event(self, event: NodeEvent) -> bool:
         # print(f"{self.node.address[:4]}:node.py:process_event: Node [bold green]{self.node.origin}[/bold green] received event [bold red]{event.eventType}[/bold red] from [bold blue]{event.origin}[/bold blue]")
-
-        # Core
-        if event.eventType == "tx":
-            # print(event.data)
-            if not isinstance(event.data["tx"], Transaction):
-                event.data["tx"] = TransactionProcessor.cast_transaction(event.data["tx"])
-
-            # if not isinstance(event.data["publicKey"], str):
-            #     event.data["publicKey"] = event.data["publicKey"].hex()
-
-            if self.node.blockchain.contain_transaction(event.data["tx"]):  # Already processed
-                return False
-
-            self.node.blockchain.temporary_add_to_mempool(event.data["tx"])
-            print(f"{self.node.address[:4]}:node.py:process_event: Processing transaction")
-            # inspect(event.data["tx"])
-            self.node.process_tx(event.data["tx"], event.data["signature"], event.data["publicKey"])
-            return True
-        elif event.eventType == "block":
-            block = event.data["block"]
-            if isinstance(block, str):
-                block = BlockProcessor.cast_block(event.data["block"])
-
-            if not Validator.validate_block_without_chain(block, self.node.blockchain.get_last_block().hash):  # Not a valid block
-                return False
-
-            if not self.node.consensus.is_valid(block):  # Not a valid block
-                return False
-
-            block = self.node.blockchain.add_block(block)
-
-
-            # inspect(BlockProcessor.cast_block(block.to_string()))
-            # inspect(block)
-
-            # NodeSyncServices.check_sync(self, choice(self.node_subscribtions))
-
-            return True if block else False
-
-        # Peer Discovery
-        elif event.eventType == "peer_discovery":
-            # print(f"[NodeEventHandler] [bold green]{self.node.origin}[/bold green]: Received peer_discovery event")
-            # print(self.peers)
-            if not is_valid_origin(event.origin):
-                return False
-
-            if not self.check_connection(event.origin):
-                data = is_valid_origin(event.origin)
-                if not data:
-                    return False
-                ip, port = data
-                peer = RemotePeer(ip, int(port))
-                # inspect(peer)
-                self.subscribe(peer) # Add connection to this peer
-                return False
-
-            # print(PeerSerializer.to_json(self.peers[0]))
-            # print(PeerSerializer.serialize_multi_peers(self.peers.copy()))
-            self.fire_to(event.origin, NodeEvent("peer_discovery_fullfilled",
-        {
-                "peers": PeerSerializer.serialize_multi_peers(self.peers.copy())
-            },
-            self.node.origin))
-        elif event.eventType == "peer_discovery_fullfilled":
-            # print(event.data["peers"])
-            peers = PeerSerializer.deserialize_multi_peers(event.data["peers"])
-            for peer in peers:
-                if self.check_connection(peer.address):
-                    # print(f"[NodeEventHandler] [bold green]{self.node.origin}[/bold green]: Already subscribed to {peer.address}")
-                    continue
-                if peer.address == self.node.origin: # Don't subscribe to yourself lol
-                    # print(f"[NodeEventHandler] [bold green]{self.node.origin}[/bold green]: Don't subscribe to yourself")
-                    continue
-                self.subscribe(peer)
-
-            print(f"[NodeEventHandler] [bold green]{self.node.origin}[/bold green]: Subscribed to {len(self.peers)} peers")
-            # inspect(self.peers)
-
-            return False # Don't relay
-
-        # Check peer alive
-        elif event.eventType == "ping":
-            self.fire_to(event.origin, NodeEvent("pong", {}, self.node.origin))
-        elif event.eventType == "pong":
-            # check this peer is alive
-            peer = self.find_peer_by_address(event.origin)
-            if peer is None:
-                return False
-            self.peer_timer[peer.address] = int(time.time())
-
-            for p in self.peers:
-                if self.peer_timer[p.address] is None:
-                    # Send ping
-                    self.fire_to(p, NodeEvent("ping", {}, self.node.origin))
-                    self.peer_timer[p.address] = int(time.time())
-                    continue
-                if time.time() - self.peer_timer[p.address] > 10:
-                    self.peers.remove(p)
-                    self.peer_timer.pop(p.address)
-
-            return False
-
-        # Chain sync
-        elif event.eventType == "chain_head":
-            if not is_valid_origin(event.origin):
-                return False
-
-            if self.node.blockchain.is_genesis():
-                # There is nothing to sync
-                return False
-
-
-            # Sending chain head to peer
-            chain_head = self.node.blockchain.get_last_block()
-
-            self.fire_to(event.origin, NodeEvent("chain_head_fullfilled", {
-                "block": chain_head
-            }, self.node.origin))
-
-        elif event.eventType == "chain_head_fullfilled":
-            # Receiving chain head from peer
-            if not is_valid_origin(event.origin):
-                return False # Check fault tolerance
-
-            chain_head = event.data["block"]
-            if not isinstance(chain_head, Block):
-                chain_head = BlockProcessor.cast_block(chain_head)
-
-            current_chain_head = self.node.blockchain.get_last_block()
-
-            # inspect(chain_head)
-            # inspect(current_chain_head)
-
-            if current_chain_head.index > chain_head.index:
-                print(f"[NodeEventHandler] [bold green]{self.node.origin}[/bold green]: I have the longer chain")
-                return False # I have the longer chain
-
-            # Only when them get the longer or equal chain
-
-            # Check the current block and peer block to seeking for error
-            synced = self.node.blockchain.get_last_block().hash == chain_head.hash
-
-            print(f"[NodeEventHandler] [bold green]{self.node.origin}[/bold green]: Synced: {synced}")
-
-            if not synced:
-                # One of the 2 are wrong, either me or peer
-                # Sending full chain request to peer
-                req = NodeEvent("full_chain", {}, self.node.origin)
-                self.fire_to(event.origin, req)
-
-        elif event.eventType == "full_chain":
-
-            print("[NodeEventHandler] [bold green]{self.node.origin}[/bold green]: Requested full chain from peer")
-
-            if not is_valid_origin(event.origin):
-                return False # Check fault tolerance
-
-            # Sending full chain to peer
-            full_chain = ChainSerializer.serialize_chain(self.node.blockchain, exclude_genesis=True) # Skip genesis
-
-            # print(full_chain)
-
-            res = NodeEvent("full_chain_fullfilled", {
-                "chain": full_chain
-            }, self.node.origin)
-            self.fire_to(event.origin, res)
-
-        elif event.eventType == "full_chain_fullfilled":
-            if not is_valid_origin(event.origin):
-                return False # Check fault tolerance
-
-            # Receiving full chain from peer
-            full_chain = event.data["chain"]
-            if not isinstance(full_chain, Chain):
-                full_chain = ChainSerializer.deserialize_chain(full_chain)
-
-            # Validate the chain
-
-            if not Validator.validate_full_chain(full_chain, self.node.blockchain.consensus):
-                return False
-
-            print(f"[NodeEventHandler] [bold green]{self.node.origin}[/bold green]: Received full chain from peer, ready to replace my chain")
-
-            # "Replay" my chain
-            ChainSyncServices.sync_chain(self.node.blockchain, full_chain, self.node.execution)
-
-            # inspect(self.node.blockchain.chain)
-            print(f"[NodeEventHandler] [bold green]{self.node.origin}[/bold green]: [bold green]Synced {len(self.node.blockchain.chain)} blocks from {event.origin}[/bold green]")
-
-
-
-        return False  # don't relay unknown events
-
+        return self.ef.handle(event)
     def propose_block(self, block: Block):
         self.broadcast(NodeEvent("block", {
             "block": block

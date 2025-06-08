@@ -15,7 +15,7 @@ class ChainSyncJob(BackgroundSyncJob):
         # Make a request to get the head of the chain from a random peer
         print(f"[UDPProtocol - ChainSyncJob] {self.event_handler.node.origin}: Sending chain_head event to random peers")
         event = NodeEvent("chain_head", {}, self.event_handler.node.origin)
-        self.event_handler.ask(event)
+        self.event_handler.fire_to_random(event)
         time.sleep(15)
 
 

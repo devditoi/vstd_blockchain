@@ -139,13 +139,13 @@ class Validator:
         for i in range(len(chain.chain)):
             block = chain.chain[i]
 
-            if not Validator.validate_block_without_chain(block, prev_hash):
+            if i != 0 and not Validator.validate_block_without_chain(block, prev_hash):
                 return False
 
             if i != 0 and block.timestamp < chain.chain[i - 1].timestamp:
                 return False
 
-            if i != 0 and not consensus.is_valid(block): # don't check first block
+            if i != 0 and not consensus.is_valid(block): # don't check the first block
                 return False
 
             prev_hash = block.hash

@@ -29,8 +29,9 @@ class Transaction(ITransaction):
             "nonce": self.nonce,
             "gasPrice": self.gasPrice,
             "data": self.transactionData,
+            "hash": self.hash,
             "signature": self.signature,
-            "publicKey": self.publicKey
+            "publicKey": self.publicKey,
         })
 
     def to_verifiable_string(self) -> str:
@@ -39,7 +40,7 @@ class Transaction(ITransaction):
             "Txtype": self.Txtype,
             "nonce": self.nonce,
             "gasPrice": self.gasPrice,
-            "data": self.transactionData
+            "data": self.transactionData,
         })
 
     def __repr__(self):

@@ -2,6 +2,7 @@
 import ecdsa
 
 from mmb_layer0.blockchain.chain.local_saver import ISaver, NotImplementedSaver
+from mmb_layer0.blockchain.chain.saver_impl.filebase_saver import FilebaseSaver, FilebaseDatabase
 from mmb_layer0.blockchain.core.chain import Chain
 from mmb_layer0.blockchain.consensus.poa_consensus import ProofOfAuthority
 from mmb_layer0.blockchain.core.transaction_type import Transaction, MintBurnTransaction
@@ -24,9 +25,9 @@ from rich import print, inspect
 from mmb_layer0.blockchain.core.block import Block
 
 class Node:
-    def __init__(self) -> None:
+    def __init__(self, dummy = False) -> None:
         print("node.py:__init__: Initializing Node")
-        self.blockchain: Chain = Chain(False)
+        self.blockchain: Chain = Chain(dummy)
 
         self.worldState: WorldState = WorldState()
 
@@ -60,15 +61,19 @@ class Node:
 
         self.chain_file = f"{self.address}_chain.json"
 
-        self.saver = NotImplementedSaver()
+        self.saver = FilebaseSaver(FilebaseDatabase())
 
-        # self.load_chain_from_disk()
+        self.load_chain_from_disk()
 
     def set_saver(self, saver: ISaver) -> None:
         self.saver = saver
 
     def load_chain_from_disk(self):
-        self.blockchain = self.saver.load_chain()
+        chain = self.saver.load_chain()
+        self.blockchain.reset_chain()
+        self.saver.add_block(chain.chain[0]) # add genesis
+        for block in chain.chain[1:]: # skip genesis again lol
+            self.blockchain.add_block(block, initially=True)
 
     def save_chain_to_disk(self):
         self.saver.save_chain(self.blockchain)

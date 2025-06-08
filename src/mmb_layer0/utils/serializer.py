@@ -26,7 +26,7 @@ class ChainSerializer:
         chain = Chain()
         data = json.loads(chain_json)
         chain.max_block_size = data["max_block_size"]
-        for block in data["chain"]:
+        for block in data["chain"][1:]:
             chain.add_block(BlockProcessor.cast_block(block), initially=True)
         return chain
 

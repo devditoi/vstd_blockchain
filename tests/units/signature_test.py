@@ -28,6 +28,6 @@ def data():
     return data
 
 def test_sig_valid(data):
-    # Test fail before. Reason: Signature generate from Wallet using to_string() function to convert transaction where
+    # Test fail before. Reason: Signature generates from Wallet using to_string() function to convert transaction where
     # in the verify function, the to_verifiable_string() function is used. Cause mismatch
     assert SignerFactory().get_signer().verify(data["tx2"].to_verifiable_string(), data["tx2_sign"], data["publicKey"]), "Signature check failed"

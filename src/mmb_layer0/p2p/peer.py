@@ -6,7 +6,7 @@ class Peer:
     def __init__(self, node: "Node" = None, address: str = None, ip: str = None, port: int = None):
         self.port = port
         self.ip = ip
-        self.node = node # Just a dummy node
+        self.node = node # Just a fake node
         self.address = address
 
     def fire(self, event: "NodeEvent"):

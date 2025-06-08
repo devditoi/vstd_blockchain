@@ -7,7 +7,7 @@ from rich import print
 from mmb_layer0.p2p.peer import Peer
 
 class RemotePeer(Peer):
-    def __init__(self, ip: str, port: int):
+    def __init__(self, ip: str, port: int) -> None:
         self.ip = ip
         self.port = port
         super().__init__(None, f"{ip}:{port}", ip, port)  # Không cần node gắn vào
