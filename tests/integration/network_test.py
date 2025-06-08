@@ -45,6 +45,13 @@ def data():
 
     return master, peers_test, processes
 
+@pytest.fixture(autouse=True)
+def cleanup(data):
+    yield # Run test
+
+    for p in data[2]:
+        p.terminate()
+
 def length_polling(node, expected_peers, timeout=20, interval=0.5):
     max_iter = int(timeout / interval)
     for _ in range(max_iter):
@@ -70,7 +77,3 @@ def test_network_check(data):
 
     # check if all peers are connected
     assert length_polling(node, peers + 1), "Peer connection timeout"
-
-    # Kill all processes
-    for p in processes:
-        p.kill()
