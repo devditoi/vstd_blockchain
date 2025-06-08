@@ -1,14 +1,13 @@
 from mmb_layer0.blockchain.chain.chain_sync_services import ChainSyncServices
 from mmb_layer0.blockchain.core.validator import Validator
 from mmb_layer0.node.events.EventHandler import EventHandler
-from mmb_layer0.node.node_event_handler import NodeEventHandler, NodeEvent
+import typing
+if typing.TYPE_CHECKING:
+    from mmb_layer0.node.node_event_handler import NodeEvent
 from mmb_layer0.utils.serializer import ChainSerializer
 from mmb_layer0.blockchain.core.chain import Chain
 
 class FullChainEvent(EventHandler):
-    def __init__(self, node_event_handler: "NodeEventHandler"):
-        super().__init__(node_event_handler)
-
     def require_field(self):
         return [] # Not required
 
@@ -32,9 +31,6 @@ class FullChainEvent(EventHandler):
         return False # This call from 1 peer not needed to relay
 
 class FullChainFullfilledEvent(EventHandler):
-    def __init__(self, node_event_handler: "NodeEventHandler"):
-        super().__init__(node_event_handler)
-
     def require_field(self):
         return ["chain"] # Not required
 

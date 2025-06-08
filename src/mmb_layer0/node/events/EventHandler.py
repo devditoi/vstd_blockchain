@@ -1,5 +1,7 @@
-from ..node_event_handler import NodeEventHandler, NodeEvent
 from abc import abstractmethod
+import typing
+if typing.TYPE_CHECKING:
+    from ..node_event_handler import NodeEventHandler, NodeEvent
 from mmb_layer0.utils.network_utils import is_valid_origin
 
 

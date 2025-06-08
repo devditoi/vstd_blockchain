@@ -1,13 +1,12 @@
 from mmb_layer0.node.events.EventHandler import EventHandler
-from mmb_layer0.node.node_event_handler import NodeEventHandler, NodeEvent
 from mmb_layer0.p2p.peer import Peer
 import time
+import typing
+if typing.TYPE_CHECKING:
+    from mmb_layer0.node.node_event_handler import NodeEvent, NodeEventHandler
 
 
 class PingEvent(EventHandler):
-    def __init__(self, node_event_handler: "NodeEventHandler"):
-        super().__init__(node_event_handler)
-
     def require_field(self):
         return [] # Not required
 

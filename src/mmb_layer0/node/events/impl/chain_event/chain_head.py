@@ -1,13 +1,12 @@
 from mmb_layer0.blockchain.processor.block_processor import BlockProcessor
 from mmb_layer0.node.events.EventHandler import EventHandler
-from mmb_layer0.node.node_event_handler import NodeEventHandler, NodeEvent
+import typing
+if typing.TYPE_CHECKING:
+    from mmb_layer0.node.node_event_handler import NodeEvent
 from mmb_layer0.blockchain.core.block import Block
 
 
 class ChainHeadEvent(EventHandler):
-    def __init__(self, node_event_handler: "NodeEventHandler"):
-        super().__init__(node_event_handler)
-
     def require_field(self):
         return [] # Not required
 
@@ -30,9 +29,6 @@ class ChainHeadEvent(EventHandler):
         return False
 
 class ChainHeadFullfilledEvent(EventHandler):
-    def __init__(self, node_event_handler: "NodeEventHandler"):
-        super().__init__(node_event_handler)
-
     def require_field(self):
         return ["block"] # Required
 

@@ -1,14 +1,13 @@
 from mmb_layer0.node.events.EventHandler import EventHandler
-from mmb_layer0.node.node_event_handler import NodeEventHandler, NodeEvent
 from mmb_layer0.p2p.peer_type.remote_peer import RemotePeer
 from mmb_layer0.utils.network_utils import is_valid_origin
 from mmb_layer0.utils.serializer import PeerSerializer
+import typing
+if typing.TYPE_CHECKING:
+    from mmb_layer0.node.node_event_handler import NodeEvent
 
 
 class PeerDiscoveryEvent(EventHandler):
-    def __init__(self, node_event_handler: "NodeEventHandler"):
-        super().__init__(node_event_handler)
-
     @staticmethod
     def event_name() -> str:
         return "peer_discovery"
@@ -37,9 +36,6 @@ class PeerDiscoveryEvent(EventHandler):
         return False
 
 class PeerDiscoveryFullfilledEvent(EventHandler):
-    def __init__(self, node_event_handler: "NodeEventHandler"):
-        super().__init__(node_event_handler)
-
     @staticmethod
     def event_name() -> str:
         return "peer_discovery_fullfilled"

@@ -19,12 +19,13 @@ class ISaver(ABC):
 
 class NotImplementedSaver(ISaver):
     def save_chain(self, chain: "Chain") -> None:
-        raise NotImplementedError("save_chain not implemented")
+        # raise NotImplementedError("save_chain not implemented")
+        pass
 
     def load_chain(self) -> "Chain":
-        raise NotImplementedError("load_chain not implemented")
-        # return Chain()
+        # raise NotImplementedError("load_chain not implemented")
+        return Chain()
 
     def add_block(self, block: "Block") -> None:
-        raise NotImplementedError("add_block not implemented")
-        # pass
+        # raise NotImplementedError("add_block not implemented")
+        pass
