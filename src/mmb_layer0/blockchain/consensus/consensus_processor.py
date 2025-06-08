@@ -21,6 +21,8 @@ class ConsensusProcessor:
             print("chain.py:process_block: Block invalid")
             return None
 
+        print("chain.py:process_block: Block valid, signing")
+
         # Sign block
         consensus.sign_block(block)
 
@@ -28,5 +30,4 @@ class ConsensusProcessor:
         broadcast_callback(block)
 
         # callback(block)
-
         return block

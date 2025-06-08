@@ -1,5 +1,5 @@
 from random import choice
-
+from rich import print
 import typing
 from mmb_layer0.blockchain.core.block import Block
 from mmb_layer0.p2p.peer import Peer
@@ -106,8 +106,9 @@ class NodeEventHandler:
 
     # return True mean continue to send it to other peers, False mean stop
     def process_event(self, event: NodeEvent) -> bool:
-        # print(f"{self.node.address[:4]}:node.py:process_event: Node [bold green]{self.node.origin}[/bold green] received event [bold red]{event.eventType}[/bold red] from [bold blue]{event.origin}[/bold blue]")
+        print(f"{self.node.address[:4]}:node.py:process_event: Node [bold green]{self.node.origin}[/bold green] received event [bold red]{event.eventType}[/bold red] from [bold blue]{event.origin}[/bold blue]")
         return self.ef.handle(event)
+
     def propose_block(self, block: Block):
         self.broadcast(NodeEvent("block", {
             "block": block

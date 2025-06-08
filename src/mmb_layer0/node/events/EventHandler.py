@@ -19,7 +19,7 @@ class EventHandler:
         return False
 
     @abstractmethod
-    def require_field(self) -> str:
+    def require_field(self) -> list[str]:
         return ""
 
 class EventFactory:
@@ -31,12 +31,17 @@ class EventFactory:
 
     def handle(self, event: "NodeEvent") -> bool:
         handler = self.handlers.get(event.eventType)
-        if not is_valid_origin(event.origin):
-            return False
+
         if handler:
+            if not is_valid_origin(event.origin):
+                print("[EventFactory] Invalid origin:", event.origin)
+                return False
+
             if len(handler.require_field()) > 0:
-                if all([k not in event.data for k in handler.require_field()]):
+                if any([k not in event.data for k in handler.require_field()]):
                     print("[EventFactory] Not enough data for event type:", event.eventType)
-                return False # Not enough data
+                    return False # Not enough data
             return handler.handle(event)
-        raise ValueError(f"No handler registered for event type: {event.eventType}")
+
+        print(f"No handler registered for event type: {event.eventType}")
+        return False
