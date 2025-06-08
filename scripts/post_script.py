@@ -156,11 +156,11 @@ def main():
     console.print(f"[success]Updated {PYPROJECT_TOML_PATH} to version [bold white]{new_version}[/bold white].[/success]")
 
     # --- Step 2: Git Commit ---
-    # console.print("\n[step]--- Committing changes ---[/step]")
-    # run_command(["git", "add", PYPROJECT_TOML_PATH])
-    # commit_message = f"chore(release): {new_version}"
-    # run_command(["git", "commit", "-m", commit_message])
-    # console.print(f"[success]Committed: {commit_message}[/success]")
+    console.print("\n[step]--- Committing changes ---[/step]")
+    run_command(["git", "add", "."]) # Add all changes
+    commit_message = f"chore(release): {new_version}"
+    run_command(["git", "commit", "-m", commit_message])
+    console.print(f"[success]Committed: {commit_message}[/success]")
 
     # --- Step 3: Create Git Tag ---
     console.print("\n[step]--- Creating Git tag ---[/step]")
