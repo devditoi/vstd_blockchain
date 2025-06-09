@@ -65,7 +65,7 @@ class Node:
         self.saver = NotImplementedSaver()
 
         # TODO: Debugging purposes
-        # self.load_chain_from_disk()
+        self.load_chain_from_disk()
 
     def set_saver(self, saver: ISaver) -> None:
         self.saver = saver
@@ -98,22 +98,6 @@ class Node:
         self.signer.save(filename, self.publicKey, self.privateKey)
         print(f"{self.address[:4]}:node.py:export_key: Exported key " + self.address)
 
-
-    # EVENT MANAGER
-    # def subscribe(self, peer: "Peer"):
-    #     # print(f"{self.origin}:node.py:subscribe: Subscribed to {peer.address}")
-    #     # inspect(peer)
-    #     self.node_event_handler.subscribe(peer)
-    #
-    # def broadcast(self, event: "NodeEvent"):
-    #     self.node_event_handler.broadcast(event)
-    #
-    # def fire_to(self, peer: "RemotePeer", event: "NodeEvent"):
-    #     self.node_event_handler.fire_to(peer, event)
-    #
-    # def process_event(self, event: "NodeEvent") -> bool:
-    #     return self.node_event_handler.process_event(event)
-
     def mint(self, address: str, privateKey: any, publicKey: any) -> None:
         # print("node.py:faucet: Processing 100 native tokens to address")
         amount = int(100 * MMBConfig.NativeTokenValue)
@@ -121,28 +105,6 @@ class Node:
         self.mintburn_nonce += 1
         sign = self.signer.sign(tx.to_verifiable_string(), privateKey)
         self.propose_tx(tx, sign, publicKey)
-
-
-    # def sync(self, other_json: str):
-    #     # sync from another node
-    #     other_obj = json.loads(other_json)
-    #     print("node.py:sync: Syncing from " + other_obj["address"])
-    #     blockchain_data = json.loads(other_obj["blockchain"])
-    #     # Check height
-    #     if self.blockchain.get_height() > blockchain_data["length"]:
-    #         return
-
-        # print(blockchain_data)
-        # # Sync blocks
-        # for i in range(self.blockchain.get_height(), blockchain_data["length"]):
-        #     print(f"node.py:sync: Syncing block #{i}")
-        #     block_data = blockchain_data["chain"][i]
-        #     new_block = self.blockchain.add_block(BlockProcessor.cast_block(block_data))
-        #     self.execution(new_block)
-
-    # def check_sync(self, other_json: str):
-    #     other_node = NodeSerializer.deserialize_node(other_json)
-    #     return NodeSyncServices.check_sync(self, other_node)
 
     def get_height(self) -> int:
         return self.blockchain.get_height()
