@@ -36,7 +36,7 @@ class Node:
         self.nativeTokenSupply = int(MMBConfig.NativeTokenValue * MMBConfig.NativeTokenQuantity)
 
         self.chain_file = "chain.json"
-        self.version = open("node_ver.txt", "r").read()
+        # self.version = open("node_ver.txt", "r").read()
 
         self.signer = SignerFactory().instance.get_signer()
 
