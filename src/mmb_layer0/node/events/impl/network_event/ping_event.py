@@ -37,7 +37,7 @@ class PongEvent(EventHandler):
         self.peer_timer[peer.address] = int(time.time())
 
         for p in self.neh.peers:
-            if self.peer_timer[p.address] is None:
+            if p.address not in self.peer_timer:
                 continue
             if time.time() - self.peer_timer[p.address] > 10:
                 self.safe_remove(p)

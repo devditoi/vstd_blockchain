@@ -44,7 +44,11 @@ class NodeEventHandler:
     def subscribe(self, peer: "Peer"):
         if peer in self.peers:
             return
+        if peer.address == self.node.origin:
+            return
+
         self.peers.append(peer)
+        # return peer
         # print(f"{self.node.origin}:node.py:subscribe: Subscribed to {peer.address}")
 
     def broadcast(self, event: NodeEvent):
