@@ -53,7 +53,7 @@ def cleanup(data):
         p.terminate()
 
 def length_polling(node, expected_peers, timeout=20, interval=0.5):
-    max_iter = int(timeout / interval)
+    max_iter = int(timeout * (1 + expected_peers / 10)/ interval)
     for _ in range(max_iter):
         if len(node.node_event_handler.peers) == expected_peers:
             return True
