@@ -4,7 +4,7 @@ build-backend = "flit_core.buildapi"
 
 [project]
 name = "mmb_layer0"
-version = "1.0.4"
+version = "1.0.5"
 description = "MMB blockchain network"
 readme = "README.md"
 requires-python = ">=3.10"
