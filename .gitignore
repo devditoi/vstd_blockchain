@@ -23,4 +23,9 @@ mint_key*
 # Poetry
 poetry.lock
 
+# Environment
 .env
+
+# Test data
+blockchain
+transactions

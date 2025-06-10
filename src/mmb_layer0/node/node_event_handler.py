@@ -39,7 +39,6 @@ class NodeEventHandler:
         self.ef.register_event(PongEvent(self))
 
 
-
     # EVENT MANAGER
     def subscribe(self, peer: "Peer"):
         if peer in self.peers:
@@ -49,7 +48,7 @@ class NodeEventHandler:
 
         self.peers.append(peer)
         # return peer
-        # print(f"{self.node.origin}:node.py:subscribe: Subscribed to {peer.address}")
+        print(f"{self.node.origin}:node.py:subscribe: Subscribed to {peer.address}")
 
     def broadcast(self, event: NodeEvent):
         # time.sleep(1)
@@ -57,6 +56,8 @@ class NodeEventHandler:
             return
 
         event.origin = self.node.origin # Update origin
+
+        print(f"{self.node.origin}:node.py:broadcast: Broadcasting event: " + str(event.eventType))
 
         for peer in self.peers:
             # time.sleep(1)
@@ -67,9 +68,13 @@ class NodeEventHandler:
     def fire_to_random(self, event: NodeEvent):
         if not self.peers:
             return
+        if len(self.peers) == 0:
+            return
         peer = choice(self.peers)
         # inspect(peer)
         peer.fire(event)
+
+        print(f"{self.node.origin}:node.py:fire_to_random: Firing to {peer.address} - event: " + str(event.eventType))
 
     # @staticmethod
     def fire_to(self, peer_origin: any, event: NodeEvent):

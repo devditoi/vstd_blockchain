@@ -61,8 +61,7 @@ class FullChainFullfilledEvent(EventHandler):
         # time.sleep(5)
 
         # Try to send chain_head again to check
-        print(
-            f"[NodeEventHandler - ChainSyncJob] Resending chain_head event to random peers")
+        # print(f"[NodeEventHandler - ChainSyncJob] Resending chain_head event to random peers")
         event = NodeEvent("chain_head", {}, self.neh.node.origin)
         self.neh.fire_to_random(event)
 
