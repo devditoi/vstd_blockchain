@@ -1,5 +1,8 @@
 # 🧱 MMB Blockchain Network
 
+[![Build and Release](https://github.com/devditoi/mmb_blockchain/actions/workflows/build_and_release.yaml/badge.svg)](https://github.com/devditoi/mmb_blockchain/actions/workflows/build_and_release.yaml)
+[![Run Tests](https://github.com/devditoi/mmb_blockchain/actions/workflows/test.yaml/badge.svg)](https://github.com/devditoi/mmb_blockchain/actions/workflows/test.yaml)
+
 **MMB Blockchain** is a custom-built experimental blockchain system designed from scratch with a modular, multi-layered architecture. It features a basic **Proof of Authority (PoA)** consensus, built-in smart contract handling, and support for decentralized applications (dApps) via a web interface.
 
 ---
