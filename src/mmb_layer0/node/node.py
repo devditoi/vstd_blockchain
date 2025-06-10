@@ -61,8 +61,9 @@ class Node:
 
         self.chain_file = f"{self.address}_chain.json"
 
-        # self.saver = FilebaseSaver(FilebaseDatabase())
-        self.saver = NotImplementedSaver()
+        # Bruh why :D
+        self.saver = FilebaseSaver(FilebaseDatabase())
+        # self.saver = NotImplementedSaver()
 
         # TODO: Debugging purposes
         self.load_chain_from_disk()
