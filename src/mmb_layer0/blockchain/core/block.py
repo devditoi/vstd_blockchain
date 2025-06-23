@@ -2,11 +2,7 @@
 from mmb_layer0.blockchain.core.transaction_type import Transaction
 from mmb_layer0.utils.hash import HashUtils
 import jsonlight
-
-
 # from rich import print
-
-
 class Block:
     def __init__(self, index, previous_hash, timestamp, data: list[Transaction]):
         self.index = index
@@ -16,6 +12,8 @@ class Block:
         self.hash = HashUtils.sha256(str(self.index) + str(self.previous_hash) + str(self.timestamp) + str(self.data))
         self.signature = None
         self.address = None
+
+        # For developing purpose
 
     def to_string(self) -> str:
         return jsonlight.dumps({
