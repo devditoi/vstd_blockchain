@@ -4,7 +4,7 @@ from mmb_layer0.utils.hash import HashUtils
 import jsonlight
 # from rich import print
 class Block:
-    def __init__(self, index, previous_hash, timestamp, data: list[Transaction]):
+    def __init__(self, index, previous_hash, timestamp, worldstate_hash, data: list[Transaction]):
         self.index = index
         self.previous_hash = previous_hash
         self.timestamp = timestamp
@@ -14,6 +14,7 @@ class Block:
         self.address = None
 
         # For developing purpose
+        self.world_state_hash = worldstate_hash
 
     def to_string(self) -> str:
         return jsonlight.dumps({
@@ -23,7 +24,8 @@ class Block:
             "data": self.data,
             "hash": self.hash,
             "signature": self.signature,
-            "address": self.address
+            "address": self.address,
+            "world_state_hash": self.world_state_hash
         }, indent=2)
 
     def get_string_for_signature(self) -> str:
@@ -32,7 +34,8 @@ class Block:
             "previous_hash": self.previous_hash,
             "timestamp": self.timestamp,
             "data": self.data,
-            "hash": self.hash
+            "hash": self.hash,
+            "world_state_hash": self.world_state_hash
         })
 
     def __repr__(self):

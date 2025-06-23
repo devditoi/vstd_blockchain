@@ -1,6 +1,6 @@
 import time
 
-from ecdsa import VerifyingKey
+# from ecdsa import VerifyingKey
 # import json
 from rsa import PublicKey
 # import jsonlight
@@ -11,19 +11,18 @@ from mmb_layer0.blockchain.consensus.consensus_processor import ConsensusProcess
 from mmb_layer0.blockchain.core.validator import Validator
 from mmb_layer0.blockchain.core.block import Block
 from mmb_layer0.blockchain.core.transaction_type import Transaction
+from mmb_layer0.config import MMBConfig
 from mmb_layer0.utils.crypto.signer import SignerFactory
 
-
 # from mmb_layer0.node_sync_services import NodeSyncServices
-
 
 class Chain:
     def __init__(self, dummy = True) -> None:
         print("chain.py:__init__: Initializing Chain")
         self.genesis_tx = Transaction("0x0", "genesis", 0, 0)
-        self.genesis_block: Block = Block(0, "0", 0, [self.genesis_tx])
+        self.genesis_block: Block = Block(0, "0", 0, "0", [self.genesis_tx])
         self.chain = []
-        self.length = 1
+        self.height = 1
         self.mempool: list[Transaction] = []
         self.mempool_tx_id: set[str] = set()
         self.interval = 3 # 10 seconds before try to send and validate
@@ -33,6 +32,7 @@ class Chain:
         self.consensus = None
         self.execution_callback = None
         self.broadcast_callback = None
+        self.world_state = None
 
         self.reset_chain()
         if not dummy:
@@ -42,18 +42,19 @@ class Chain:
         self.mempool_lock = threading.Lock()
 
     def is_genesis(self):
-        return self.length == 1
+        return self.height == 1
 
     def reset_chain(self):
         print("chain.py:reset_chain: Reset chain")
         self.chain = [self.genesis_block]
 
-    def set_callbacks(self, consensus, execution_callback, broadcast_callback):
+    def set_initial_data(self, consensus, execution_callback, broadcast_callback, world_state):
         self.consensus = consensus
         self.execution_callback = execution_callback
         self.broadcast_callback = broadcast_callback
+        self.world_state = world_state
 
-        print("chain.py:set_callbacks: Set callbacks")
+        print("chain.py:set_initial_data: Set callbacks")
 
     def add_block(self, block: Block, initially = False) -> Block | None:
         if not Validator.validate_block_on_chain(block, self, initially): # Validate block
@@ -63,7 +64,11 @@ class Chain:
         print(f"chain.py:add_block: Block #{block.index} valid, add to chain")
         # print(block)
         self.chain.append(block)
-        self.length += 1
+        self.height += 1
+
+        # If the length is greater than max block history, remove the first block
+        if self.height > MMBConfig.BLOCK_HISTORY_LIMIT:
+            self.chain.pop(0)
 
         if self.execution_callback:
             # Execute block
@@ -80,7 +85,7 @@ class Chain:
         return block
 
     def get_block(self, index) -> Block:
-        if index >= self.length:
+        if index >= self.height:
             print("chain.py:get_block: Index out of range")
             raise Exception("Index out of range")
         # print("chain.py:get_block: Return block at index", index)
@@ -92,10 +97,10 @@ class Chain:
 
     def get_height(self) -> int:
         # print("chain.py:get_height: Return chain length")
-        if self.length != len(self.chain):
+        if self.height != len(self.chain):
             print("chain.py:get_height: Chain length does not match length")
             raise Exception("Chain length does not match length")
-        return self.length
+        return self.height
 
     def contain_transaction(self, transaction: Transaction) -> bool:
         return transaction.hash in self.mempool_tx_id

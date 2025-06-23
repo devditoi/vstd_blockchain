@@ -15,7 +15,7 @@ class ChainSerializer:
     def serialize_chain(chain: Chain, exclude_genesis=False) -> str:
         return jsonlight.dumps({
             "chain": chain.chain[1:] if exclude_genesis else chain.chain,
-            "length": chain.length,
+            "length": chain.height,
             "mempool": chain.mempool,
             "max_block_size": chain.max_block_size
         })

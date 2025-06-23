@@ -1,6 +1,10 @@
 from dataclasses import dataclass, field
 import jsonlight
 import json
+
+from mmb_layer0.utils.hash import HashUtils
+
+
 # This is a single unit of the world state that only contains the data
 @dataclass
 class EOAs:
@@ -67,3 +71,11 @@ class WorldState:
 
     def get_smart_contract_full(self):
         return self.__smartContracts.copy()
+
+    def get_hash(self):
+        return HashUtils.sha256(self.to_json())
+
+    def clone(self):
+        copy = WorldState()
+        copy.set_eoa_and_smart_contract(self.get_eoa_full(), self.get_smart_contract_full())
+        return copy

@@ -7,7 +7,7 @@ class BlockProcessor:
     def cast_block(block_json: str):
         block_data = json.loads(block_json)
         transaction_list = [TransactionProcessor.cast_transaction(tx) for tx in block_data["data"]]
-        raw_block = Block(block_data["index"], block_data["previous_hash"], block_data["timestamp"], transaction_list.copy())
+        raw_block = Block(block_data["index"], block_data["previous_hash"], block_data["timestamp"], block_data["world_state_hash"], transaction_list.copy())
         raw_block.signature = block_data["signature"]
         raw_block.address = block_data["address"]
         return raw_block

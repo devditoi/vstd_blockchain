@@ -12,3 +12,4 @@ class MMBConfig:
     MinimumGasPrice: int = 100
     FaucetAddress = "0x00000000000000000000000000000000faucet"
     MINT_KEY = "public_key.pem"
+    BLOCK_HISTORY_LIMIT = 1000

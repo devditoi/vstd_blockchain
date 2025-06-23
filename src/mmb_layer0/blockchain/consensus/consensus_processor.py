@@ -6,7 +6,7 @@ from ..core.block import Block
 import time
 class ConsensusProcessor:
     @staticmethod
-    def process_block(data, last_block: Block, consensus, broadcast_callback) -> Block | None:
+    def process_block(data, last_block: Block, consensus, broadcast_callback, world_state) -> Block | None:
         # Check block
         if not Validator.preblock_validate(data):
             return None
@@ -14,7 +14,10 @@ class ConsensusProcessor:
         # PoA validation
 
         print("chain.py:process_block: Mempool valid, create block")
-        block = Block(last_block.index + 1, last_block.hash, time.time(), data)
+
+        worldstate_hash = world_state.get_hash()
+
+        block = Block(last_block.index + 1, last_block.hash, time.time(), worldstate_hash, data)
 
         # Validate block
         if not Validator.validate_block_without_chain(block, last_block.hash):

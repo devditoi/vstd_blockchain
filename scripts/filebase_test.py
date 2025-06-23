@@ -11,6 +11,6 @@ wallet = Wallet(node)
 
 tx, sign = wallet.create_tx(100, "0x1234")
 
-block = Block(0, 0, 0, [tx])
+block = Block(0, 0, 0, node.worldState.get_hash(), [tx])
 
 saver.add_block(block)

@@ -55,7 +55,7 @@ class Node:
         #
         # TODO: Refactor this shit right here
         self.consensus = ProofOfAuthority(self.address, self.privateKey)
-        self.blockchain.set_callbacks(self.consensus, self.execution, self.propose_block)
+        self.blockchain.set_initial_data(self.consensus, self.execution, self.propose_block, self.worldState)
 
         self.origin = ""
 
@@ -92,7 +92,7 @@ class Node:
         self.publicKey, self.privateKey = self.signer.load(filename)
         self.address = self.signer.address(self.publicKey)
         self.consensus = ProofOfAuthority(self.address, self.privateKey)
-        self.blockchain.set_callbacks(self.consensus, self.execution, self.node_event_handler.propose_block)
+        self.blockchain.set_initial_data(self.consensus, self.execution, self.node_event_handler.propose_block, self.worldState)
         print(f"{self.address[:4]}:node.py:import_key: Imported key " + self.address)
 
     def export_key(self, filename: str) -> None:
@@ -145,7 +145,14 @@ class Node:
     def execution(self, block: Block):
         # Block execution only happend after block is processed
         excecutor = TransactionProcessor(block, self.worldState)
-        excecutor.process()
+        if not excecutor.process():
+            print("node.py:execution: Block execution failed, invalid block")
+            print("node.py:execution: delete newly added block")
+            self.blockchain.chain.pop() # Pop last block aka newly added one
+            return
+
+
+
 
         # Save block
         self.saver.add_block(block)
