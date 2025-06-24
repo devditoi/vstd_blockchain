@@ -96,11 +96,11 @@ if __name__ == '__main__':
     # p1.start()
     # p2.start()
 
-    # peers_test = 3
-    # for i in range(peers_test):
-    #     port = 5001 + i
-    #     p = multiprocessing.Process(target=start_node, args=(port,))
-    #     p.start()
-    #
+    peers_test = 1
+    for i in range(peers_test):
+        port = 5001 + i
+        p = multiprocessing.Process(target=start_node, args=(port,))
+        p.start()
+
     while True:
         pass

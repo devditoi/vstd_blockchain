@@ -7,9 +7,9 @@ class MMBConfig:
     gmmbi: int = 1e6
     NativeToken: str = 'mmbi'
     NativeTokenSymbol: str = 'MMB'
-    NativeTokenValue = 1e9
-    NativeTokenQuantity = 1e9
-    MinimumGasPrice: int = 100
+    NativeTokenValue = 1e9 # 1 MMB
+    NativeTokenQuantity = 1e18 # Total token
+    MinimumGasPrice: int = 0
     FaucetAddress = "0x00000000000000000000000000000000faucet"
     MINT_KEY = "public_key.pem"
     BLOCK_HISTORY_LIMIT = 1000

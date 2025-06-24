@@ -19,13 +19,13 @@ from mmb_layer0.utils.crypto.signer import SignerFactory
 class Chain:
     def __init__(self, dummy = True) -> None:
         print("chain.py:__init__: Initializing Chain")
-        self.genesis_tx = Transaction("0x0", "genesis", 0, 0)
+        self.genesis_tx = Transaction("0x0", "genesis", 0, 0, 0)
         self.genesis_block: Block = Block(0, "0", 0, "0", [self.genesis_tx])
         self.chain = []
         self.height = 1
         self.mempool: list[Transaction] = []
         self.mempool_tx_id: set[str] = set()
-        self.interval = 3 # 10 seconds before try to send and validate
+        self.interval = 10 # 10 seconds before try to send and validate
         self.max_block_size = 10 # maximum number of transactions in a block
         self.last_block_time = time.time()
 
@@ -67,12 +67,13 @@ class Chain:
         self.height += 1
 
         # If the length is greater than max block history, remove the first block
+        # Not DELETE Old block, just delete the data
         if self.height > MMBConfig.BLOCK_HISTORY_LIMIT:
-            self.chain.pop(0)
+            self.chain[self.height - MMBConfig.BLOCK_HISTORY_LIMIT].data = None
 
         if self.execution_callback:
             # Execute block
-            self.execution_callback(block)
+            self.execution_callback(block) # DELETE OLD BLOCK : EXECUTION
 
         # Remove transactions from mempool
         for tx in block.data:
@@ -124,6 +125,7 @@ class Chain:
             # print("chain.py:add_transaction: Not leader, return")
             return
 
+    # PROPOSE BLOCK, CREATE BLOCK
     def __process_block_thread(self):
         # Check some conditions
         while True:
@@ -148,7 +150,7 @@ class Chain:
                 self.last_block_time = time.time()
                 if len(self.mempool) == 0:
                     # Create filling block
-                    ConsensusProcessor.process_block([], self.get_last_block(), self.consensus, self.broadcast_callback)
+                    ConsensusProcessor.process_block([], self.get_last_block(), self.consensus, self.broadcast_callback, self.world_state)
                     continue
 
                 self.mempool_lock.acquire()
@@ -157,7 +159,7 @@ class Chain:
                 pool = self.mempool[:block_to_process]
                 self.mempool = self.mempool[block_to_process:]
 
-                block = ConsensusProcessor.process_block(pool, self.get_last_block(), self.consensus, self.broadcast_callback)
+                block = ConsensusProcessor.process_block(pool, self.get_last_block(), self.consensus, self.broadcast_callback, self.world_state)
                 if block:
                     print("chain.py:__process_block_thread: Block processed, delete transactions from mempool")
                     # for tx in block.data:

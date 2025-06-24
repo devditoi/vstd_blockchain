@@ -19,6 +19,7 @@ class EventHandler:
     def handle(self, event: "NodeEvent") -> bool:
         return False
 
+    @staticmethod
     @abstractmethod
     def require_field(self) -> list[str]:
         return ""

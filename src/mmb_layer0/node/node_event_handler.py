@@ -9,7 +9,9 @@ from mmb_layer0.node.events.impl.network_event.peer_discovery_event import PeerD
 from mmb_layer0.node.events.impl.chain_event.tx_event import TxEvent
 from .events.impl.chain_event.chain_head import ChainHeadEvent, ChainHeadFullfilledEvent
 from .events.impl.chain_event.full_chain import FullChainEvent, FullChainFullfilledEvent
+from .events.impl.network_event.get_worldstate_event import GetWorldStateEvent
 from .events.impl.network_event.ping_event import PingEvent, PongEvent
+from ..p2p.peer_type.remote_peer import RemotePeer
 from ..utils.network_utils import is_valid_origin
 from .events.node_event import NodeEvent
 
@@ -37,6 +39,8 @@ class NodeEventHandler:
 
         self.ef.register_event(PingEvent(self))
         self.ef.register_event(PongEvent(self))
+
+        self.ef.register_event(GetWorldStateEvent(self))
 
 
     # EVENT MANAGER
@@ -90,6 +94,12 @@ class NodeEventHandler:
 
         event.origin = self.node.origin # Just in case
 
+        peer.fire(event)
+
+    @staticmethod
+    def fire_to_raw(origin, event: NodeEvent):
+        ip, port = is_valid_origin(origin)
+        peer = RemotePeer(ip, port)
         peer.fire(event)
 
     def find_peer_by_address(self, origin: str):

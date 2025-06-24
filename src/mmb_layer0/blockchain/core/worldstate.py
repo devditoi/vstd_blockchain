@@ -12,8 +12,14 @@ class EOAs:
     balance: int
     nonce: int
 
-    def __str__(self) -> str:
-        return f"EOAs(address={self.address}, balance={self.balance}, nonce={self.nonce})"
+    def __jsondump__(self):
+        return {
+            "address": self.address,
+            "balance": self.balance,
+            "nonce": self.nonce
+        }
+    # def __str__(self) -> str:
+    #     return f"EOAs(address={self.address}, balance={self.balance}, nonce={self.nonce})"
 
 @dataclass
 class SmartContract:
@@ -23,13 +29,26 @@ class SmartContract:
     codeHash: str
     storage: dict
 
-    def __str__(self) -> str:
-        return f"SmartContract(address={self.address}, balance={self.balance}, nonce={self.nonce}, codeHash={self.codeHash}, storage={self.storage})"
+    def __jsondump__(self):
+        return {
+            "address": self.address,
+            "balance": self.balance,
+            "nonce": self.nonce,
+            "codeHash": self.codeHash,
+            "storage": self.storage
+        }
+
+    # def __str__(self) -> str:
+    #     return f"SmartContract(address={self.address}, balance={self.balance}, nonce={self.nonce}, codeHash={self.codeHash}, storage={self.storage})"
 
 @dataclass
 class WorldState:
-    __eoas: dict[str, EOAs] = field(default_factory=dict[str, EOAs])
-    __smartContracts: dict[str, SmartContract] = field(default_factory=dict[str, SmartContract])
+    __eoas: dict[str, EOAs]
+    __smartContracts: dict[str, SmartContract]
+
+    def __init__(self):
+        self.__eoas = {}
+        self.__smartContracts = {}
 
     def set_eoa_and_smart_contract(self, eoas: dict[str, EOAs], smartContracts: dict[str, SmartContract]):
         self.__eoas = eoas

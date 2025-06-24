@@ -41,11 +41,18 @@ class WorldStateSerializer:
 
     @staticmethod
     def deserialize_world_state(world_state_json: str) -> WorldState:
-        world_state = WorldState()
         data = json.loads(world_state_json)
-        world_state.set_eoa_and_smart_contract(json.loads(data["eoas"]), json.loads(data["smartContracts"]))
+        return WorldStateSerializer.build_world_state(data)
 
+    @staticmethod
+    def build_world_state(data: any) -> WorldState:
+        world_state = WorldState()
+        eoas = json.loads(data["eoas"])
+        smartContracts = json.loads(data["smartContracts"])
+        # print(eoas, smartContracts)
+        world_state.set_eoa_and_smart_contract(eoas, smartContracts)
         return world_state
+
 
 class NodeSerializer:
     @staticmethod

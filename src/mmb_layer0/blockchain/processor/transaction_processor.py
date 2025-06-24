@@ -4,6 +4,19 @@ from mmb_layer0.blockchain.core.worldstate import WorldState
 import json
 from rich import print
 
+
+def cast_raw_transaction(transaction, transaction_data):
+    match transaction["Txtype"]:
+        case "mintburn":
+            return MintBurnTransaction(transaction["to"], transaction_data["amount"],
+                                       transaction["nonce"], transaction["gasLimit"])
+        case "native":
+            return NativeTransaction(transaction["sender"], transaction["to"],
+                                     transaction_data["amount"], transaction["nonce"], transaction["gasLimit"])
+        case _:
+            raise Exception("Transaction type is not supported")
+
+
 class TransactionProcessor:
     def __init__(self, block: Block, worldState: WorldState) -> None:
         self.block = block
@@ -26,15 +39,36 @@ class TransactionProcessor:
 
         print(f"TransactionProcessor:process: Process block #{self.block.index}")
         # print(self.block)
-        state = True
         for tx in self.block.data:
             print("TransactionProcessor:process: Process " + tx.Txtype + " transaction")
-            if isinstance(tx, NativeTransaction):
-                state = self.process_native_transaction(tx)
-            elif isinstance(tx, MintBurnTransaction):
-                state = self.process_mint_burn_transaction(tx)
-            elif isinstance(tx, Transaction):
-                print("Transaction type is not supported")
+            # if isinstance(tx, NativeTransaction):
+            #     state, gas = self.process_native_transaction(tx)
+            # elif isinstance(tx, MintBurnTransaction):
+            #     state, gas = self.process_mint_burn_transaction(tx)
+            # elif isinstance(tx, Transaction):
+            #     print("Transaction type is not supported")
+            #     return False
+
+            # Deduct the gas
+            gas_allowed = tx.gasLimit
+            neoa = self.worldState.get_eoa(tx.sender)
+            neoa.balance -= gas_allowed
+            self.worldState.set_eoa(tx.sender, neoa)
+
+            # Execute transaction and calculate gas used
+            state, gas_used = tx.process(self.worldState)
+
+            # Subtract the gas
+            gas_leftover = gas_allowed - gas_used
+
+            # Transfer back gas to the sender
+            neoa = self.worldState.get_eoa(tx.sender)
+            neoa.balance += gas_leftover
+            self.worldState.set_eoa(tx.sender, neoa)
+
+            if not state:
+                print("TransactionProcessor:process: Transaction failed, reverse the transaction")
+                self.worldState = backup.clone()
                 return False
 
             # Update nonce
@@ -42,13 +76,8 @@ class TransactionProcessor:
             neoa.nonce += 1
             self.worldState.set_eoa(tx.sender, neoa)
 
-        if not state:
-            # Reverse the transaction
-            print("TransactionProcessor:process: Transaction failed, reverse the transaction")
-            self.worldState = backup.clone()
-            return False
 
-        return False
+        return True
 
     @staticmethod
     def cast_transaction(transaction_raw: str):
@@ -56,65 +85,56 @@ class TransactionProcessor:
         # print(transaction)
         transaction_data = transaction["data"]
         # print(transaction)
-        def cast_raw_transaction():
-            match transaction["Txtype"]:
-                case "mintburn":
-                    return MintBurnTransaction(transaction_data["receiver"], transaction_data["amount"], transaction["nonce"], transaction["gasPrice"])
-                case "native":
-                    return NativeTransaction(transaction["sender"], transaction_data["receiver"], transaction_data["amount"], transaction["nonce"], transaction["gasPrice"])
-                case _:
-                    raise Exception("Transaction type is not supported")
 
-        tx = cast_raw_transaction()
+        tx = cast_raw_transaction(transaction, transaction_data)
         tx.signature = transaction["signature"]
         tx.publicKey = transaction["publicKey"]
 
         return tx
 
+    # def process_mint_burn_transaction(self, transaction: Transaction) -> (bool, int):
+    #     print("TransactionProcessor:process_mint_burn_transaction: Process mint burn transaction")
+    #
+    #     # Update world state
+    #     receiver = transaction.to
+    #     amount = transaction.transactionData["amount"]
+    #
+    #     if self.worldState.get_eoa(receiver).balance + amount < 0:
+    #         # Clear the balance
+    #         neoa = self.worldState.get_eoa(receiver)
+    #         neoa.balance = 0
+    #         self.worldState.set_eoa(receiver, neoa)
+    #         return False
+    #
+    #     neoa = self.worldState.get_eoa(receiver)
+    #     neoa.balance += amount
+    #     self.worldState.set_eoa(receiver, neoa)
+    #
+    #     return True
 
-    def process_mint_burn_transaction(self, transaction: Transaction) -> bool:
-        print("TransactionProcessor:process_mint_burn_transaction: Process mint burn transaction")
-
-        # Update world state
-        receiver = transaction.transactionData["receiver"]
-        amount = transaction.transactionData["amount"]
-
-        if self.worldState.get_eoa(receiver).balance + amount < 0:
-            # Clear the balance
-            neoa = self.worldState.get_eoa(receiver)
-            neoa.balance = 0
-            self.worldState.set_eoa(receiver, neoa)
-            return False
-
-        neoa = self.worldState.get_eoa(receiver)
-        neoa.balance += amount
-        self.worldState.set_eoa(receiver, neoa)
-
-        return True
-
-    def process_native_transaction(self, transaction: NativeTransaction) -> bool:
-
-        if transaction.sender == transaction.transactionData["receiver"]:
-            print(f"[Skip] Tx {transaction.hash[:8]} is noop (sender == receiver)")
-            return True
-
-        print("TransactionProcessor:process_native_transaction: Process native transaction, gas fee: " + str(transaction.gasPrice))
-
-        # Update world state
-        sender = transaction.sender
-        receiver = transaction.transactionData["receiver"]
-        amount = transaction.transactionData["amount"]
-        gasPrice = transaction.gasPrice
-
-        # self.worldState.get_eoa(sender).balance -= amount + gasPrice
-        # self.worldState.get_eoa(receiver).balance += amount
-
-        neoa = self.worldState.get_eoa(sender)
-        neoa.balance -= amount + gasPrice
-        self.worldState.set_eoa(sender, neoa)
-
-        neoa = self.worldState.get_eoa(receiver)
-        neoa.balance += amount
-        self.worldState.set_eoa(receiver, neoa)
-
-        return True
+    # def process_native_transaction(self, transaction: NativeTransaction) -> (bool, int):
+    #
+    #     if transaction.sender == transaction.transactionData["receiver"]:
+    #         print(f"[Skip] Tx {transaction.hash[:8]} is noop (sender == receiver)")
+    #         return True
+    #
+    #     print("TransactionProcessor:process_native_transaction: Process native transaction, gas fee: " + str(transaction.gasLimit))
+    #
+    #     # Update world state
+    #     sender = transaction.sender
+    #     receiver = transaction.to
+    #     amount = transaction.transactionData["amount"]
+    #     gasPrice = transaction.gasLimit
+    #
+    #     # self.worldState.get_eoa(sender).balance -= amount + gasPrice
+    #     # self.worldState.get_eoa(receiver).balance += amount
+    #
+    #     neoa = self.worldState.get_eoa(sender)
+    #     neoa.balance -= amount + gasPrice
+    #     self.worldState.set_eoa(sender, neoa)
+    #
+    #     neoa = self.worldState.get_eoa(receiver)
+    #     neoa.balance += amount
+    #     self.worldState.set_eoa(receiver, neoa)
+    #
+    #     return True

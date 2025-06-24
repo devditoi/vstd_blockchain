@@ -10,7 +10,6 @@ from mmb_layer0.p2p.background_sync.peer_sync_job import PeerSyncJob
 from mmb_layer0.p2p.background_sync.ping_job import PingSnycJob
 from mmb_layer0.p2p.protocol import Protocol
 
-
 class UDPProtocol(Protocol):
     def __init__(self, event_handler: "NodeEventHandler", port: int):
         self.event_handler = event_handler
@@ -35,7 +34,6 @@ class UDPProtocol(Protocol):
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.sock.bind(("0.0.0.0", self.port))
         print(f"[UDPProtocol] Listening on port {self.port}")
-
 
         while not self.stop_flag:
             try:
