@@ -1,4 +1,4 @@
-from mmb_layer0.config import MMBConfig
+from mmb_layer0.config import ChainConfig
 from mmb_layer0.node.node import Node
 from mmb_layer0.p2p.peer_type.local_peer import LocalPeer
 from mmb_layer0.p2p.peer_type.remote_peer import RemotePeer
@@ -48,8 +48,8 @@ import time
 # # while i < 15:
 # #     time.sleep(2)
 # #     # NodeSyncServices.check_sync(node, leader)
-# #     if wallet.get_balance() > int(0.01 * MMBConfig.NativeTokenValue):
-# #         wallet.pay(int(0.01 * MMBConfig.NativeTokenValue), wallet2.address)
+# #     if wallet.get_balance() > int(0.01 * ChainConfig.NativeTokenValue):
+# #         wallet.pay(int(0.01 * ChainConfig.NativeTokenValue), wallet2.address)
 # #     print(wallet2.get_balance())
 # #     i += 1
 # #

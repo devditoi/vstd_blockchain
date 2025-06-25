@@ -1,14 +1,14 @@
 from dataclasses import dataclass
 
 @dataclass
-class MMBConfig:
+class ChainConfig:
     decimals: int = 9
-    mmbi: int = 1
-    gmmbi: int = 1e6
-    NativeToken: str = 'mmbi'
-    NativeTokenSymbol: str = 'MMB'
-    NativeTokenValue = 1e9 # 1 MMB
-    NativeTokenQuantity = 1e18 # Total token
+    NativeTokenWeiValue: int = 1
+    NativeTokenGigaweiValue: int = 1e6
+    NativeToken: str = 'Vietnam Stable Digital'
+    NativeTokenSymbol: str = 'VSTD'
+    NativeTokenValue = 1e9
+    NativeTokenQuantity = 1e18
     MinimumGasPrice: int = 0
     FaucetAddress = "0x00000000000000000000000000000000faucet"
     MINT_KEY = "public_key.pem"

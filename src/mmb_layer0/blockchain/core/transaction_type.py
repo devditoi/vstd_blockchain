@@ -3,7 +3,7 @@ import jsonlight
 from rsa import PublicKey
 from rich import print
 
-from mmb_layer0.config import MMBConfig
+from mmb_layer0.config import ChainConfig
 from mmb_layer0.utils.hash import HashUtils
 
 
@@ -85,7 +85,7 @@ class NativeTransaction(Transaction):
         neoa.balance += amount
         worldState.set_eoa(receiver, neoa)
 
-        return True, MMBConfig.gmmbi * 0.01
+        return True, ChainConfig.NativeTokenGigaweiValue * 0.01
 
 # class StakeTransaction(Transaction):
 #     def __init__(self, sender: str, receiver: str, amount: int, nonce: int, gasPrice:int) -> None:
@@ -123,10 +123,10 @@ class MintBurnTransaction(Transaction):
             neoa = worldState.get_eoa(receiver)
             neoa.balance = 0
             worldState.set_eoa(receiver, neoa)
-            return True, MMBConfig.gmmbi * 0.01
+            return True, ChainConfig.NativeTokenGigaweiValue * 0.01
 
         neoa = worldState.get_eoa(receiver)
         neoa.balance += amount
         worldState.set_eoa(receiver, neoa)
 
-        return True, MMBConfig.gmmbi * 0 # Zero fees
+        return True, ChainConfig.NativeTokenGigaweiValue * 0 # Zero fees

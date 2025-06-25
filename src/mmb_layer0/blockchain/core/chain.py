@@ -11,7 +11,7 @@ from mmb_layer0.blockchain.consensus.consensus_processor import ConsensusProcess
 from mmb_layer0.blockchain.core.validator import Validator
 from mmb_layer0.blockchain.core.block import Block
 from mmb_layer0.blockchain.core.transaction_type import Transaction
-from mmb_layer0.config import MMBConfig
+from mmb_layer0.config import ChainConfig
 from mmb_layer0.utils.crypto.signer import SignerFactory
 
 # from mmb_layer0.node_sync_services import NodeSyncServices
@@ -68,8 +68,8 @@ class Chain:
 
         # If the length is greater than max block history, remove the first block
         # Not DELETE Old block, delete the data (Somehow)
-        if self.height > MMBConfig.BLOCK_HISTORY_LIMIT:
-            self.chain[self.height - MMBConfig.BLOCK_HISTORY_LIMIT].data = None
+        if self.height > ChainConfig.BLOCK_HISTORY_LIMIT:
+            self.chain[self.height - ChainConfig.BLOCK_HISTORY_LIMIT].data = None
 
         if self.execution_callback:
             # Execute block

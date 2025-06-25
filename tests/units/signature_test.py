@@ -3,7 +3,7 @@ import pytest
 from mmb_layer0.blockchain.core.transaction_type import NativeTransaction
 from mmb_layer0.blockchain.core.validator import Validator
 from mmb_layer0.blockchain.core.worldstate import WorldState, EOAs
-from mmb_layer0.config import MMBConfig
+from mmb_layer0.config import ChainConfig
 from mmb_layer0.utils.crypto.signer import SignerFactory
 from mmb_layer0.wallet.wallet import Wallet
 from mmb_layer0.node.node import Node

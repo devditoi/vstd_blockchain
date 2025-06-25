@@ -8,7 +8,7 @@ if typing.TYPE_CHECKING:
     from mmb_layer0.blockchain.core.chain import Chain
 from mmb_layer0.blockchain.core.transaction_type import Transaction
 from mmb_layer0.blockchain.core.worldstate import WorldState
-from mmb_layer0.config import MMBConfig
+from mmb_layer0.config import ChainConfig
 from mmb_layer0.utils.crypto.signer import SignerFactory
 from mmb_layer0.utils.hash import HashUtils
 from rich import print, inspect
@@ -40,7 +40,7 @@ class Validator:
     @staticmethod
     def validate_transaction_with_worldstate(tx: Transaction, worldState: WorldState) -> bool:
 
-        if tx.gasLimit < MMBConfig.MinimumGasPrice:
+        if tx.gasLimit < ChainConfig.MinimumGasPrice:
             print("Validator.py:offchain_validate: Transaction gasPrice is below minimum")
             return False
 

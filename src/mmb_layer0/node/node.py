@@ -10,7 +10,7 @@ from mmb_layer0.blockchain.processor.block_processor import BlockProcessor
 from mmb_layer0.blockchain.processor.transaction_processor import TransactionProcessor
 from mmb_layer0.blockchain.core.validator import Validator
 from mmb_layer0.blockchain.core.worldstate import WorldState
-from mmb_layer0.config import MMBConfig
+from mmb_layer0.config import ChainConfig
 import typing
 import os
 from mmb_layer0.node.node_event_handler import NodeEventHandler
@@ -34,7 +34,7 @@ class Node:
 
         self.worldState.get_eoa("0x0")
 
-        self.nativeTokenSupply = int(MMBConfig.NativeTokenValue * MMBConfig.NativeTokenQuantity)
+        self.nativeTokenSupply = int(ChainConfig.NativeTokenValue * ChainConfig.NativeTokenQuantity)
 
         self.chain_file = "chain.json"
         # self.version = open("node_ver.txt", "r").read()
@@ -105,7 +105,7 @@ class Node:
     # TODO: When approuch smart contract. This will be use to overcollateral.V
     # def mint(self, address: str, privateKey: any, publicKey: any) -> None:
     #     # print("node.py:faucet: Processing 100 native tokens to address")
-    #     amount = int(100 * MMBConfig.NativeTokenValue)
+    #     amount = int(100 * ChainConfig.NativeTokenValue)
     #     tx = MintBurnTransaction(address, amount, self.mintburn_nonce + 1, 0)
     #     self.mintburn_nonce += 1
     #     sign = self.signer.sign(tx.to_verifiable_string(), privateKey)

@@ -3,7 +3,7 @@ import pytest
 from mmb_layer0.blockchain.core.transaction_type import NativeTransaction
 from mmb_layer0.blockchain.core.validator import Validator
 from mmb_layer0.blockchain.core.worldstate import WorldState, EOAs
-from mmb_layer0.config import MMBConfig
+from mmb_layer0.config import ChainConfig
 from mmb_layer0.utils.crypto.signer import SignerFactory
 from mmb_layer0.wallet.wallet import Wallet
 from mmb_layer0.node.node import Node
@@ -16,7 +16,7 @@ def data():
 
     ws = node.worldState
 
-    ws.set_eoa("0x0", EOAs("0x0", int(1 * MMBConfig.NativeTokenValue), 0))
+    ws.set_eoa("0x0", EOAs("0x0", int(1 * ChainConfig.NativeTokenValue), 0))
     ws.set_eoa("0x2", EOAs("0x0", int(99), 0))
 
     wallet_1 = Wallet(node)

@@ -1,5 +1,5 @@
 from mmb_layer0.blockchain.core.transaction_type import MintBurnTransaction
-from mmb_layer0.config import MMBConfig
+from mmb_layer0.config import ChainConfig
 from mmb_layer0.p2p.peer_type.remote_peer import RemotePeer
 from mmb_layer0.wallet.wallet_remote import WalletRemote
 
@@ -18,7 +18,7 @@ while True:
         print(f"Balance: {balance}")
     elif command.startswith("mint "):
         try:
-            amount = int(int(command.split()[1]) * MMBConfig.NativeTokenValue)
+            amount = int(int(command.split()[1]) * ChainConfig.NativeTokenValue)
             mint_for_myself(amount)
             print(f"Minted {amount} MMB successfully.")
         except (IndexError, ValueError):

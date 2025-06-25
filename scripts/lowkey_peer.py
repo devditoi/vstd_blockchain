@@ -1,4 +1,4 @@
-from mmb_layer0.config import MMBConfig
+from mmb_layer0.config import ChainConfig
 from mmb_layer0.node.node import Node
 from mmb_layer0.p2p.peer_type.local_peer import LocalPeer
 from mmb_layer0.p2p.peer_type.remote_peer import RemotePeer
