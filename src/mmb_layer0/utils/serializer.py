@@ -34,6 +34,15 @@ class ChainSerializer:
 class WorldStateSerializer:
     @staticmethod
     def serialize_world_state(world_state: WorldState) -> str:
+        """
+        Serializes a WorldState object into a JSON string.
+
+        Args:
+            world_state (WorldState): The WorldState object to serialize.
+
+        Returns:
+            str: A JSON string representation of the world state, including EOAs and smart contracts.
+        """
         return jsonlight.dumps({
             "eoas": jsonlight.dumps(world_state.get_eoa_full()),
             "smartContracts": jsonlight.dumps(world_state.get_smart_contract_full())
@@ -41,11 +50,29 @@ class WorldStateSerializer:
 
     @staticmethod
     def deserialize_world_state(world_state_json: str) -> WorldState:
+        """
+        Deserialize a JSON string representation of a world state into a WorldState object.
+
+        Args:
+            world_state_json (str): The JSON string representing the world state.
+
+        Returns:
+            WorldState: A WorldState object constructed from the given JSON string.
+        """
         data = json.loads(world_state_json)
         return WorldStateSerializer.build_world_state(data)
 
     @staticmethod
     def build_world_state(data: any) -> WorldState:
+        """
+        Builds a WorldState object from a JSON string or a dictionary.
+
+        Args:
+            data (any): A JSON string or a dictionary containing the EOAs and smart contracts as keys "eoas" and "smartContracts" respectively.
+
+        Returns:
+            WorldState: A WorldState object constructed from the given data.
+        """
         world_state = WorldState()
         eoas = json.loads(data["eoas"])
         smartContracts = json.loads(data["smartContracts"])
@@ -57,6 +84,15 @@ class WorldStateSerializer:
 class NodeSerializer:
     @staticmethod
     def to_json(node: "Node"):
+        """
+        Serialize a Node object to a JSON string.
+
+        Args:
+            node (Node): The Node object to serialize.
+
+        Returns:
+            str: A JSON string representation of the given Node object.
+        """
         return jsonlight.dumps({
             "blockchain": ChainSerializer.serialize_chain(node.blockchain),
             "worldstate": node.worldState.to_json(),
@@ -67,6 +103,15 @@ class NodeSerializer:
 
     @staticmethod
     def deserialize_node(node_json: str) -> "Node":
+        """
+        Deserialize a JSON string representation of a Node object into a Node object.
+
+        Args:
+            node_json (str): The JSON string representing the Node object.
+
+        Returns:
+            Node: A Node object constructed from the given JSON string.
+        """
         data = json.loads(node_json)
         print(data["publicKey"])
         node = Node()

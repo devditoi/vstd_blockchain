@@ -26,6 +26,7 @@ from mmb_layer0.blockchain.core.block import Block
 
 class Node:
     def __init__(self, dummy = False) -> None:
+
         print("node.py:__init__: Initializing Node")
         self.blockchain: Chain = Chain(dummy)
 
@@ -37,6 +38,7 @@ class Node:
 
         self.chain_file = "chain.json"
         # self.version = open("node_ver.txt", "r").read()
+        self.version = "v0.0.1"
 
         self.signer = SignerFactory().instance.get_signer()
 
@@ -46,7 +48,7 @@ class Node:
         # self.node_subscribtions = []
         # self.peers: list["Peer"] = []
 
-        self.mintburn_nonce = 1
+        # self.mintburn_nonce = 1
 
         print(f"{self.address[:4]}:node.py:__init__: Initialized node")
 
@@ -99,13 +101,15 @@ class Node:
         self.signer.save(filename, self.publicKey, self.privateKey)
         print(f"{self.address[:4]}:node.py:export_key: Exported key " + self.address)
 
-    def mint(self, address: str, privateKey: any, publicKey: any) -> None:
-        # print("node.py:faucet: Processing 100 native tokens to address")
-        amount = int(100 * MMBConfig.NativeTokenValue)
-        tx = MintBurnTransaction(address, amount, self.mintburn_nonce + 1, 0)
-        self.mintburn_nonce += 1
-        sign = self.signer.sign(tx.to_verifiable_string(), privateKey)
-        self.propose_tx(tx, sign, publicKey)
+    #! Depricated, not called by node anymore, typical admin wallet, address, contract.
+    # TODO: When approuch smart contract. This will be use to overcollateral.V
+    # def mint(self, address: str, privateKey: any, publicKey: any) -> None:
+    #     # print("node.py:faucet: Processing 100 native tokens to address")
+    #     amount = int(100 * MMBConfig.NativeTokenValue)
+    #     tx = MintBurnTransaction(address, amount, self.mintburn_nonce + 1, 0)
+    #     self.mintburn_nonce += 1
+    #     sign = self.signer.sign(tx.to_verifiable_string(), privateKey)
+    #     self.propose_tx(tx, sign, publicKey)
 
     def get_height(self) -> int:
         return self.blockchain.get_height()

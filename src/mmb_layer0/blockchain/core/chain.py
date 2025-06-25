@@ -67,7 +67,7 @@ class Chain:
         self.height += 1
 
         # If the length is greater than max block history, remove the first block
-        # Not DELETE Old block, just delete the data
+        # Not DELETE Old block, delete the data (Somehow)
         if self.height > MMBConfig.BLOCK_HISTORY_LIMIT:
             self.chain[self.height - MMBConfig.BLOCK_HISTORY_LIMIT].data = None
 

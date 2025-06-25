@@ -16,34 +16,46 @@ class FilebaseDatabase:
         # Create directories if they don't exist
         os.makedirs(self.blockchain_dir, exist_ok=True)
         os.makedirs(self.transactions_dir, exist_ok=True)
+        self.height = 0
+
+    def get_and_sort_filelist(self) -> list[str]:
+        file_list = os.listdir(self.blockchain_dir)
+        # Sort by the number after #, default sort is error
+        file_list.sort(key=lambda x: int(x.split("#")[1][:-5]))
+        return file_list
+
+    def load_height(self):
+        self.height = len(self.get_and_sort_filelist())
 
     def save_block(self, block: "Block") -> None:
         """Save a block to the blockchain directory"""
+        # First we going to check the height
+        if block.index > self.height:
+            self.height = block.index
+        else:
+            raise Exception("Block index is lower than current height") # Bruh
         block_path = os.path.join(self.blockchain_dir, f"Block#{block.index}.json")
         with open(block_path, "w") as f:
             f.write(block.to_string())
 
-    # def load_block(self, block_height: int) -> Dict:
-    #     """Load a block from the blockchain directory"""
-    #     block_path = os.path.join(self.blockchain_dir, f"{block_height}.json")
-    #     if not os.path.exists(block_path):
-    #         raise FileNotFoundError(f"Block {block_height} not found")
-    #     with open(block_path, "r") as f:
-    #         return json.load(f)
+    def load_block(self, block_height: int) -> str:
+        """Load a block from the blockchain directory"""
+        block_path = os.path.join(self.blockchain_dir, f"{block_height}.json")
+        if not os.path.exists(block_path):
+            raise FileNotFoundError(f"Block {block_height} not found")
+        with open(block_path, "r") as f:
+            return f.read()
 
-    def save_transaction(self, tx: "Transaction") -> None:
-        """Save a transaction to the transactions directory"""
-        tx_path = os.path.join(self.transactions_dir, f"{tx.hash}.json")
-        with open(tx_path, "w") as f:
-            # json.dump(tx_data, f, indent=4)
-            f.write(tx.to_string())
+    # def save_transaction(self, tx: "Transaction") -> None:
+    #     """Save a transaction to the transactions directory"""
+    #     tx_path = os.path.join(self.transactions_dir, f"{tx.hash}.json")
+    #     with open(tx_path, "w") as f:
+    #         # json.dump(tx_data, f, indent=4)
+    #         f.write(tx.to_string())
 
     def load_block_all(self):
         block_datas = []
-        file_list = os.listdir(self.blockchain_dir)
-        # Sort by the number after #, default sort is error
-        file_list.sort(key=lambda x: int(x.split("#")[1][:-5]))
-        for filename in file_list:
+        for filename in self.get_and_sort_filelist():
             if filename.endswith(".json"):
                 with open(os.path.join(self.blockchain_dir, filename), "r") as f:
                     block_datas.append(f.read())
@@ -67,23 +79,14 @@ class FilebaseSaver(ISaver):
         Add a new block to the blockchain.
         Returns the block hash.
         """
-        # print(block.data)
-        for tx in block.data:
-            # tx_id = str(uuid.uuid4())
-            # tx_data = {
-            #     "tx_id": tx_id,
-            #     "sender": tx.get("sender"),
-            #     "receiver": tx.get("receiver"),
-            #     "amount": tx.get("amount"),
-            #     "data": tx.get("data")
-            # }
-
-            # print(tx)
-
-            self.database.save_transaction(tx)
-            # block_data["transactions"].append(tx.hash)
-
         self.database.save_block(block)
+
+    def get_block(self, height: int) -> "Block":
+        block_data = self.database.load_block(height)
+        return BlockProcessor.cast_block(block_data)
+
+    def get_height(self) -> int:
+        return self.database.height
 
     def save_chain(self, chain: "Chain") -> None:
         for block in chain.chain:

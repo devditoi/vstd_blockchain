@@ -37,8 +37,6 @@ class WalletRemote:
             self.world_state = WorldStateSerializer.deserialize_world_state(world_state_raw["worldstate"])
             # print(self.world_state.to_json())
 
-
-
     def listen_loop(self):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
