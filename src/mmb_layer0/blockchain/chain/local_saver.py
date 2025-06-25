@@ -25,16 +25,11 @@ class ISaver(ABC):
     def get_height(self) -> int:
         pass
 
-    @abstractmethod
-    def set_block(self, index: int, block: "Block") -> None:
-        pass
 
 class NotImplementedSaver(ISaver):
     def get_height(self) -> int:
         pass
 
-    def set_block(self, index: int, block: "Block") -> None:
-        pass
 
     def get_block(self, height: int) -> Block:
         pass

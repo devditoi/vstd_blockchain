@@ -6,6 +6,8 @@ from rsa import PublicKey
 # import jsonlight
 from rich import print, inspect
 import threading
+
+from mmb_layer0.blockchain.chain.saver_impl.filebase_saver import FilebaseSaver, FilebaseDatabase
 from mmb_layer0.blockchain.consensus.consensus_processor import ConsensusProcessor
 # from mmb_layer0.blockchain.transaction_processor import TransactionProcessor
 from mmb_layer0.blockchain.core.validator import Validator
@@ -21,7 +23,8 @@ class Chain:
         print("chain.py:__init__: Initializing Chain")
         self.genesis_tx = Transaction("0x0", "genesis", "0", 0, 0)
         self.genesis_block: Block = Block(0, "0", 0, "0", [self.genesis_tx])
-        self.chain = []
+        self.chain = FilebaseSaver(FilebaseDatabase())
+
         self.height = 1
         self.mempool: list[Transaction] = []
         self.mempool_tx_id: set[str] = set()
@@ -42,7 +45,7 @@ class Chain:
         self.mempool_lock = threading.Lock()
 
     def is_genesis(self):
-        return self.height == 1
+        return self.chain.get_height()
 
     def reset_chain(self):
         print("chain.py:reset_chain: Reset chain")

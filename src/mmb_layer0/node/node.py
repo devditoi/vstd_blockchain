@@ -1,8 +1,6 @@
 # 1 node has 1 blockchain and 1 WorldState
 import ecdsa
 
-from mmb_layer0.blockchain.chain.local_saver import ISaver, NotImplementedSaver
-from mmb_layer0.blockchain.chain.saver_impl.filebase_saver import FilebaseSaver, FilebaseDatabase
 from mmb_layer0.blockchain.core.chain import Chain
 from mmb_layer0.blockchain.consensus.poa_consensus import ProofOfAuthority
 from mmb_layer0.blockchain.core.transaction_type import Transaction, MintBurnTransaction
@@ -65,23 +63,23 @@ class Node:
 
         # Bruh why :D
         # self.saver = FilebaseSaver(FilebaseDatabase())
-        self.saver = NotImplementedSaver() # TODO: Again, for debugging purposes
+        # self.saver = NotImplementedSaver() # TODO: Again, for debugging purposes
 
         # TODO: Debugging purposes
-        self.load_chain_from_disk()
+        # self.load_chain_from_disk()
 
-    def set_saver(self, saver: ISaver) -> None:
-        self.saver = saver
+    # def set_saver(self, saver: ISaver) -> None:
+    #     self.saver = saver
 
-    def load_chain_from_disk(self):
-        chain = self.saver.load_chain()
-        self.blockchain.reset_chain()
-        self.saver.add_block(chain.chain[0]) # add genesis
-        for block in chain.chain[1:]: # skip genesis again lol
-            self.blockchain.add_block(block, initially=True)
-
-    def save_chain_to_disk(self):
-        self.saver.save_chain(self.blockchain)
+    # def load_chain_from_disk(self):
+    #     chain = self.chain.saver.load_chain()
+    #     self.blockchain.reset_chain()
+    #     self.chain.saver.add_block(chain.chain[0]) # add genesis
+    #     for block in chain.chain[1:]: # skip genesis again lol
+    #         self.blockchain.add_block(block, initially=True)
+    #
+    # def save_chain_to_disk(self):
+    #     self.saver.save_chain(self.blockchain)
 
     def propose_block(self, block: Block):
         self.node_event_handler.propose_block(block)
