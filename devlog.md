@@ -1,15 +1,15 @@
-# Dev log
+# Dev Log
 
-## June 25 2025
+## June 25, 2025
 
 ### Problems
-- Need to implement interface or class to store chain off mem. Store inram cause serious scaling problems
-- Think a new name `MMB` was kinda cringe
-- My test fail
+- Current `self.chain` stores all blocks in memory → leads to scaling issues on long run.
+- Old test case failed after changing gas rules → now transactions with `gasLimit = 0` are considered valid.
+- The name `MMB` (old brand) feels unprofessional and lacks clarity.
 
-### Solution
-- [x] Add devlog
-- [x] Use `FileStorage` as a hecking chain object
-- [] Change all the reference of `self.chain` to new chain wrapper
-- [x] Renamed brand to `VSTD` (Vietnam Stable Digital)
-- [x] Update new test logic (The problems is now the gas-free transaction appear and broke the test)
+### Solutions
+- [x] Added `FileStorage` as new persistent chain backend (off-memory).
+- [x] Created initial devlog to track major decisions.
+- [x] Renamed project from `MMB` → `VSTD` (Vietnam Stable Digital) to improve clarity and positioning.
+- [x] Updated test logic to reflect gas-free transaction support.
+- [ ] Refactor all `self.chain` references to use new storage wrapper.
