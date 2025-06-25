@@ -19,7 +19,7 @@ from mmb_layer0.utils.crypto.signer import SignerFactory
 class Chain:
     def __init__(self, dummy = True) -> None:
         print("chain.py:__init__: Initializing Chain")
-        self.genesis_tx = Transaction("0x0", "genesis", 0, 0, 0)
+        self.genesis_tx = Transaction("0x0", "genesis", "0", 0, 0)
         self.genesis_block: Block = Block(0, "0", 0, "0", [self.genesis_tx])
         self.chain = []
         self.height = 1
