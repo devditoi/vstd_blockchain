@@ -1,7 +1,7 @@
 import pytest
-from mmb_layer0.blockchain.core.block import Block
-from mmb_layer0.node.node import Node
-from mmb_layer0.p2p.peer_type.local_peer import LocalPeer
+from layer0.blockchain.core.block import Block
+from layer0.node.node import Node
+from layer0.p2p.peer_type.local_peer import LocalPeer
 
 
 @pytest.fixture

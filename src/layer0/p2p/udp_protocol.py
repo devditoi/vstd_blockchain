@@ -3,12 +3,12 @@ import threading
 import json
 import time
 from rich import print
-from mmb_layer0.node.node_event_handler import NodeEventHandler
-from mmb_layer0.node.events.node_event import NodeEvent
-from mmb_layer0.p2p.background_sync.chain_sync_job import ChainSyncJob
-from mmb_layer0.p2p.background_sync.peer_sync_job import PeerSyncJob
-from mmb_layer0.p2p.background_sync.ping_job import PingSnycJob
-from mmb_layer0.p2p.protocol import Protocol
+from layer0.node.node_event_handler import NodeEventHandler
+from layer0.node.events.node_event import NodeEvent
+from layer0.p2p.background_sync.chain_sync_job import ChainSyncJob
+from layer0.p2p.background_sync.peer_sync_job import PeerSyncJob
+from layer0.p2p.background_sync.ping_job import PingSnycJob
+from layer0.p2p.protocol import Protocol
 
 class UDPProtocol(Protocol):
     def __init__(self, event_handler: "NodeEventHandler", port: int):

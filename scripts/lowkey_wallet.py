@@ -1,7 +1,7 @@
-from mmb_layer0.blockchain.core.transaction_type import MintBurnTransaction
-from mmb_layer0.config import ChainConfig
-from mmb_layer0.p2p.peer_type.remote_peer import RemotePeer
-from mmb_layer0.wallet.wallet_remote import WalletRemote
+from layer0.blockchain.core.transaction_type import MintBurnTransaction
+from layer0.config import ChainConfig
+from layer0.p2p.peer_type.remote_peer import RemotePeer
+from layer0.wallet.wallet_remote import WalletRemote
 
 master = RemotePeer("127.0.0.1", 5001)
 wallet = WalletRemote(master, "127.0.0.1", 2809)

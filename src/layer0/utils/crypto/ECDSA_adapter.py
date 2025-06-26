@@ -1,7 +1,7 @@
 from ecdsa import VerifyingKey, SigningKey, BadSignatureError
 
-from mmb_layer0.utils.crypto.crypto_adapter_interace import ICryptoAdapter
-from mmb_layer0.utils.hash import HashUtils
+from layer0.utils.crypto.crypto_adapter_interace import ICryptoAdapter
+from layer0.utils.hash import HashUtils
 
 
 class ECDSAAdapter(ICryptoAdapter):

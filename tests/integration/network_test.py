@@ -3,9 +3,9 @@ import multiprocessing
 import pytest
 import time
 import random
-from mmb_layer0.p2p.peer_type.remote_peer import RemotePeer
-from mmb_layer0.p2p.udp_protocol import UDPProtocol
-from mmb_layer0.node.node import Node
+from layer0.p2p.peer_type.remote_peer import RemotePeer
+from layer0.p2p.udp_protocol import UDPProtocol
+from layer0.node.node import Node
 
 def start_node(port: int):
     node = Node()

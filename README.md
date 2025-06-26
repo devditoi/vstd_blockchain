@@ -1,9 +1,9 @@
-# 🧱 MMB Blockchain Network
+# 💵🇻🇳 VSTD Blockchain Network
 
-[![Build and Release](https://github.com/devditoi/mmb_blockchain/actions/workflows/build_and_release.yaml/badge.svg)](https://github.com/devditoi/mmb_blockchain/actions/workflows/build_and_release.yaml)
-[![Run Tests](https://github.com/devditoi/mmb_blockchain/actions/workflows/test.yaml/badge.svg)](https://github.com/devditoi/mmb_blockchain/actions/workflows/test.yaml)
+[![Build and Release](https://github.com/devditoi/vstd_blockchain/actions/workflows/build_and_release.yaml/badge.svg)](https://github.com/devditoi/vstd_blockchain/actions/workflows/build_and_release.yaml)
+[![Run Tests](https://github.com/devditoi/vstd_blockchain/actions/workflows/test.yaml/badge.svg)](https://github.com/devditoi/vstd_blockchain/actions/workflows/test.yaml)
 
-**MMB Blockchain** is a custom-built experimental blockchain system designed from scratch with a modular, multi-layered architecture. It features a basic **Proof of Authority (PoA)** consensus, built-in smart contract handling, and support for decentralized applications (dApps) via a web interface.
+**VSTD Blockchain** is a custom-built experimental blockchain system designed from scratch with a modular, multi-layered architecture. It features a basic **Proof of Authority (PoA)** consensus, built-in smart contract handling, and support for decentralized applications (dApps) via a web interface.
 
 ---
 
@@ -20,7 +20,7 @@ The system is organized into **three primary layers**:
 
 ### 📜 Layer 1 – Smart Contract & Token Layer
 - Transaction types supported:
-  - `mintburn` (native MMB token)
+  - `mintburn` (native VSTD token)
   - `native`, `transfer`
   - `stake`, `deploy_contract`, `call_contract` (under development)
 - Smart contract data handled via `transactionData` field

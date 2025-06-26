@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 import jsonlight
 import json
 
-from mmb_layer0.utils.hash import HashUtils
+from layer0.utils.hash import HashUtils
 
 
 # This is a single unit of the world state that only contains the data

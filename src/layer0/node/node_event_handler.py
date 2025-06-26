@@ -1,12 +1,12 @@
 from random import choice
 from rich import print
 import typing
-from mmb_layer0.blockchain.core.block import Block
-from mmb_layer0.p2p.peer import Peer
+from layer0.blockchain.core.block import Block
+from layer0.p2p.peer import Peer
 from .events.EventHandler import EventFactory
-from mmb_layer0.node.events.impl.chain_event.block_event import BlockEvent
-from mmb_layer0.node.events.impl.network_event.peer_discovery_event import PeerDiscoveryEvent, PeerDiscoveryFullfilledEvent
-from mmb_layer0.node.events.impl.chain_event.tx_event import TxEvent
+from layer0.node.events.impl.chain_event.block_event import BlockEvent
+from layer0.node.events.impl.network_event.peer_discovery_event import PeerDiscoveryEvent, PeerDiscoveryFullfilledEvent
+from layer0.node.events.impl.chain_event.tx_event import TxEvent
 from .events.impl.chain_event.chain_head import ChainHeadEvent, ChainHeadFullfilledEvent
 from .events.impl.chain_event.full_chain import FullChainEvent, FullChainFullfilledEvent
 from .events.impl.network_event.get_worldstate_event import GetWorldStateEvent

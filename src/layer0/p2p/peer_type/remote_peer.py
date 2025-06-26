@@ -1,8 +1,8 @@
 import socket
 import jsonlight
-from mmb_layer0.node.events.node_event import NodeEvent
+from layer0.node.events.node_event import NodeEvent
 from rich import print
-from mmb_layer0.p2p.peer import Peer
+from layer0.p2p.peer import Peer
 
 class RemotePeer(Peer):
     def __init__(self, ip: str, port: int) -> None:

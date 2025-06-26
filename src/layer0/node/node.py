@@ -1,26 +1,26 @@
 # 1 node has 1 blockchain and 1 WorldState
 import ecdsa
 
-from mmb_layer0.blockchain.core.chain import Chain
-from mmb_layer0.blockchain.consensus.poa_consensus import ProofOfAuthority
-from mmb_layer0.blockchain.core.transaction_type import Transaction, MintBurnTransaction
-from mmb_layer0.blockchain.processor.block_processor import BlockProcessor
-from mmb_layer0.blockchain.processor.transaction_processor import TransactionProcessor
-from mmb_layer0.blockchain.core.validator import Validator
-from mmb_layer0.blockchain.core.worldstate import WorldState
-from mmb_layer0.config import ChainConfig
+from layer0.blockchain.core.chain import Chain
+from layer0.blockchain.consensus.poa_consensus import ProofOfAuthority
+from layer0.blockchain.core.transaction_type import Transaction, MintBurnTransaction
+from layer0.blockchain.processor.block_processor import BlockProcessor
+from layer0.blockchain.processor.transaction_processor import TransactionProcessor
+from layer0.blockchain.core.validator import Validator
+from layer0.blockchain.core.worldstate import WorldState
+from layer0.config import ChainConfig
 import typing
 import os
-from mmb_layer0.node.node_event_handler import NodeEventHandler
-from mmb_layer0.utils.serializer import ChainSerializer
+from layer0.node.node_event_handler import NodeEventHandler
+from layer0.utils.serializer import ChainSerializer
 
 if typing.TYPE_CHECKING:
-    from mmb_layer0.p2p.peer_type.remote_peer import RemotePeer
-    from mmb_layer0.p2p.peer import Peer
-from mmb_layer0.node.events.node_event import NodeEvent
-from mmb_layer0.utils.crypto.signer import SignerFactory
+    from layer0.p2p.peer_type.remote_peer import RemotePeer
+    from layer0.p2p.peer import Peer
+from layer0.node.events.node_event import NodeEvent
+from layer0.utils.crypto.signer import SignerFactory
 from rich import print, inspect
-from mmb_layer0.blockchain.core.block import Block
+from layer0.blockchain.core.block import Block
 
 class Node:
     def __init__(self, dummy = False) -> None:

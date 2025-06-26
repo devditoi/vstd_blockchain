@@ -1,13 +1,13 @@
 import jsonlight
 import json
 import typing
-from mmb_layer0.blockchain.processor.block_processor import BlockProcessor
-from mmb_layer0.blockchain.core.chain import Chain
-from mmb_layer0.p2p.peer_type.remote_peer import RemotePeer
+from layer0.blockchain.processor.block_processor import BlockProcessor
+from layer0.blockchain.core.chain import Chain
+from layer0.p2p.peer_type.remote_peer import RemotePeer
 
 if typing.TYPE_CHECKING:
-    from mmb_layer0.node.node import Node
-from mmb_layer0.blockchain.core.worldstate import WorldState
+    from layer0.node.node import Node
+from layer0.blockchain.core.worldstate import WorldState
 
 
 class ChainSerializer:

@@ -1,6 +1,6 @@
 import threading
 
-from mmb_layer0.blockchain.core.block import Block
+from layer0.blockchain.core.block import Block
 from ..core.validator import Validator
 from ..core.block import Block
 import time

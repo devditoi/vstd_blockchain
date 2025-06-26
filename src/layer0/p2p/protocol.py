@@ -1,5 +1,5 @@
 from abc import abstractmethod, ABC
-from mmb_layer0.node.node import Node
+from layer0.node.node import Node
 
 class Protocol(ABC):
     @abstractmethod

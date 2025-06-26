@@ -1,6 +1,6 @@
-from mmb_layer0.blockchain.consensus.consensus import IConsensus
-from mmb_layer0.blockchain.core.block import Block
-from mmb_layer0.utils.crypto.signer import SignerFactory
+from layer0.blockchain.consensus.consensus import IConsensus
+from layer0.blockchain.core.block import Block
+from layer0.utils.crypto.signer import SignerFactory
 
 class ProofOfAuthority(IConsensus):
     def __init__(self, address, privateKey):

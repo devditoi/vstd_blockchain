@@ -22,7 +22,7 @@ requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
-name = "mmb_layer0"
+name = "layer0"
 
 [tool.poetry.packages]
-mmb_layer0 = { from = "src" }
+layer0 = { from = "src" }

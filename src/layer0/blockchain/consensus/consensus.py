@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from mmb_layer0.blockchain.core.block import Block
+from layer0.blockchain.core.block import Block
 
 
 class IConsensus(ABC):

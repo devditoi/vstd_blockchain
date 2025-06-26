@@ -1,14 +1,14 @@
-from mmb_layer0.node.events.node_event import NodeEvent
-from mmb_layer0.p2p.peer_type.remote_peer import RemotePeer
-from mmb_layer0.utils.crypto.signer import SignerFactory
-from mmb_layer0.blockchain.core.transaction_type import Transaction, NativeTransaction
-from mmb_layer0.node.node import Node
+from layer0.node.events.node_event import NodeEvent
+from layer0.p2p.peer_type.remote_peer import RemotePeer
+from layer0.utils.crypto.signer import SignerFactory
+from layer0.blockchain.core.transaction_type import Transaction, NativeTransaction
+from layer0.node.node import Node
 import threading
 import socket
 import json
 import time
 from rich import inspect
-from mmb_layer0.utils.serializer import WorldStateSerializer
+from layer0.utils.serializer import WorldStateSerializer
 
 
 class WalletRemote:

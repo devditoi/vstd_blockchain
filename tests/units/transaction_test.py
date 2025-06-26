@@ -1,9 +1,9 @@
 import pytest
 
-from mmb_layer0.blockchain.core.transaction_type import NativeTransaction
-from mmb_layer0.blockchain.core.validator import Validator
-from mmb_layer0.blockchain.core.worldstate import WorldState, EOAs
-from mmb_layer0.config import ChainConfig
+from layer0.blockchain.core.transaction_type import NativeTransaction
+from layer0.blockchain.core.validator import Validator
+from layer0.blockchain.core.worldstate import WorldState, EOAs
+from layer0.config import ChainConfig
 
 
 @pytest.fixture
