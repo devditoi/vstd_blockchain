@@ -52,7 +52,8 @@ class FullChainFullfilledEvent(EventHandler):
             f"[NodeEventHandler] [bold green]{self.neh.node.origin}[/bold green]: Received full chain from peer, ready to replace my chain")
 
         # "Replay" my chain
-        ChainSyncServices.sync_chain(self.neh.node.blockchain, full_chain, self.neh.node.execution)
+        #! Depricated
+        # ChainSyncServices.sync_chain(self.neh.node.blockchain, full_chain, self.neh.node.execution)
 
         # inspect(self.node.blockchain.chain)
         print(
