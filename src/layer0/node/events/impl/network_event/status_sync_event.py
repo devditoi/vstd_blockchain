@@ -15,10 +15,14 @@ class GetStatusEvent(EventHandler):
         return "get_status"
 
     def handle(self, event: "NodeEvent"):
+
+        if self.neh.node.blockchain.get_latest_block() is None:
+            return False
+
         # Send back status
         status_event = NodeEvent("status", {
             "height": self.neh.node.get_height(),
-            "hash": self.neh.node.blockchain.get_last_block().hash
+            "hash": self.neh.node.blockchain.get_latest_block().hash
         }, self.neh.node.address)
         self.neh.fire_to(event.origin, status_event)
         return False
@@ -34,7 +38,7 @@ class StatusEvent(EventHandler):
 
     def handle(self, event: "NodeEvent"):
         local_height = self.neh.node.get_height()
-        local_hash = self.neh.node.blockchain.get_last_block().hash
+        local_hash = self.neh.node.blockchain.get_latest_block().hash
         remote_height = event.data.get("height")
         remote_hash = event.data.get("hash")
 

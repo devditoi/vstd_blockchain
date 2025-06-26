@@ -18,7 +18,7 @@ class ChainHeadEvent(EventHandler):
             return False
 
         # Sending chain head to peer
-        chain_head = self.neh.node.blockchain.get_last_block()
+        chain_head = self.neh.node.blockchain.get_latest_block()
 
         if chain_head is None:
             return False
@@ -46,7 +46,7 @@ class ChainHeadFullfilledEvent(EventHandler):
         if not isinstance(chain_head, Block):
             chain_head = BlockProcessor.cast_block(chain_head)
 
-        current_chain_head = self.neh.node.blockchain.get_last_block()
+        current_chain_head = self.neh.node.blockchain.get_latest_block()
 
         # inspect(chain_head)
         # inspect(current_chain_head)
@@ -58,7 +58,7 @@ class ChainHeadFullfilledEvent(EventHandler):
         # Only when them get the longer or equal chain
 
         # Check the current block and peer block to seeking for error
-        synced = self.neh.node.blockchain.get_last_block().hash == chain_head.hash
+        synced = self.neh.node.blockchain.get_latest_block().hash == chain_head.hash
 
         print(f"[NodeEventHandler] [bold green]{self.neh.node.origin}[/bold green]: Synced: {synced}")
 

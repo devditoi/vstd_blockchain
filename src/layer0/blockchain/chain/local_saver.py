@@ -1,9 +1,13 @@
 import json
 import os
 import typing
+
+
 if typing.TYPE_CHECKING:
     from layer0.blockchain.core.chain import Chain
     from layer0.blockchain.core.block import Block
+    from layer0.blockchain.core.transaction_type import Transaction
+
 from abc import ABC, abstractmethod
 class ISaver(ABC):
     @abstractmethod
@@ -42,12 +46,19 @@ class ISaver(ABC):
     def remote_block(self) -> "Block":
         pass
 
+    @abstractmethod
+    def get_tx(self, tx_hash) -> "Transaction | None":
+        pass
+
 
 class NotImplementedSaver(ISaver):
     def get_chain_hashes(self) -> list[str]:
         pass
 
     def remote_block(self) -> "Block":
+        pass
+
+    def get_tx(self, tx_hash) -> "Transaction":
         pass
 
     def get_height(self) -> int:

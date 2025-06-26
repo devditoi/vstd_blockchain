@@ -59,11 +59,15 @@ class Validator:
         if tx.Txtype == "mintburn":
             # privileged transaction
             return True
-        if not SignerFactory().get_signer().verify(tx.to_verifiable_string(), tx.signature, tx.publicKey):
+
+        # Public key are in hex format -> need to convert back
+        temp_public_key = SignerFactory().get_signer().deserialize(tx.publicKey)
+
+        if not SignerFactory().get_signer().verify(tx.to_verifiable_string(), tx.signature, temp_public_key):
             print("chain.py:process_block: Transaction signature is invalid")
             return False
 
-        if not SignerFactory().get_signer().address(tx.publicKey) == tx.sender:
+        if not SignerFactory().get_signer().address(temp_public_key) == tx.sender:
             print("chain.py:process_block: Transaction sender is invalid")
             return False
 
@@ -92,11 +96,11 @@ class Validator:
             print(block.index, chain.get_height())
             return False
 
-        if block.previous_hash != chain.get_last_block().hash:
+        if block.previous_hash != chain.get_latest_block().hash:
             print("chain.py:add_block: Block previous hash does not match last block hash")
             return False
 
-        if block.hash == chain.get_last_block().hash:
+        if block.hash == chain.get_latest_block().hash:
             print("chain.py:add_block: Block hash already exists")
             return False
 

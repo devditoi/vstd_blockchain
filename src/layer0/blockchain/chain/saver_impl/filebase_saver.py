@@ -40,6 +40,13 @@ class FilebaseDatabase:
         with open(block_path, "w") as f:
             f.write(block.to_string())
 
+        # Save transaction too!!!
+        if block.index != 0:
+            for tx in block.data:
+                tx_path = os.path.join(self.transactions_dir, f"{tx.hash}.json")
+                with open(tx_path, "w") as f:
+                    f.write(tx.to_string_with_status())
+
     def load_block(self, block_height: int) -> str | None:
         """Load a block from the blockchain directory"""
         block_path = os.path.join(self.blockchain_dir, f"Block#{block_height}.json")
@@ -48,6 +55,14 @@ class FilebaseDatabase:
             return None
         with open(block_path, "r") as f:
             return f.read()
+
+    def load_tx(self, tx_hash):
+        tx_path = os.path.join(self.transactions_dir, f"{tx_hash}.json")
+        if os.path.exists(tx_path):
+            with open(tx_path, "r") as f:
+                return f.read()
+        else:
+            return None
 
     # def save_transaction(self, tx: "Transaction") -> None:
     #     """Save a transaction to the transactions directory"""
@@ -85,6 +100,18 @@ class FilebaseSaver(ISaver):
     def __init__(self, database: FilebaseDatabase):
         self.database = database
         self.delayed = []
+
+    def get_tx(self, tx_hash) -> "Transaction | None":
+        tx_data = self.database.load_tx(tx_hash)
+        if tx_data is None:
+            return None
+        tx = TransactionProcessor.cast_transaction(tx_data)
+
+        # Cast special tx status
+        tx_json = json.loads(tx_data)
+        tx.status = tx_json["status"]
+
+        return tx
 
     def flush(self):
         for block in self.delayed:

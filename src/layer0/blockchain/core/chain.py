@@ -56,6 +56,8 @@ class Chain:
         self.chain.clear()
         self.chain.add_block(self.genesis_block)
 
+    def get_tx(self, tx_hash) -> Transaction | None:
+        return self.chain.get_tx(tx_hash)
 
     def set_initial_data(self, consensus, execution_callback, broadcast_callback, world_state):
         self.consensus = consensus
@@ -70,10 +72,20 @@ class Chain:
         if not Validator.validate_block_on_chain(block, self, initially): # Validate block
             print("chain.py:add_block: Block is invalid")
             return None
-        if not Validator.validate_block_without_chain(block, self.get_last_block().hash): # Validate block
+        if not Validator.validate_block_without_chain(block, self.get_latest_block().hash): # Validate block
             print("chain.py:add_block: Block is invalid")
             return None
         print(f"chain.py:add_block: Block #{block.index} valid, add to chain")
+
+        # Execute first, add later
+        if self.execution_callback:
+            # Execute block
+            self.execution_callback(block)
+
+        # inspect(block)
+        # inspect(block.data[0])
+        # inspect(self.world_state)
+
         # print(block)
         self.chain.add_block(block, delay_flush)
         self.height += 1
@@ -84,10 +96,6 @@ class Chain:
             # TODO: Implement this later
             pass
             # self.chain[self.height - ChainConfig.BLOCK_HISTORY_LIMIT].data = None
-
-        if self.execution_callback:
-            # Execute block
-            self.execution_callback(block)
 
         # Remove transactions from mempool
         for tx in block.data:
@@ -118,7 +126,7 @@ class Chain:
         # print("chain.py:get_block: Return block at index", index)
         return self.chain.get_block(index)
 
-    def get_last_block(self) -> Block | None:
+    def get_latest_block(self) -> Block | None:
         # print("chain.py:get_last_block: Return last block")
         return self.chain.get_block(self.chain.get_height() - 1) # Get block at height is ineed last block
 
@@ -173,8 +181,11 @@ class Chain:
                 print("chain.py:__process_block_thread: Process block")
                 self.last_block_time = time.time()
                 if len(self.mempool) == 0:
+                    # TODO Disable filling block for now
+                    #! Need filling block
                     # Create filling block
-                    ConsensusProcessor.process_block([], self.get_last_block(), self.consensus, self.broadcast_callback, self.world_state)
+                    # ConsensusProcessor.process_block([], self.get_latest_block(), self.consensus, self.broadcast_callback, self.world_state)
+                    # Ima to lazy to create filiing block
                     continue
 
                 self.mempool_lock.acquire()
@@ -183,7 +194,7 @@ class Chain:
                 pool = self.mempool[:block_to_process]
                 self.mempool = self.mempool[block_to_process:]
 
-                block = ConsensusProcessor.process_block(pool, self.get_last_block(), self.consensus, self.broadcast_callback, self.world_state)
+                block = ConsensusProcessor.process_block(pool, self.get_latest_block(), self.consensus, self.broadcast_callback, self.world_state)
                 if block:
                     print("chain.py:__process_block_thread: Block processed, delete transactions from mempool")
                     # for tx in block.data:

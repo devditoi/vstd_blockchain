@@ -41,6 +41,18 @@ class TransactionProcessor:
         # print(self.block)
         for tx in self.block.data:
             print("TransactionProcessor:process: Process " + tx.Txtype + " transaction")
+
+            if tx.gasLimit < tx.max_gas_usage():
+                print("TransactionProcessor:process: Transaction gas precomputed limit exceeded")
+                tx.status = "failed"
+                continue # Pass this transaction (aka fail safe)
+
+            # Check if the user has enough gas
+            if self.worldState.get_eoa(tx.sender).balance < tx.gasLimit:
+                print("TransactionProcessor:process: Transaction sender does not have enough balance")
+                tx.status = "failed"
+                continue # Pass this transaction
+
             # Deduct the gas
             gas_allowed = tx.gasLimit
             neoa = self.worldState.get_eoa(tx.sender)
@@ -53,21 +65,30 @@ class TransactionProcessor:
             # Subtract the gas
             gas_leftover = gas_allowed - gas_used
 
+            if gas_leftover < 0:
+                print("TransactionProcessor:process: Transaction gas limit exceeded")
+                tx.status = "failed" # And still eat the gas
+                continue
+
             # Transfer back gas to the sender
             neoa = self.worldState.get_eoa(tx.sender)
             neoa.balance += gas_leftover
             self.worldState.set_eoa(tx.sender, neoa)
 
-            if not state:
+            if not state: # Deep fail, require revert
                 print("TransactionProcessor:process: Transaction failed, reverse the transaction")
                 self.worldState = backup.clone()
-                return False
+                tx.status = "failed_revert"
+                continue # After reverse the transaction, everything is fine
+
+            backup = self.worldState.clone() # Backup the world state of current transaction
 
             # Update nonce
             neoa = self.worldState.get_eoa(tx.sender)
             neoa.nonce += 1
             self.worldState.set_eoa(tx.sender, neoa)
 
+            tx.status = "succeeded"
 
         return True
 

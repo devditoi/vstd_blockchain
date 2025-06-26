@@ -25,6 +25,8 @@ class Transaction(ITransaction):
         self.chainId = 1 # Testnet
         self.hash = HashUtils.sha256(self.to_verifiable_string()) # Hash chain_id of each transaction
 
+        self.status = "pending"
+
     def to_string(self) -> str:
         return jsonlight.dumps({
             "sender": self.sender,
@@ -36,6 +38,20 @@ class Transaction(ITransaction):
             "hash": self.hash,
             "signature": self.signature,
             "publicKey": self.publicKey,
+        })
+
+    def to_string_with_status(self) -> str:
+        return jsonlight.dumps({
+            "sender": self.sender,
+            "to": self.to,
+            "Txtype": self.Txtype,
+            "nonce": self.nonce,
+            "gasLimit": self.gasLimit,
+            "data": self.transactionData,
+            "hash": self.hash,
+            "signature": self.signature,
+            "publicKey": self.publicKey,
+            "status": self.status,
         })
 
     def to_verifiable_string(self) -> str:
@@ -56,6 +72,10 @@ class Transaction(ITransaction):
         sender = self.to
         print("Transaction type is not supported")
 
+    @staticmethod
+    def max_gas_usage() -> int:
+        return 0
+
 class NativeTransaction(Transaction):
     def __init__(self, sender: str, receiver: str, amount: int, nonce: int, gasLimit: int) -> None:
         super().__init__(sender, receiver, "native", nonce, gasLimit)
@@ -75,6 +95,11 @@ class NativeTransaction(Transaction):
         receiver = self.to
         amount = self.transactionData["amount"]
 
+        # Check if the user has enough balance
+        if worldState.get_eoa(sender).balance < amount:
+            print("TransactionProcessor:process_native_transaction: Transaction sender does not have enough balance")
+            return True, self.max_gas_usage()
+
         # Deduct the sender
         neoa = worldState.get_eoa(sender)
         neoa.balance -= amount
@@ -85,7 +110,11 @@ class NativeTransaction(Transaction):
         neoa.balance += amount
         worldState.set_eoa(receiver, neoa)
 
-        return True, ChainConfig.NativeTokenGigaweiValue * 0.01
+        return True, self.max_gas_usage()
+
+    @staticmethod
+    def max_gas_usage() -> int:
+        return int(ChainConfig.NativeTokenGigaweiValue * 0.01)
 
 # class StakeTransaction(Transaction):
 #     def __init__(self, sender: str, receiver: str, amount: int, nonce: int, gasPrice:int) -> None:
@@ -108,9 +137,13 @@ class NativeTransaction(Transaction):
 #
 class MintBurnTransaction(Transaction):
     def __init__(self, receiver: str, amount: int, nonce: int, gasLimit: int) -> None:
-        super().__init__("0x0", receiver, "mintburn", nonce, gasLimit)
+        super().__init__(receiver, receiver, "mintburn", nonce, gasLimit)
         # self.transactionData["receiver"] = receiver
         self.transactionData["amount"] = amount
+
+    @staticmethod
+    def max_gas_usage() -> int:
+        return 0
 
     def process(self, worldState) -> (bool, int):
         print("TransactionProcessor:process_mint_burn_transaction: Process mint burn transaction")
@@ -123,7 +156,7 @@ class MintBurnTransaction(Transaction):
             neoa = worldState.get_eoa(receiver)
             neoa.balance = 0
             worldState.set_eoa(receiver, neoa)
-            return True, ChainConfig.NativeTokenGigaweiValue * 0.01
+            return True, ChainConfig.NativeTokenGigaweiValue * 0.01 # Charge fee for burning
 
         neoa = worldState.get_eoa(receiver)
         neoa.balance += amount

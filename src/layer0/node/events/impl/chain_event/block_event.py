@@ -21,9 +21,9 @@ class BlockEvent(EventHandler):
             block = BlockProcessor.cast_block(event.data["block"])
 
         print(event.origin)
-        inspect(block)
+        # inspect(block)
 
-        if not Validator.validate_block_without_chain(block, self.neh.node.blockchain.get_last_block().hash):  # Not a valid block
+        if not Validator.validate_block_without_chain(block, self.neh.node.blockchain.get_latest_block().hash):  # Not a valid block
             print("validator.py:validate_block_without_chain: Block is invalid")
             return False
 

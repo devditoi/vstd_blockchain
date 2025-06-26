@@ -1,3 +1,4 @@
+from layer0.config import ChainConfig
 from layer0.node.events.node_event import NodeEvent
 from layer0.p2p.peer_type.remote_peer import RemotePeer
 from layer0.utils.crypto.signer import SignerFactory
@@ -31,6 +32,7 @@ class WalletRemote:
 
 
     def process_event(self, event):
+        # print(event)
         if event.eventType == "getworldstate_finished":
             world_state_raw = event.data
             # print(world_state_raw)
@@ -45,15 +47,14 @@ class WalletRemote:
 
         while not self.stop_flag:
             try:
-                with self.lock:
-                    data, addr = self.sock.recvfrom(65536)
-                    message = json.loads(data.decode())
-                    event = NodeEvent(
-                        eventType=message["eventType"],
-                        data=message["data"],
-                        origin=message["origin"]
-                    )
-                    self.process_event(event)
+                data, addr = self.sock.recvfrom(65536)
+                message = json.loads(data.decode())
+                event = NodeEvent(
+                    eventType=message["eventType"],
+                    data=message["data"],
+                    origin=message["origin"]
+                )
+                self.process_event(event)
             except Exception as e:
                 # print stack trace
                 import traceback
@@ -71,7 +72,7 @@ class WalletRemote:
 
     def pay(self, amount: any, payee_address: str) -> None:
         amount = int(amount)
-        tx: Transaction = NativeTransaction(self.address, payee_address, amount, self.nonce + 1, 0)
+        tx: Transaction = NativeTransaction(self.address, payee_address, amount, self.nonce + 1, ChainConfig.NativeTokenGigaweiValue * 1)
         self.post_transaction(tx)
 
     def get_balance_thread_start(self):
@@ -86,8 +87,16 @@ class WalletRemote:
 
     def get_balance(self) -> int:
         if not self.world_state:
+            print("No world state")
             return 0
-        return self.world_state.get_eoa(self.address)["balance"]
+        print(self.world_state.get_eoa(self.address))
+        try:
+            self.nonce = int(self.world_state.get_eoa(self.address)["nonce"])
+            return self.world_state.get_eoa(self.address)["balance"]
+        except TypeError as e:
+            import traceback
+            traceback.print_exc()
+            return 0
 
     def export_key(self, filename: str) -> None:
         self.signer.save(filename, self.publicKey, self.privateKey)

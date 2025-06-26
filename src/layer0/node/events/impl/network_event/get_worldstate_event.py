@@ -11,6 +11,7 @@ class GetWorldStateEvent(EventHandler):
         return "getworldstate"
 
     def handle(self, event: "NodeEvent"):
+        print(f"[{self.neh.node.origin}] GetWorldStateEvent.handle: received request for worldstate from {event.origin}")
         # This is a request to get the worldstate of the node
         self.neh.fire_to_raw(event.origin, NodeEvent("getworldstate_finished", {
             "worldstate": WorldStateSerializer.serialize_world_state(self.neh.node.worldState)

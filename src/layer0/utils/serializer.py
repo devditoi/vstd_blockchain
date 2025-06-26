@@ -1,6 +1,9 @@
 import jsonlight
 import json
 import typing
+
+from rich import inspect
+
 from layer0.blockchain.processor.block_processor import BlockProcessor
 from layer0.blockchain.core.chain import Chain
 from layer0.p2p.peer_type.remote_peer import RemotePeer
@@ -78,8 +81,8 @@ class WorldStateSerializer:
         world_state = WorldState()
         eoas = json.loads(data["eoas"])
         smartContracts = json.loads(data["smartContracts"])
-        # print(eoas, smartContracts)
         world_state.set_eoa_and_smart_contract(eoas, smartContracts)
+        # inspect(world_state)
         return world_state
 
 

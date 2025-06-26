@@ -29,6 +29,10 @@
 - Write some more test just in case for furthur testing environment
 - Rewrite chain sync
 - When reorg -> State change, need to save state diff to block for reverse.
+- Create Fast API (temporary) for the blockscan -> Need to create block scan website
+- Future task: Implement dynamic minting transaction!!!
+- Save and request transaction
+- Execution fail doesn't mean block is invalid
 
 ### Solutions
 - [x] Depricated any chain sync and remove any other chain dummy objects.
@@ -44,3 +48,7 @@
   - [ ] Store diff mapped to block height
   - [ ] Revert logic on reorg using diff
   - [ ] Optional: persist diff to disk (future-proof)
+- [ ] Implement blockscan REST API
+- [ ] Save and search transaction
+- [x] Fix unexpected bug of nonce where nonce updated for 0x0 not for the sender
+- [x] Refactor gas for transaction

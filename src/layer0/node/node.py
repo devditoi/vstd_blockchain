@@ -146,14 +146,14 @@ class Node:
         self.blockchain.add_transaction(tx, signature, publicKey)
 
     def execution(self, block: Block):
-        # Block execution only happend after block is processed
-        excecutor = TransactionProcessor(block, self.worldState)
-        if not excecutor.process():
-            print("node.py:execution: Block execution failed, invalid block")
-            print("node.py:execution: delete newly added block")
-            self.blockchain.chain.pop() # Pop last block aka newly added one
+
+        if block.index == 0:
+            # Don't process genesis block
             return
 
+        # Block execution only happend after block is processed
+        excecutor = TransactionProcessor(block, self.worldState)
+        excecutor.process()
     # def save_chain(self):
     #     print("node.py:save_chain: Saving chain")
     #     chain_data = self.to_json()

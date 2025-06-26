@@ -1,3 +1,5 @@
+from rich import inspect
+
 from layer0.node.events.EventHandler import EventHandler
 from layer0.node.events.node_event import NodeEvent
 import typing
@@ -27,7 +29,8 @@ class GetAncestorHashesEvent(EventHandler):
             })
 
         ancestor_event = NodeEvent("ancestor_hashes", {
-            "ancestor_hashes": ancestor
+            "ancestor_hashes": ancestor,
+            "highest_height": self.neh.node.blockchain.get_height()
         }, self.neh.node.origin)
 
         self.neh.fire_to(event.origin, ancestor_event) # This get event is send by some other peer. Even origin is the address of that peers
@@ -37,7 +40,7 @@ class GetAncestorHashesEvent(EventHandler):
 # Client side event
 class AncestorHashesEvent(EventHandler):
     def require_field(self):
-        return ["ancestor_hashes"]
+        return ["ancestor_hashes", "highest_height"]
 
     @staticmethod
     def event_name() -> str:
@@ -45,6 +48,7 @@ class AncestorHashesEvent(EventHandler):
 
     def handle(self, event: "NodeEvent"):
         ancestors = event.data["ancestor_hashes"]
+        highest_height = int(event.data["highest_height"])
         local_hashes = self.neh.node.blockchain.chain.get_chain_hashes()
 
         # Convert local_hashes to dict for quick lookup by height
@@ -64,8 +68,9 @@ class AncestorHashesEvent(EventHandler):
             # Gửi request block sync từ ancestor đến head
             get_blocks_event = NodeEvent("get_blocks", {
                 "start_index": common_ancestor_height,
-                "end_index": ancestors[0]["height"], # Highest
+                "end_index": highest_height, # Highest
             }, self.neh.node.address)
+            # inspect(get_blocks_event)
             self.neh.fire_to(event.origin, get_blocks_event) # Send back where this came from to request a full sync
         else:
             print("[SYNC] No common ancestor found — full resync might be needed.")
