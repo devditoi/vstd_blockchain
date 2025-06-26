@@ -6,6 +6,7 @@ from layer0.utils.serializer import ChainSerializer
 
 
 class JsonChainRepository(IChainRepository):
+    #! Warning Depricated
     def __init__(self, filename) -> None:
         self.filename = filename
 

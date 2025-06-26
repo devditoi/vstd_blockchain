@@ -1,11 +1,13 @@
 from ..local_saver import ISaver
 import json
 import os
-from layer0.blockchain.core.block import Block
+import typing
 from layer0.blockchain.core.transaction_type import Transaction
 from ...processor.block_processor import BlockProcessor
 from ...processor.transaction_processor import TransactionProcessor
-from layer0.blockchain.core.chain import Chain
+if typing.TYPE_CHECKING:
+    from layer0.blockchain.core.block import Block
+    from layer0.blockchain.core.chain import Chain
 
 
 class FilebaseDatabase:
@@ -30,8 +32,8 @@ class FilebaseDatabase:
     def save_block(self, block: "Block") -> None:
         """Save a block to the blockchain directory"""
         # First we going to check the height
-        if block.index > self.height:
-            self.height = block.index
+        if block.index + 1 >= self.height:
+            self.height = block.index + 1
         else:
             raise Exception("Block index is lower than current height") # Bruh
         block_path = os.path.join(self.blockchain_dir, f"Block#{block.index}.json")
@@ -40,7 +42,7 @@ class FilebaseDatabase:
 
     def load_block(self, block_height: int) -> str | None:
         """Load a block from the blockchain directory"""
-        block_path = os.path.join(self.blockchain_dir, f"{block_height}.json")
+        block_path = os.path.join(self.blockchain_dir, f"Block#{block_height}.json")
         if not os.path.exists(block_path):
             # raise FileNotFoundError(f"Block {block_height} not found")
             return None
@@ -62,6 +64,10 @@ class FilebaseDatabase:
                     block_datas.append(f.read())
         return block_datas
 
+    def clear(self) -> None:
+        for filename in self.get_and_sort_filelist():
+            os.remove(os.path.join(self.blockchain_dir, filename))
+
     # def load_transaction(self, tx_id: str) -> Optional[Dict]:
     #     """Load a transaction from the transactions directory"""
     #     tx_path = os.path.join(self.transactions_dir, f"{tx_id}.json")
@@ -74,6 +80,9 @@ class FilebaseDatabase:
 class FilebaseSaver(ISaver):
     def __init__(self, database: FilebaseDatabase):
         self.database = database
+
+    def clear(self) -> None:
+        self.database.clear()
 
     def add_block(self, block: "Block") -> None:
         """
@@ -95,7 +104,8 @@ class FilebaseSaver(ISaver):
         Raises:
             FileNotFoundError: If the block at the specified height does not exist.
         """
-        block_data = self.database.load_block(height)
+        # print("[FilebaseSaver] get_block " + str(height))
+        block_data = self.database.load_block(height) # TODO: Hmm
         if block_data is None:
             return None
         return BlockProcessor.cast_block(block_data)

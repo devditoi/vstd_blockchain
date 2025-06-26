@@ -20,6 +20,9 @@ class ChainHeadEvent(EventHandler):
         # Sending chain head to peer
         chain_head = self.neh.node.blockchain.get_last_block()
 
+        if chain_head is None:
+            return False
+
         self.neh.fire_to(event.origin, NodeEvent("chain_head_fullfilled", {
             "block": chain_head
         }, self.neh.node.origin))
@@ -37,6 +40,9 @@ class ChainHeadFullfilledEvent(EventHandler):
     def handle(self, event: "NodeEvent"):
         # Receiving chain head from peer
         chain_head = event.data["block"]
+
+        # print(chain_head)
+
         if not isinstance(chain_head, Block):
             chain_head = BlockProcessor.cast_block(chain_head)
 

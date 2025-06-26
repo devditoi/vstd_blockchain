@@ -1,5 +1,5 @@
 from layer0.blockchain.core.block import Block
-from layer0.blockchain.core.transaction_type import Transaction, NativeTransaction, MintBurnTransaction
+from layer0.blockchain.core.transaction_type import Transaction, NativeTransaction, MintBurnTransaction, NopTransaction
 from layer0.blockchain.core.worldstate import WorldState
 import json
 from rich import print
@@ -14,7 +14,7 @@ def cast_raw_transaction(transaction, transaction_data):
             return NativeTransaction(transaction["sender"], transaction["to"],
                                      transaction_data["amount"], transaction["nonce"], transaction["gasLimit"])
         case _:
-            raise Exception("Transaction type is not supported")
+            return NopTransaction()
 
 
 class TransactionProcessor:

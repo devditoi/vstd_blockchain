@@ -88,8 +88,8 @@ class Validator:
     @staticmethod
     def validate_block_on_chain(block: Block, chain, initially=False) -> bool:
         if block.index != chain.get_height() and not initially:
-            print("chain.py:add_block: Block index does not match chain length of " + str(chain.height))
-            print(chain.chain)
+            print("chain.py:add_block: Block index does not match chain length of " + str(chain.get_height()))
+            print(block.index, chain.get_height())
             return False
 
         if block.previous_hash != chain.get_last_block().hash:

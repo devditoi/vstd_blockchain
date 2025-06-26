@@ -1,8 +1,9 @@
 import json
 import os
 import typing
-from layer0.blockchain.core.chain import Chain
-from layer0.blockchain.core.block import Block
+if typing.TYPE_CHECKING:
+    from layer0.blockchain.core.chain import Chain
+    from layer0.blockchain.core.block import Block
 from abc import ABC, abstractmethod
 class ISaver(ABC):
     @abstractmethod
@@ -18,11 +19,15 @@ class ISaver(ABC):
         pass
 
     @abstractmethod
-    def get_block(self, height: int) -> Block:
+    def get_block(self, height: int) -> "Block":
         pass
 
     @abstractmethod
     def get_height(self) -> int:
+        pass
+
+    @abstractmethod
+    def clear(self) -> None:
         pass
 
 
@@ -31,7 +36,7 @@ class NotImplementedSaver(ISaver):
         pass
 
 
-    def get_block(self, height: int) -> Block:
+    def get_block(self, height: int) -> "Block":
         pass
 
     def save_chain(self, chain: "Chain") -> None:
@@ -44,4 +49,7 @@ class NotImplementedSaver(ISaver):
 
     def add_block(self, block: "Block") -> None:
         # raise NotImplementedError("add_block not implemented")
+        pass
+
+    def clear(self) -> None:
         pass

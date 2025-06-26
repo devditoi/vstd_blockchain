@@ -27,5 +27,4 @@ poetry.lock
 .env
 
 # Test data
-blockchain
-transactions
+chain_*

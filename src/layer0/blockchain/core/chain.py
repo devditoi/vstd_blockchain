@@ -19,11 +19,14 @@ from layer0.utils.crypto.signer import SignerFactory
 # from layer0.node_sync_services import NodeSyncServices
 
 class Chain:
-    def __init__(self, dummy = True) -> None:
+    def __init__(self, chain_id: str, dummy = True) -> None:
         print("chain.py:__init__: Initializing Chain")
         self.genesis_tx = Transaction("0x0", "genesis", "0", 0, 0)
         self.genesis_block: Block = Block(0, "0", 0, "0", [self.genesis_tx])
-        self.chain = FilebaseSaver(FilebaseDatabase())
+        self.chain = FilebaseSaver(FilebaseDatabase(
+            f"chain_{chain_id}_blockchain",
+            f"chain_{chain_id}_transaction",
+        ))
 
         self.height = 1
         self.mempool: list[Transaction] = []
@@ -49,7 +52,10 @@ class Chain:
 
     def reset_chain(self):
         print("chain.py:reset_chain: Reset chain")
-        self.chain = [self.genesis_block]
+        # self.chain = [self.genesis_block]
+        self.chain.clear()
+        self.chain.add_block(self.genesis_block)
+
 
     def set_initial_data(self, consensus, execution_callback, broadcast_callback, world_state):
         self.consensus = consensus
@@ -61,8 +67,10 @@ class Chain:
 
     def add_block(self, block: Block, initially = False) -> Block | None:
         if not Validator.validate_block_on_chain(block, self, initially): # Validate block
+            print("chain.py:add_block: Block is invalid")
             return None
         if not Validator.validate_block_without_chain(block, self.get_last_block().hash): # Validate block
+            print("chain.py:add_block: Block is invalid")
             return None
         print(f"chain.py:add_block: Block #{block.index} valid, add to chain")
         # print(block)
@@ -109,9 +117,9 @@ class Chain:
         # print("chain.py:get_block: Return block at index", index)
         return self.chain.get_block(index)
 
-    def get_last_block(self) -> Block:
+    def get_last_block(self) -> Block | None:
         # print("chain.py:get_last_block: Return last block")
-        return self.chain.get_block(self.chain.get_height()) # Get block at height is ineed last block
+        return self.chain.get_block(self.chain.get_height() - 1) # Get block at height is ineed last block
 
     def get_height(self) -> int:
         # print("chain.py:get_height: Return chain length")

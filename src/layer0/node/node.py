@@ -26,7 +26,6 @@ class Node:
     def __init__(self, dummy = False) -> None:
 
         print("node.py:__init__: Initializing Node")
-        self.blockchain: Chain = Chain(dummy)
 
         self.worldState: WorldState = WorldState()
 
@@ -42,6 +41,8 @@ class Node:
 
         self.publicKey, self.privateKey = self.signer.gen_key()
         self.address = self.signer.address(self.publicKey)
+
+        self.blockchain: Chain = Chain(self.address, dummy)
 
         # self.node_subscribtions = []
         # self.peers: list["Peer"] = []
@@ -152,12 +153,6 @@ class Node:
             print("node.py:execution: delete newly added block")
             self.blockchain.chain.pop() # Pop last block aka newly added one
             return
-
-
-
-
-        # Save block
-        self.saver.add_block(block)
 
     # def save_chain(self):
     #     print("node.py:save_chain: Saving chain")

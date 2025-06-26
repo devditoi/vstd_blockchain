@@ -23,7 +23,7 @@ class Transaction(ITransaction):
         self.gasLimit = gasLimit
         self.nonce = nonce
         self.chainId = 1 # Testnet
-        self.hash = HashUtils.sha256(self.to_verifiable_string()) # Hash id of each transaction
+        self.hash = HashUtils.sha256(self.to_verifiable_string()) # Hash chain_id of each transaction
 
     def to_string(self) -> str:
         return jsonlight.dumps({
@@ -130,3 +130,11 @@ class MintBurnTransaction(Transaction):
         worldState.set_eoa(receiver, neoa)
 
         return True, ChainConfig.NativeTokenGigaweiValue * 0 # Zero fees
+
+class NopTransaction(Transaction):
+    def __init__(self):
+        super().__init__("0x0", "0x0", "nop", 0, 0)
+
+    def process(self, worldState) -> (bool, int):
+        print("TransactionProcessor:process_nop_transaction: Process noop transaction")
+        return True, 0
