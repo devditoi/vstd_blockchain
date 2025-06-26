@@ -38,11 +38,12 @@ class FilebaseDatabase:
         with open(block_path, "w") as f:
             f.write(block.to_string())
 
-    def load_block(self, block_height: int) -> str:
+    def load_block(self, block_height: int) -> str | None:
         """Load a block from the blockchain directory"""
         block_path = os.path.join(self.blockchain_dir, f"{block_height}.json")
         if not os.path.exists(block_path):
-            raise FileNotFoundError(f"Block {block_height} not found")
+            # raise FileNotFoundError(f"Block {block_height} not found")
+            return None
         with open(block_path, "r") as f:
             return f.read()
 
@@ -81,8 +82,22 @@ class FilebaseSaver(ISaver):
         """
         self.database.save_block(block)
 
-    def get_block(self, height: int) -> "Block":
+    def get_block(self, height: int) -> "Block | None":
+        """
+        Retrieve a block from the blockchain at a given height.
+
+        Args:
+            height (int): The height of the block to retrieve.
+
+        Returns:
+            Block: The Block object corresponding to the specified height.
+
+        Raises:
+            FileNotFoundError: If the block at the specified height does not exist.
+        """
         block_data = self.database.load_block(height)
+        if block_data is None:
+            return None
         return BlockProcessor.cast_block(block_data)
 
     def get_height(self) -> int:
@@ -92,17 +107,20 @@ class FilebaseSaver(ISaver):
         for block in chain.chain:
             self.add_block(block)
 
-    def load_chain(self) -> "Chain":
-        block_datas = self.database.load_block_all()
-        chain = Chain()
-        is_genesis = True
-        for block_data in block_datas:
-            if is_genesis:
-                is_genesis = False
-                continue
-            block = BlockProcessor.cast_block(block_data)
-            chain.add_block(block, initially=True)
-        return chain
+    def load_chain(self) -> "None":
+        #! Depricated
+        # TODO: Need to change this to apply every block to worldstate, not to return the chain
+        pass
+        # block_datas = self.database.load_block_all()
+        # chain = Chain()
+        # is_genesis = True
+        # for block_data in block_datas:
+        #     if is_genesis:
+        #         is_genesis = False
+        #         continue
+        #     block = BlockProcessor.cast_block(block_data)
+        #     chain.add_block(block, initially=True)
+        # return chain
 
 
     # def get_block(self, block_height: int) -> Dict:

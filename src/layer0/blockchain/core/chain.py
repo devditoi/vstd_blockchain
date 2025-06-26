@@ -66,17 +66,19 @@ class Chain:
             return None
         print(f"chain.py:add_block: Block #{block.index} valid, add to chain")
         # print(block)
-        self.chain.append(block)
+        self.chain.add_block(block)
         self.height += 1
 
         # If the length is greater than max block history, remove the first block
         # Not DELETE Old block, delete the data (Somehow)
         if self.height > ChainConfig.BLOCK_HISTORY_LIMIT:
-            self.chain[self.height - ChainConfig.BLOCK_HISTORY_LIMIT].data = None
+            # TODO: Implement this later
+            pass
+            # self.chain[self.height - ChainConfig.BLOCK_HISTORY_LIMIT].data = None
 
         if self.execution_callback:
             # Execute block
-            self.execution_callback(block) # DELETE OLD BLOCK : EXECUTION
+            self.execution_callback(block)
 
         # Remove transactions from mempool
         for tx in block.data:
@@ -89,22 +91,31 @@ class Chain:
         return block
 
     def get_block(self, index) -> Block:
-        if index >= self.height:
+        """
+        Get a block at a certain index
+
+        Args:
+            index (int): The index of the block to retrieve
+
+        Returns:
+            Block: The block at the given index
+
+        Raises:
+            Exception: If the index is out of range
+        """
+        if index >= self.get_height():
             print("chain.py:get_block: Index out of range")
             raise Exception("Index out of range")
         # print("chain.py:get_block: Return block at index", index)
-        return self.chain[index]
+        return self.chain.get_block(index)
 
     def get_last_block(self) -> Block:
         # print("chain.py:get_last_block: Return last block")
-        return self.chain[-1]
+        return self.chain.get_block(self.chain.get_height()) # Get block at height is ineed last block
 
     def get_height(self) -> int:
         # print("chain.py:get_height: Return chain length")
-        if self.height != len(self.chain):
-            print("chain.py:get_height: Chain length does not match length")
-            raise Exception("Chain length does not match length")
-        return self.height
+        return self.chain.get_height()
 
     def contain_transaction(self, transaction: Transaction) -> bool:
         return transaction.hash in self.mempool_tx_id
@@ -124,11 +135,12 @@ class Chain:
         self.mempool.append(transaction)
         self.mempool_lock.release()
 
-        if not self.consensus.is_leader():
-            # print("chain.py:add_transaction: Not leader, return")
-            return
+        # if not self.consensus.is_leader(): # Check if leader
+        #     # print("chain.py:add_transaction: Not leader, return")
+        #     return
 
     # PROPOSE BLOCK, CREATE BLOCK
+    # TODO Need to refactor this to own file, consensus logic
     def __process_block_thread(self):
         # Check some conditions
         while True:
@@ -198,8 +210,8 @@ class Chain:
     def debug_chain(self):
         # print("chain.py:debug_chain:----------------------Print chain----------------------------")
         # print("chain.py:debug_chain: Print chain")
-        for block in self.chain:
-            print(block.to_string())
+        for block in range(self.chain.get_height()):
+            print(self.chain.get_block(block).to_string())
 
         print("chain.py:debug_chain: Print mempool")
         for tx in self.mempool:
