@@ -40,3 +40,7 @@
     - [x] Rewrite chain sync, chain deserialization
 - [x] Rewrite chain sync logic
 - [ ] Implement state diff logic
+  - [ ] Capture state diff during tx execution
+  - [ ] Store diff mapped to block height
+  - [ ] Revert logic on reorg using diff
+  - [ ] Optional: persist diff to disk (future-proof)
