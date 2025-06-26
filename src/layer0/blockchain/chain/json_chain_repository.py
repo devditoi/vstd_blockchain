@@ -1,8 +1,8 @@
 # import jsonlight
 
 from .chain_repository_interface import IChainRepository
-from mmb_layer0.blockchain.core.chain import Chain
-from mmb_layer0.utils.serializer import ChainSerializer
+from layer0.blockchain.core.chain import Chain
+from layer0.utils.serializer import ChainSerializer
 
 
 class JsonChainRepository(IChainRepository):

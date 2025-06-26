@@ -1,7 +1,7 @@
-from mmb_layer0.blockchain.processor.block_processor import BlockProcessor
-from mmb_layer0.node.events.EventHandler import EventHandler
-from mmb_layer0.node.events.node_event import NodeEvent
-from mmb_layer0.blockchain.core.block import Block
+from layer0.blockchain.processor.block_processor import BlockProcessor
+from layer0.node.events.EventHandler import EventHandler
+from layer0.node.events.node_event import NodeEvent
+from layer0.blockchain.core.block import Block
 
 
 class ChainHeadEvent(EventHandler):

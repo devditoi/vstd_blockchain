@@ -1,4 +1,4 @@
-from mmb_layer0.blockchain.core.chain import Chain
+from layer0.blockchain.core.chain import Chain
 
 
 class ChainSyncServices:

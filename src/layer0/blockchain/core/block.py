@@ -1,6 +1,6 @@
 # Define a block for the blockchain
-from mmb_layer0.blockchain.core.transaction_type import Transaction
-from mmb_layer0.utils.hash import HashUtils
+from layer0.blockchain.core.transaction_type import Transaction
+from layer0.utils.hash import HashUtils
 import jsonlight
 # from rich import print
 class Block:

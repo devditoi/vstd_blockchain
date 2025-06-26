@@ -1,8 +1,8 @@
-from mmb_layer0.node.events.EventHandler import EventHandler
-from mmb_layer0.p2p.peer_type.remote_peer import RemotePeer
-from mmb_layer0.utils.network_utils import is_valid_origin
-from mmb_layer0.utils.serializer import PeerSerializer
-from mmb_layer0.node.events.node_event import NodeEvent
+from layer0.node.events.EventHandler import EventHandler
+from layer0.p2p.peer_type.remote_peer import RemotePeer
+from layer0.utils.network_utils import is_valid_origin
+from layer0.utils.serializer import PeerSerializer
+from layer0.node.events.node_event import NodeEvent
 
 
 class PeerDiscoveryEvent(EventHandler):

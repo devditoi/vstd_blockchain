@@ -1,10 +1,10 @@
-from mmb_layer0.node.events.EventHandler import EventHandler
-from mmb_layer0.p2p.peer import Peer
+from layer0.node.events.EventHandler import EventHandler
+from layer0.p2p.peer import Peer
 import time
 import typing
 if typing.TYPE_CHECKING:
-    from mmb_layer0.node.node_event_handler import NodeEventHandler
-from mmb_layer0.node.events.node_event import NodeEvent
+    from layer0.node.node_event_handler import NodeEventHandler
+from layer0.node.events.node_event import NodeEvent
 
 class PingEvent(EventHandler):
     def require_field(self):
@@ -13,6 +13,7 @@ class PingEvent(EventHandler):
     @staticmethod
     def event_name() -> str:
         return "ping"
+
 
     def handle(self, event: "NodeEvent"):
         self.neh.fire_to(event.origin, NodeEvent("pong", {}, self.neh.node.origin))

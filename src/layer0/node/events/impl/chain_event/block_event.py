@@ -1,7 +1,7 @@
-from mmb_layer0.blockchain.core.validator import Validator
-from mmb_layer0.blockchain.processor.block_processor import BlockProcessor
-from mmb_layer0.node.events.EventHandler import EventHandler
-from mmb_layer0.node.events.node_event import NodeEvent
+from layer0.blockchain.core.validator import Validator
+from layer0.blockchain.processor.block_processor import BlockProcessor
+from layer0.node.events.EventHandler import EventHandler
+from layer0.node.events.node_event import NodeEvent
 
 class BlockEvent(EventHandler):
     @staticmethod

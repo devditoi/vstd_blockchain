@@ -3,8 +3,8 @@ import jsonlight
 from rsa import PublicKey
 from rich import print
 
-from mmb_layer0.config import ChainConfig
-from mmb_layer0.utils.hash import HashUtils
+from layer0.config import ChainConfig
+from layer0.utils.hash import HashUtils
 
 
 class ITransaction(ABC):

@@ -1,7 +1,7 @@
-from mmb_layer0.blockchain.core.transaction_type import Transaction
-from mmb_layer0.blockchain.processor.transaction_processor import TransactionProcessor
-from mmb_layer0.node.events.EventHandler import EventHandler
-from mmb_layer0.node.events.node_event import NodeEvent
+from layer0.blockchain.core.transaction_type import Transaction
+from layer0.blockchain.processor.transaction_processor import TransactionProcessor
+from layer0.node.events.EventHandler import EventHandler
+from layer0.node.events.node_event import NodeEvent
 
 
 class TxEvent(EventHandler):

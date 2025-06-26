@@ -1,6 +1,6 @@
-from mmb_layer0.node.events.EventHandler import EventHandler
-from mmb_layer0.node.events.node_event import NodeEvent
-from mmb_layer0.utils.serializer import WorldStateSerializer
+from layer0.node.events.EventHandler import EventHandler
+from layer0.node.events.node_event import NodeEvent
+from layer0.utils.serializer import WorldStateSerializer
 
 
 class GetWorldStateEvent(EventHandler):
