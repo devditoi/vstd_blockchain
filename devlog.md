@@ -28,12 +28,15 @@
 - Rename mmb_layer0 to layer0 for better naming
 - Write some more test just in case for furthur testing environment
 - Rewrite chain sync
+- When reorg -> State change, need to save state diff to block for reverse.
 
 ### Solutions
 - [x] Depricated any chain sync and remove any other chain dummy objects.
 - [x] Finish replacing all imports from mmb_layer0 to layer0
-- [?] Refactor all `self.chain` references to use new storage wrapper.
+- [x] Refactor all `self.chain` references to use new storage wrapper.
     - [x] Replace all `self.chain` to the new storage wrapper
     - [x] Make normal block sync work
     - [x] ~~REWRITE~~ Depricated all the old dummy chain logic for like, serialize, deserialize. 
-    - [ ] Rewrite chain sync, chain deserialization
+    - [x] Rewrite chain sync, chain deserialization
+- [x] Rewrite chain sync logic
+- [ ] Implement state diff logic

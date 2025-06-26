@@ -65,7 +65,8 @@ class Chain:
 
         print("chain.py:set_initial_data: Set callbacks")
 
-    def add_block(self, block: Block, initially = False) -> Block | None:
+    def add_block(self, block: Block, initially = False, delay_flush = False) -> Block | None:
+        #** Delay flush: Delay the flush of the block to the next flush interval (manually)
         if not Validator.validate_block_on_chain(block, self, initially): # Validate block
             print("chain.py:add_block: Block is invalid")
             return None
@@ -74,7 +75,7 @@ class Chain:
             return None
         print(f"chain.py:add_block: Block #{block.index} valid, add to chain")
         # print(block)
-        self.chain.add_block(block)
+        self.chain.add_block(block, delay_flush)
         self.height += 1
 
         # If the length is greater than max block history, remove the first block

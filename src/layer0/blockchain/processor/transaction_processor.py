@@ -41,14 +41,6 @@ class TransactionProcessor:
         # print(self.block)
         for tx in self.block.data:
             print("TransactionProcessor:process: Process " + tx.Txtype + " transaction")
-            # if isinstance(tx, NativeTransaction):
-            #     state, gas = self.process_native_transaction(tx)
-            # elif isinstance(tx, MintBurnTransaction):
-            #     state, gas = self.process_mint_burn_transaction(tx)
-            # elif isinstance(tx, Transaction):
-            #     print("Transaction type is not supported")
-            #     return False
-
             # Deduct the gas
             gas_allowed = tx.gasLimit
             neoa = self.worldState.get_eoa(tx.sender)

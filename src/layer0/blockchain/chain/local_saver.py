@@ -30,11 +30,31 @@ class ISaver(ABC):
     def clear(self) -> None:
         pass
 
+    @abstractmethod
+    def get_chain_hashes(self) -> list[str]:
+        pass
+
+    @abstractmethod
+    def flush(self):
+        pass
+
+    @abstractmethod
+    def remote_block(self) -> "Block":
+        pass
+
 
 class NotImplementedSaver(ISaver):
+    def get_chain_hashes(self) -> list[str]:
+        pass
+
+    def remote_block(self) -> "Block":
+        pass
+
     def get_height(self) -> int:
         pass
 
+    def flush(self):
+        pass
 
     def get_block(self, height: int) -> "Block":
         pass
@@ -45,7 +65,7 @@ class NotImplementedSaver(ISaver):
 
     def load_chain(self) -> "Chain":
         # raise NotImplementedError("load_chain not implemented")
-        return Chain()
+        pass
 
     def add_block(self, block: "Block") -> None:
         # raise NotImplementedError("add_block not implemented")

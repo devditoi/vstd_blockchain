@@ -13,7 +13,7 @@ class ChainSyncJob(BackgroundSyncJob):
 
     def execution(self):
         # Send get_status event to random peers for chain synchronization
-        status_request_event = NodeEvent("get_status", {}, self.event_handler.node.address)
+        status_request_event = NodeEvent("get_status", {}, self.event_handler.node.origin)
         self.event_handler.fire_to_random(status_request_event)
         time.sleep(10) # Adjust interval as needed
 

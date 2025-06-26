@@ -7,7 +7,8 @@ from layer0.utils.crypto.signer import SignerFactory
 from layer0.wallet.wallet import Wallet
 from rich import print, inspect
 import time
-
+import os
+import shutil
 
 # Test 1
 # node = Node()
@@ -81,7 +82,20 @@ def start_node(port: int):
     while True:
         pass
 
+def clear_blockchain_node():
+    for path in os.listdir():
+        if path.startswith("chain_") and path.endswith("_blockchain"):
+            print("Try to remove:", path)
+            shutil.rmtree(path)
+
+        if path.startswith("chain_") and path.endswith("_transaction"):
+            print("Try to remove:", path)
+            shutil.rmtree(path)
+
+
 if __name__ == '__main__':
+    clear_blockchain_node()
+
     master = Node()
     master.import_key("validator_key")
     master.debug()

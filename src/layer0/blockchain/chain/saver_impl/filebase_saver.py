@@ -64,6 +64,10 @@ class FilebaseDatabase:
                     block_datas.append(f.read())
         return block_datas
 
+    def remove_last_block(self):
+        os.remove(os.path.join(self.blockchain_dir, f"Block#{self.height-1}.json"))
+        self.height -= 1
+
     def clear(self) -> None:
         for filename in self.get_and_sort_filelist():
             os.remove(os.path.join(self.blockchain_dir, filename))
@@ -80,16 +84,43 @@ class FilebaseDatabase:
 class FilebaseSaver(ISaver):
     def __init__(self, database: FilebaseDatabase):
         self.database = database
+        self.delayed = []
+
+    def flush(self):
+        for block in self.delayed:
+            self.add_block(block)
+        self.delayed = []
+
+    def remote_block(self):
+        # Purge the last block
+        self.database.remove_last_block()
 
     def clear(self) -> None:
         self.database.clear()
 
-    def add_block(self, block: "Block") -> None:
+    def get_chain_hashes(self) -> list[str]:
+        hashes = []
+        # TODO: Need to implement some kind of index for hashes of it would cost a huge amount of I/O
+        for i in range(self.database.height):
+            block = self.get_block(i)
+            if not block:
+                continue
+            hashes.append({
+                "height": i,
+                "hash": block.hash
+            })
+
+        return hashes
+
+    def add_block(self, block: "Block", delay_flush = False) -> None:
         """
         Add a new block to the blockchain.
         Returns the block hash.
         """
-        self.database.save_block(block)
+        if not delay_flush:
+            self.database.save_block(block)
+        else:
+            self.delayed.append(block)
 
     def get_block(self, height: int) -> "Block | None":
         """
@@ -105,7 +136,7 @@ class FilebaseSaver(ISaver):
             FileNotFoundError: If the block at the specified height does not exist.
         """
         # print("[FilebaseSaver] get_block " + str(height))
-        block_data = self.database.load_block(height) # TODO: Hmm
+        block_data = self.database.load_block(height) # TODO: Hmm fine
         if block_data is None:
             return None
         return BlockProcessor.cast_block(block_data)

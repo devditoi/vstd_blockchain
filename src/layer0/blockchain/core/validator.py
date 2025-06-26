@@ -136,18 +136,17 @@ class Validator:
     @staticmethod
     def validate_full_chain(chain: "Chain", consensus: "IConsensus"):
         prev_hash = "0"
-        for i in range(len(chain.chain)):
-            block = chain.chain[i]
+        for i in range(chain.get_height()):
+            block = chain.chain.get_block(i)
 
             if i != 0 and not Validator.validate_block_without_chain(block, prev_hash):
                 return False
 
-            if i != 0 and block.timestamp < chain.chain[i - 1].timestamp:
+            if i != 0 and block.timestamp < chain.chain.get_block(i - 1).timestamp:
                 return False
 
             if i != 0 and not consensus.is_valid(block): # don't check the first block
                 return False
 
             prev_hash = block.hash
-
         return True

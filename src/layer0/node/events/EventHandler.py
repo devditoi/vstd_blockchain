@@ -1,4 +1,4 @@
-from abc import abstractmethod
+from abc import abstractmethod, ABC
 import typing
 if typing.TYPE_CHECKING:
     from ..node_event_handler import NodeEventHandler
@@ -6,7 +6,7 @@ from layer0.node.events.node_event import NodeEvent
 from layer0.utils.network_utils import is_valid_origin
 
 
-class EventHandler:
+class EventHandler(ABC):
     def __init__(self, node_event_handler: "NodeEventHandler"):
         self.neh = node_event_handler # Neh :)
 
@@ -42,6 +42,12 @@ class EventFactory:
             if len(handler.require_field()) > 0:
                 if any([k not in event.data for k in handler.require_field()]):
                     print("[EventFactory] Not enough data for event type:", event.eventType)
+                    # Find the missing field
+                    for k in handler.require_field():
+                        if k not in event.data:
+                            print("[EventFactory] Missing field:", k)
+                        else:
+                            print("[EventFactory] Found field:", k, " with value:", event.data[k])
                     return False # Not enough data
             return handler.handle(event)
 
