@@ -11,6 +11,8 @@ from .events.impl.chain_event.chain_head import ChainHeadEvent, ChainHeadFullfil
 from .events.impl.chain_event.full_chain import FullChainEvent, FullChainFullfilledEvent
 from .events.impl.network_event.get_worldstate_event import GetWorldStateEvent
 from .events.impl.network_event.ping_event import PingEvent, PongEvent
+from .events.impl.network_event.status_sync_event import GetStatusEvent, StatusEvent
+from .events.impl.network_event.blocks_sync_event import GetBlocksEvent, BlocksEvent
 from ..p2p.peer_type.remote_peer import RemotePeer
 from ..utils.network_utils import is_valid_origin
 from .events.node_event import NodeEvent
@@ -41,6 +43,10 @@ class NodeEventHandler:
         self.ef.register_event(PongEvent(self))
 
         self.ef.register_event(GetWorldStateEvent(self))
+        self.ef.register_event(GetStatusEvent(self))
+        self.ef.register_event(GetBlocksEvent(self))
+        self.ef.register_event(StatusEvent(self))
+        self.ef.register_event(BlocksEvent(self))
 
 
     # EVENT MANAGER
