@@ -27,6 +27,54 @@ def data():
     }
     return data
 
+
+def test_valid_signature_verification():
+    """
+    Test that a properly signed transaction is verified correctly
+    """
+    # Setup
+    signer = SignerFactory().get_signer()
+    public_key, private_key = signer.gen_key()
+    message = "test message"
+
+    # Action
+    signature = signer.sign(message, private_key)
+    is_verified = signer.verify(message, signature, public_key)
+
+    # Assert
+    assert is_verified is True
+
+
+def test_tampered_message_verification():
+    """
+    Test that tampered messages fail verification
+    """
+    # Setup
+    signer = SignerFactory().get_signer()
+    public_key, private_key = signer.gen_key()
+    original_message = "original message"
+    tampered_message = "tampered message"
+
+    # Action
+    signature = signer.sign(original_message, private_key)
+    is_verified = signer.verify(tampered_message, signature, public_key)
+
+    # Assert
+    assert is_verified is False
+
+
+def test_invalid_signature_format():
+    """
+    Test that malformed signatures are handled gracefully
+    """
+    # Setup
+    signer = SignerFactory().get_signer()
+    public_key, _ = signer.gen_key()
+
+    # Action & Assert
+    assert signer.verify("test", "Suspicious signature".encode("utf-8"), public_key) is False
+
+
 def test_sig_valid(data):
     # Test fail before. Reason: Signature generates from Wallet using to_string() function to convert transaction where
     # in the verify function, the to_verifiable_string() function is used. Cause mismatch

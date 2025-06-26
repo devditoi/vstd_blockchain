@@ -26,11 +26,13 @@
 - Continue solving the chain sync problems and chain deserialization problems.
 - Continue solving `Current chain deserialization assumes loading the entire chain at once, which is inefficient and unrealistic for syncing nodes in a real network.`
 - Rename mmb_layer0 to layer0 for better naming
+- Write some more test just in case for furthur testing environment
 
 ### Solutions
 - [x] Depricated any chain sync and remove any other chain dummy objects.
 - [x] Finish replacing all imports from mmb_layer0 to layer0
-- [ ] Refactor all `self.chain` references to use new storage wrapper.
-    - [ ] Replace all `self.chain` to the new storage wrapper
+- [?] Refactor all `self.chain` references to use new storage wrapper.
+    - [x] Replace all `self.chain` to the new storage wrapper
+    - [x] Make normal block sync work
     - [ ] REWRITE all the old dummy chain logic for like, serialize, deserialize. 
     - [ ] Rewrite chain sync, chain deserialization

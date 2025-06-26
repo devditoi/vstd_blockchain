@@ -24,6 +24,9 @@ class ECDSAAdapter(ICryptoAdapter):
         except BadSignatureError:
             print("BadSignatureError")
             return False
+        except ValueError:
+            print("ValueError")
+            return False
 
     @staticmethod
     def serialize(publicKey: VerifyingKey) -> str:
