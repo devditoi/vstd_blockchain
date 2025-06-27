@@ -114,7 +114,7 @@ class NativeTransaction(Transaction):
 
     @staticmethod
     def max_gas_usage() -> int:
-        return int(ChainConfig.NativeTokenGigaweiValue * 0.01)
+        return int(ChainConfig.NativeTokenGigaweiValue * 10)
 
 # class StakeTransaction(Transaction):
 #     def __init__(self, sender: str, receiver: str, amount: int, nonce: int, gasPrice:int) -> None:
@@ -136,8 +136,8 @@ class NativeTransaction(Transaction):
 #         self.transactionData["data"] = data
 #
 class MintBurnTransaction(Transaction):
-    def __init__(self, receiver: str, amount: int, nonce: int, gasLimit: int) -> None:
-        super().__init__(receiver, receiver, "mintburn", nonce, gasLimit)
+    def __init__(self, sender: str, receiver: str, amount: int, nonce: int, gasLimit: int) -> None:
+        super().__init__(sender, receiver, "mintburn", nonce, gasLimit)
         # self.transactionData["receiver"] = receiver
         self.transactionData["amount"] = amount
 
@@ -156,7 +156,7 @@ class MintBurnTransaction(Transaction):
             neoa = worldState.get_eoa(receiver)
             neoa.balance = 0
             worldState.set_eoa(receiver, neoa)
-            return True, ChainConfig.NativeTokenGigaweiValue * 0.01 # Charge fee for burning
+            return True, ChainConfig.NativeTokenGigaweiValue * 1000 # Charge fee for burning
 
         neoa = worldState.get_eoa(receiver)
         neoa.balance += amount

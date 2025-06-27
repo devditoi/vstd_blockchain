@@ -122,14 +122,33 @@ class Node:
     def get_nonce(self, address: str) -> int:
         return self.worldState.get_eoa(address).nonce
 
+    def get_tx(self, tx_hash) -> Transaction | None:
+        return self.blockchain.get_tx(tx_hash)
+
+    def get_txs(self) -> list[str]:
+        return self.blockchain.get_txs()
+
+    def get_block(self, height: int) -> Block | None:
+        return self.blockchain.get_block(height)
+
+    def query_tx(self, query: str, field: str | None = None) -> list[str]:
+        return self.blockchain.query_tx(query, field)
+
+    def query_block(self, query: str, field: str | None = None) -> list[str]:
+        return self.blockchain.query_block(query, field)
+
     def propose_tx(self, tx: Transaction, signature, publicKey: any):
+        """
+        :param tx: Transaction
+        :param signature: Signature (HEX)
+        :param publicKey: Public key (HEX)
+        :return:
+        """
         self.node_event_handler.broadcast(NodeEvent("tx", {
             "tx": tx,
             "signature": signature,
-            "publicKey": SignerFactory().get_signer().serialize(publicKey)
+            "publicKey": publicKey, #! Assume the public key are HEXDECIMAL
         }, self.address))
-
-        print(SignerFactory().get_signer().serialize(publicKey))
 
     def process_tx(self, tx: Transaction, signature, publicKey):
         print(f"{self.address[:4]}:node.py:process_tx: Add pool " + tx.Txtype + " transaction")

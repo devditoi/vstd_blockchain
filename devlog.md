@@ -59,8 +59,16 @@
 - The state diff -> Not planed
 - Now implement REST API (or RPC) for blockscan and a smallest wallet
 - Make a chrome extension for a wallet
+- Need to fix pytest error
+- Finish blockscan
+- Refactor gas for transaction 
+- Need some addition metadata for transaction tho :D
+- Very wierd worldstate mismatch for syncher ??
+- I think transaction need more data like timestamp and stuff lol\
 
 ## Solutions
-- [ ] Implement blockscan REST API
-- [ ] Save and search transaction
+- [x] Implement blockscan REST API (Ok it fine)
+- [x] Save and search transaction
 - [ ] Implemnt wallet
+- [x] Implement web interface for blockscan (Yo it so niceeeee)
+- [x] Yo we need to fix the test!!! (EZ:D)

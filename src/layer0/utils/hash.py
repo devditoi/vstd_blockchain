@@ -36,7 +36,6 @@ class HashUtils:
         encoded_data: bytes = data.encode('utf8')
         return True if rsa.verify(encoded_data, signature, publicKey) else False
 
-
     @staticmethod
     def ecdsa_keygen():
         sk = ecdsa.SigningKey.generate()

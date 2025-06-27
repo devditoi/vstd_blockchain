@@ -50,8 +50,28 @@ class ISaver(ABC):
     def get_tx(self, tx_hash) -> "Transaction | None":
         pass
 
+    @abstractmethod
+    def query_tx(self, query: str, field: str | None = None) -> list[str]:
+        pass
+
+    @abstractmethod
+    def query_block(self, query: str, field: str | None = None) -> list[str]:
+        pass
+
+    @abstractmethod
+    def get_txs(self) -> list[str]:
+        pass
 
 class NotImplementedSaver(ISaver):
+    def get_txs(self) -> list[str]:
+        pass
+
+    def query_tx(self, query: str, field: str | None = None) -> list[str]:
+        pass
+
+    def query_block(self, query: str, field: str | None = None) -> list[str]:
+        pass
+
     def get_chain_hashes(self) -> list[str]:
         pass
 

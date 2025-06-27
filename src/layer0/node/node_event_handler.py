@@ -14,6 +14,7 @@ from .events.impl.network_event.get_worldstate_event import GetWorldStateEvent
 from .events.impl.network_event.ping_event import PingEvent, PongEvent
 from .events.impl.network_event.status_sync_event import GetStatusEvent, StatusEvent
 from .events.impl.network_event.blocks_sync_event import GetBlocksEvent, BlocksEvent
+from ..config import ChainConfig
 from ..p2p.peer_type.remote_peer import RemotePeer
 from ..utils.network_utils import is_valid_origin
 from .events.node_event import NodeEvent
@@ -60,6 +61,10 @@ class NodeEventHandler:
         if peer.address == self.node.origin:
             return
 
+        # MAX PEERS
+        if len(self.peers) > ChainConfig.MAX_PEERS:
+            return
+
         self.peers.append(peer)
         # return peer
         print(f"{self.node.origin}:node.py:subscribe: Subscribed to {peer.address}")
@@ -88,7 +93,7 @@ class NodeEventHandler:
         # inspect(peer)
         peer.fire(event)
 
-        print(f"{self.node.origin}:node.py:fire_to_random: Firing to {peer.address} - event: " + str(event.eventType))
+        # print(f"{self.node.origin}:node.py:fire_to_random: Firing to {peer.address} - event: " + str(event.eventType))
 
     # @staticmethod
     def fire_to(self, peer_origin: any, event: NodeEvent):

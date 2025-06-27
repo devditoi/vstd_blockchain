@@ -13,3 +13,4 @@ class ChainConfig:
     FaucetAddress = "0x00000000000000000000000000000000faucet"
     MINT_KEY = "public_key.pem"
     BLOCK_HISTORY_LIMIT = 1000
+    MAX_PEERS = 10

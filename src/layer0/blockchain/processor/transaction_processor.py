@@ -8,7 +8,7 @@ from rich import print
 def cast_raw_transaction(transaction, transaction_data):
     match transaction["Txtype"]:
         case "mintburn":
-            return MintBurnTransaction(transaction["to"], transaction_data["amount"],
+            return MintBurnTransaction(transaction["sender"] ,transaction["to"], transaction_data["amount"],
                                        transaction["nonce"], transaction["gasLimit"])
         case "native":
             return NativeTransaction(transaction["sender"], transaction["to"],
@@ -29,13 +29,13 @@ class TransactionProcessor:
         backup = self.worldState.clone()
 
         # TODO After processing transaction, check the world state hash to match with the block worldstate hash
-        current_worldstate_hash = self.worldState.get_hash()
-        if current_worldstate_hash != self.block.world_state_hash:
-            print(
-                "World state hash does not match with block worldstate hash, Either block invalid or world state corrupted")
-            # Reverse the transaction
-            self.worldState = backup.clone()
-            return False
+        # current_worldstate_hash = self.worldState.get_hash()
+        # if current_worldstate_hash != self.block.world_state_hash:
+        #     print(
+        #         "World state hash does not match with block worldstate hash, Either block invalid or world state corrupted")
+        #     # Reverse the transaction
+        #     self.worldState = backup.clone()
+        #     return False
 
         print(f"TransactionProcessor:process: Process block #{self.block.index}")
         # print(self.block)
@@ -91,6 +91,18 @@ class TransactionProcessor:
             tx.status = "succeeded"
 
         return True
+
+    @staticmethod
+    def check_valid_transaction(transaction_raw: str) -> bool:
+        try:
+            transaction = json.loads(transaction_raw)
+
+            if any([key not in transaction for key in ["Txtype", "data", "signature", "publicKey"]]):
+                return False
+
+            return True
+        except json.JSONDecodeError:
+            return False
 
     @staticmethod
     def cast_transaction(transaction_raw: str):

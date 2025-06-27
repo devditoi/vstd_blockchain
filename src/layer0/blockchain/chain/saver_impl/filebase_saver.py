@@ -20,14 +20,14 @@ class FilebaseDatabase:
         os.makedirs(self.transactions_dir, exist_ok=True)
         self.height = 0
 
-    def get_and_sort_filelist(self) -> list[str]:
+    def get_and_sort_filelist_blocks(self) -> list[str]:
         file_list = os.listdir(self.blockchain_dir)
         # Sort by the number after #, default sort is error
         file_list.sort(key=lambda x: int(x.split("#")[1][:-5]))
         return file_list
 
     def load_height(self):
-        self.height = len(self.get_and_sort_filelist())
+        self.height = len(self.get_and_sort_filelist_blocks())
 
     def save_block(self, block: "Block") -> None:
         """Save a block to the blockchain directory"""
@@ -73,10 +73,43 @@ class FilebaseDatabase:
 
     def load_block_all(self):
         block_datas = []
-        for filename in self.get_and_sort_filelist():
+        for filename in self.get_and_sort_filelist_blocks():
             if filename.endswith(".json"):
                 with open(os.path.join(self.blockchain_dir, filename), "r") as f:
                     block_datas.append(f.read())
+        return block_datas
+
+    def get_txs(self):
+        # Return all txs hash
+        file_list = os.listdir(self.transactions_dir)
+        return file_list
+
+    def query_tx(self, query: str, field: str | None = None) -> list[str]:
+        tx_datas = []
+        for filename in self.get_txs():
+            if filename.endswith(".json"):
+                with open(os.path.join(self.transactions_dir, filename), "r") as f:
+                    tx_data = json.load(f)
+                    if field is not None:
+                        if query in tx_data[field]:
+                            tx_datas.append(tx_data)
+                    else:
+                        if query in tx_data:
+                            tx_datas.append(tx_data)
+        return tx_datas
+
+    def query_block(self, query: str, field: str | None = None) -> list[str]:
+        block_datas = []
+        for filename in self.get_and_sort_filelist_blocks():
+            if filename.endswith(".json"):
+                with open(os.path.join(self.blockchain_dir, filename), "r") as f:
+                    block_data = json.load(f)
+                    if field is not None:
+                        if query in block_data[field]:
+                            block_datas.append(block_data)
+                    else:
+                        if query in block_data:
+                            block_datas.append(block_data)
         return block_datas
 
     def remove_last_block(self):
@@ -84,7 +117,7 @@ class FilebaseDatabase:
         self.height -= 1
 
     def clear(self) -> None:
-        for filename in self.get_and_sort_filelist():
+        for filename in self.get_and_sort_filelist_blocks():
             os.remove(os.path.join(self.blockchain_dir, filename))
 
     # def load_transaction(self, tx_id: str) -> Optional[Dict]:
@@ -112,6 +145,9 @@ class FilebaseSaver(ISaver):
         tx.status = tx_json["status"]
 
         return tx
+
+    def get_txs(self) -> list[str]:
+        return self.database.get_txs()
 
     def flush(self):
         for block in self.delayed:
@@ -174,6 +210,12 @@ class FilebaseSaver(ISaver):
     def save_chain(self, chain: "Chain") -> None:
         for block in chain.chain:
             self.add_block(block)
+
+    def query_tx(self, query: str, field: str | None = None) -> list[str]:
+        return self.database.query_tx(query, field)
+
+    def query_block(self, query: str, field: str | None = None) -> list[str]:
+        return self.database.query_block(query, field)
 
     def load_chain(self) -> "None":
         #! Depricated

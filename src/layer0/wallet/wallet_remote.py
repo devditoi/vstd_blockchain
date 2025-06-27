@@ -72,7 +72,7 @@ class WalletRemote:
 
     def pay(self, amount: any, payee_address: str) -> Transaction:
         amount = int(amount)
-        tx: Transaction = NativeTransaction(self.address, payee_address, amount, self.nonce + 1, ChainConfig.NativeTokenGigaweiValue * 1)
+        tx: Transaction = NativeTransaction(self.address, payee_address, amount, self.nonce + 1, ChainConfig.NativeTokenGigaweiValue * 100)
         # self.sign_and_post_transaction(tx)
         return tx
 

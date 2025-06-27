@@ -6,17 +6,17 @@ from rsa import PublicKey
 # import jsonlight
 from rich import print, inspect
 import threading
-
+import random
 from layer0.blockchain.chain.saver_impl.filebase_saver import FilebaseSaver, FilebaseDatabase
 from layer0.blockchain.consensus.consensus_processor import ConsensusProcessor
 # from layer0.blockchain.transaction_processor import TransactionProcessor
 from layer0.blockchain.core.validator import Validator
 from layer0.blockchain.core.block import Block
-from layer0.blockchain.core.transaction_type import Transaction
+from layer0.blockchain.core.transaction_type import Transaction, MintBurnTransaction
 from layer0.config import ChainConfig
 from layer0.utils.crypto.signer import SignerFactory
+from layer0.utils.hash import HashUtils
 
-# from layer0.node_sync_services import NodeSyncServices
 
 class Chain:
     def __init__(self, chain_id: str, dummy = True) -> None:
@@ -32,7 +32,7 @@ class Chain:
         self.mempool: list[Transaction] = []
         self.mempool_tx_id: set[str] = set()
         self.interval = 10 # 10 seconds before try to send and validate
-        self.max_block_size = 10 # maximum number of transactions in a block
+        self.max_block_size = 1 #maximum number of transactions in a block
         self.last_block_time = time.time()
 
         self.consensus = None
@@ -58,6 +58,15 @@ class Chain:
 
     def get_tx(self, tx_hash) -> Transaction | None:
         return self.chain.get_tx(tx_hash)
+
+    def get_txs(self) -> list[str]:
+        return self.chain.get_txs()
+
+    def query_tx(self, query: str, field: str | None = None):
+        return self.chain.query_tx(query, field)
+
+    def query_block(self, query: str, field: str | None = None):
+        return self.chain.query_block(query, field)
 
     def set_initial_data(self, consensus, execution_callback, broadcast_callback, world_state):
         self.consensus = consensus
@@ -86,7 +95,7 @@ class Chain:
         # inspect(block.data[0])
         # inspect(self.world_state)
 
-        inspect(self.world_state)
+        # inspect(self.world_state)
 
         # print(block)
         self.chain.add_block(block, delay_flush)
@@ -186,7 +195,7 @@ class Chain:
                     # TODO Disable filling block for now
                     #! Need filling block
                     # Create filling block
-                    # ConsensusProcessor.process_block([], self.get_latest_block(), self.consensus, self.broadcast_callback, self.world_state)
+                    ConsensusProcessor.process_block([], self.get_latest_block(), self.consensus, self.broadcast_callback, self.world_state)
                     # Ima to lazy to create filiing block
                     continue
 
@@ -208,6 +217,9 @@ class Chain:
                         # self.mempool_tx_id.remove(tx.hash)
 
                 self.mempool_lock.release()
+
+                # After done 1 block
+                time.sleep(3)
 
             time.sleep(1)
 

@@ -61,6 +61,12 @@ class Validator:
             return True
 
         # Public key are in hex format -> need to convert back
+
+        # Yeah wtf?
+        if not tx.publicKey:
+            print("chain.py:process_block: Transaction public key is missing")
+            return False
+
         temp_public_key = SignerFactory().get_signer().deserialize(tx.publicKey)
 
         if not SignerFactory().get_signer().verify(tx.to_verifiable_string(), tx.signature, temp_public_key):
