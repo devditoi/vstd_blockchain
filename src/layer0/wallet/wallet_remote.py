@@ -55,25 +55,26 @@ class WalletRemote:
                     origin=message["origin"]
                 )
                 self.process_event(event)
-            except Exception as e:
+            except:
                 # print stack trace
                 import traceback
                 traceback.print_exc()
                 print(f"[UDPProtocol] Error in receive")
 
 
-    def post_transaction(self, tx: Transaction):
+    def sign_and_post_transaction(self, tx: Transaction):
         self.nonce += 1
         sign: bytes = self.signer.sign(tx.to_verifiable_string(), self.privateKey)
         serialize_public_key = SignerFactory().get_signer().serialize(self.publicKey)
         event = NodeEvent("tx", {"tx": tx, "signature": sign, "publicKey": serialize_public_key}, self.origin)
-        inspect(event)
+        # inspect(event)
         self.peer.fire(event)
 
-    def pay(self, amount: any, payee_address: str) -> None:
+    def pay(self, amount: any, payee_address: str) -> Transaction:
         amount = int(amount)
         tx: Transaction = NativeTransaction(self.address, payee_address, amount, self.nonce + 1, ChainConfig.NativeTokenGigaweiValue * 1)
-        self.post_transaction(tx)
+        # self.sign_and_post_transaction(tx)
+        return tx
 
     def get_balance_thread_start(self):
         def get_balance_thread():
@@ -87,15 +88,15 @@ class WalletRemote:
 
     def get_balance(self) -> int:
         if not self.world_state:
-            print("No world state")
+            # print("No world state")
             return 0
-        print(self.world_state.get_eoa(self.address))
+        # print(self.world_state.get_eoa(self.address))
         try:
             self.nonce = int(self.world_state.get_eoa(self.address)["nonce"])
             return self.world_state.get_eoa(self.address)["balance"]
         except TypeError as e:
-            import traceback
-            traceback.print_exc()
+            # import traceback
+            # traceback.print_exc()
             return 0
 
     def export_key(self, filename: str) -> None:

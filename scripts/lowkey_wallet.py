@@ -9,7 +9,7 @@ wallet.import_key("mint_key")
 
 def mint_for_myself(minted_amount):
     tx = MintBurnTransaction(wallet.address, minted_amount, wallet.nonce + 1, 0)
-    wallet.post_transaction(tx)
+    wallet.sign_and_post_transaction(tx)
 
 while True:
     command = input("> Enter command ('get_balance' or 'mint <amount>'): ").strip()

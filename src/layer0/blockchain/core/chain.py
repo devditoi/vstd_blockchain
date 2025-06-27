@@ -86,6 +86,8 @@ class Chain:
         # inspect(block.data[0])
         # inspect(self.world_state)
 
+        inspect(self.world_state)
+
         # print(block)
         self.chain.add_block(block, delay_flush)
         self.height += 1

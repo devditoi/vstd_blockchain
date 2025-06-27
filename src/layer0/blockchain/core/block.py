@@ -16,6 +16,9 @@ class Block:
         # For developing purpose
         self.world_state_hash = worldstate_hash
 
+        # Next we need state diff for a block. (aka record state different in a block)
+        # Not planed
+
     def to_string(self) -> str:
         return jsonlight.dumps({
             "index": self.index,

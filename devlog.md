@@ -52,3 +52,15 @@
 - [ ] Save and search transaction
 - [x] Fix unexpected bug of nonce where nonce updated for 0x0 not for the sender
 - [x] Refactor gas for transaction
+
+## June 27, 2025
+
+### Problems
+- The state diff -> Not planed
+- Now implement REST API (or RPC) for blockscan and a smallest wallet
+- Make a chrome extension for a wallet
+
+## Solutions
+- [ ] Implement blockscan REST API
+- [ ] Save and search transaction
+- [ ] Implemnt wallet
