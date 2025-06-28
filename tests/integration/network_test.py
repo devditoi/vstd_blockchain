@@ -34,7 +34,9 @@ def data():
     # p1.start()
     # p2.start()
 
-    peers_test = random.randint(5, 20)
+    # TODO: Somehow expanding the network? multiple node test?
+    peers_test = random.randint(5, 15) # Temporary limit this shit
+
     processes = []
     for i in range(peers_test):
         port = 5001 + i

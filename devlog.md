@@ -85,7 +85,7 @@
 - [ ] Implement wallet
 - [x] Check the worldstate mismatch
 - [x] Implement transaction metadata
-- [x] Fix intergration test for node (because of peer limit)
+- [x] Fix integration test for node (because of peer limit)
 - [x] Fix unit test when append metadata for transaction
 - [ ] Actually use those metadata for transaction
 - [ ] Fix why the node can't connect to the network (Or luck?)
