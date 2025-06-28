@@ -74,7 +74,7 @@ def confirm_and_sign(tx: Transaction) -> bool:
         if key == "amount":
             value = format_number_with_spaces(float(value) / ChainConfig.NativeTokenValue) + " VSTD"
         table.add_row(str(key), str(value))
-    table.add_row("Fee:", f"{tx.gasLimit / ChainConfig.NativeTokenValue:.6f} VSTD")
+    table.add_row("Fee:", f"{tx.gas_limit / ChainConfig.NativeTokenValue:.6f} VSTD")
     table.add_row("Nonce:", f"{tx.nonce}")
     table.add_row("Type:", f"{tx.Txtype}")
     console.print(table)

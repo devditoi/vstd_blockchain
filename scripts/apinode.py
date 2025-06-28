@@ -76,7 +76,7 @@ async def get_block_transactions(height: int, skip: int = 0, limit: int = 10) ->
 @app.get("/transaction/{tx_hash}", response_model=Dict[str, Any])
 async def get_transaction(tx_hash: str) -> any:
     return {
-        "transaction": master.get_tx(tx_hash).to_string_with_status()
+        "transaction": master.get_tx(tx_hash).to_string_with_offchain_data()
     }
 
 @app.get("/transactions", response_model=Dict[str, Any])

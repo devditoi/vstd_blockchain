@@ -9,12 +9,13 @@ class PeerSyncJob(BackgroundSyncJob):
         print(f"[UDPProtocol - PeerSyncJob] {self.event_handler.node.origin}: Waiting for peers")
         while not self.event_handler.peers:
             time.sleep(1)
+        print(f"[UDPProtocol - PeerSyncJob] {self.event_handler.node.origin}: Peers found")
 
     def execution(self):
         # Send peers discovery event to random peers
         event = NodeEvent("peer_discovery", {}, self.event_handler.node.origin)
         # Select random peer to send event to
 
-        # print(f"[UDPProtocol - PeerSyncJob] {self.event_handler.node.origin}: Sending peer_discovery event to random peers")
+        print(f"[UDPProtocol - PeerSyncJob] {self.event_handler.node.origin}: Sending peer_discovery event to random peers")
         self.event_handler.fire_to_random(event)
-        time.sleep(15)
+        time.sleep(10) # it here

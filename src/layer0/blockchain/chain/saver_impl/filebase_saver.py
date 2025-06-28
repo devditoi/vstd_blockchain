@@ -45,7 +45,7 @@ class FilebaseDatabase:
             for tx in block.data:
                 tx_path = os.path.join(self.transactions_dir, f"{tx.hash}.json")
                 with open(tx_path, "w") as f:
-                    f.write(tx.to_string_with_status())
+                    f.write(tx.to_string_with_offchain_data())
 
     def load_block(self, block_height: int) -> str | None:
         """Load a block from the blockchain directory"""

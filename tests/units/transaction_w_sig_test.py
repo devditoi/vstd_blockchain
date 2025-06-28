@@ -21,7 +21,7 @@ def data():
 
     wallet_1 = Wallet(node)
 
-    tx1 = NativeTransaction("0x0", "0x1", 100, 0, 100) # Invalid (No sig)
+    tx1 = NativeTransaction("0x0", "0x1", 100, 0, 100, 100) # Invalid (No sig)
 
     tx2, tx2_sign = wallet_1.create_tx(100, "0x1")
 

@@ -13,6 +13,9 @@ from layer0.utils.crypto.signer import SignerFactory
 from layer0.utils.hash import HashUtils
 from rich import print, inspect
 from layer0.blockchain.core.block import Block
+import time
+
+MAX_TRANSACTION_WAITING_TIME = 1000 * 60 * 60 # 1 Hours
 
 class Validator:
     @staticmethod
@@ -40,11 +43,11 @@ class Validator:
     @staticmethod
     def validate_transaction_with_worldstate(tx: Transaction, worldState: WorldState) -> bool:
 
-        if tx.gasLimit < ChainConfig.MinimumGasPrice:
+        if tx.gas_limit < ChainConfig.MinimumGasPrice:
             print("Validator.py:offchain_validate: Transaction gasPrice is below minimum")
             return False
 
-        if worldState.get_eoa(tx.sender).balance < tx.gasLimit and tx.Txtype != "mintburn":
+        if worldState.get_eoa(tx.sender).balance < tx.gas_limit and tx.Txtype != "mintburn":
             print("Validator.py:offchain_validate: Transaction sender does not have enough balance")
             return False
 
@@ -75,6 +78,10 @@ class Validator:
 
         if not SignerFactory().get_signer().address(temp_public_key) == tx.sender:
             print("chain.py:process_block: Transaction sender is invalid")
+            return False
+
+        # Check if transaction aren't too old or in the futures
+        if tx.timestamp < (time.time() * 1000 - MAX_TRANSACTION_WAITING_TIME) or tx.timestamp > time.time() * 1000:
             return False
 
         if pre_nonce_check:

@@ -48,13 +48,13 @@ class BlocksEvent(EventHandler):
 
     def handle(self, event: "NodeEvent"):
         blocks_data = event.data["blocks"]
-        print(f"[{self.neh.node.address}] BlocksEvent.handle: received {len(blocks_data)} blocks from {event.origin}")
+        print(f"[{self.neh.node.origin}] BlocksEvent.handle: received {len(blocks_data)} blocks from {event.origin}")
 
         # Need to check where to overwrite and remove all block in that case
         # TODO: Find smallest height block and start purging from top to there height before add new block
         # TODO: Need to implement state diff logic for reverse
 
-        print(blocks_data)
+        # print(blocks_data)
         if len(blocks_data) > 1:
             highest_point = BlockProcessor.cast_block(blocks_data[1]).index
             if highest_point < self.neh.node.blockchain.get_height():
@@ -65,7 +65,7 @@ class BlocksEvent(EventHandler):
             block = BlockProcessor.cast_block(block_data)
             if block.index == 0:
                 continue # Pass genesis block
-            print(f"[{self.neh.node.address}] BlocksEvent.handle: adding block {block.index} to blockchain")
+            print(f"[{self.neh.node.origin}] BlocksEvent.handle: adding block {block.index} to blockchain")
             self.neh.node.blockchain.add_block(block) # Perment write to disk
 
         status_request_event = NodeEvent("get_status", {}, self.neh.node.origin)

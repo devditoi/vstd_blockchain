@@ -1,7 +1,7 @@
 from layer0.utils.crypto.signer import SignerFactory
 from layer0.blockchain.core.transaction_type import Transaction, NativeTransaction
 from layer0.node.node import Node
-
+import time
 
 class Wallet:
     def __init__(self, node: Node) -> None:
@@ -16,7 +16,7 @@ class Wallet:
 
     def create_tx(self, amount: int, payee_address: str):
         amount = int(amount)
-        tx: Transaction = NativeTransaction(self.address, payee_address, amount, self.nonce + 1, 100)
+        tx: Transaction = NativeTransaction(self.address, payee_address, amount, self.nonce + 1, int(time.time() * 1000), 100)
         self.nonce += 1
         sign: bytes = self.signer.sign(tx.to_verifiable_string(), self.privateKey)
 

@@ -13,19 +13,24 @@ class ITransaction(ABC):
         pass
 
 class Transaction(ITransaction):
-    def __init__(self, sender: str, to: str, Txtype: str, nonce: int, gasLimit: int) -> None:
+    def __init__(self, sender: str, to: str, Txtype: str, timestamp: int, nonce: int, gas_limit: int) -> None:
         self.sender = sender
         self.to = to
         self.Txtype = Txtype
+        self.timestamp = timestamp
         self.signature = None
         self.publicKey = None
         self.transactionData: dict = {}
-        self.gasLimit = gasLimit
+        self.gas_limit = gas_limit
         self.nonce = nonce
         self.chainId = 1 # Testnet
         self.hash = HashUtils.sha256(self.to_verifiable_string()) # Hash chain_id of each transaction
 
+        # Offchain data
         self.status = "pending"
+        self.gas_used = 0
+        self.block_index = -1 # After processing, we will know what block it in
+
 
     def to_string(self) -> str:
         return jsonlight.dumps({
@@ -33,25 +38,30 @@ class Transaction(ITransaction):
             "to": self.to,
             "Txtype": self.Txtype,
             "nonce": self.nonce,
-            "gasLimit": self.gasLimit,
+            "gas_limit": self.gas_limit,
             "data": self.transactionData,
             "hash": self.hash,
             "signature": self.signature,
             "publicKey": self.publicKey,
+            "timestamp": self.timestamp
         })
 
-    def to_string_with_status(self) -> str:
+    def to_string_with_offchain_data(self) -> str:
         return jsonlight.dumps({
             "sender": self.sender,
             "to": self.to,
             "Txtype": self.Txtype,
             "nonce": self.nonce,
-            "gasLimit": self.gasLimit,
+            "gas_limit": self.gas_limit,
             "data": self.transactionData,
             "hash": self.hash,
             "signature": self.signature,
             "publicKey": self.publicKey,
+            "timestamp": self.timestamp,
+            # Offchain data
             "status": self.status,
+            "gas_used": self.gas_used,
+            "block_index": self.block_index
         })
 
     def to_verifiable_string(self) -> str:
@@ -59,8 +69,9 @@ class Transaction(ITransaction):
             "sender": self.sender,
             "Txtype": self.Txtype,
             "nonce": self.nonce,
-            "gasLimit": self.gasLimit,
+            "gas_limit": self.gas_limit,
             "data": self.transactionData,
+            "timestamp": self.timestamp
         })
 
     def __repr__(self):
@@ -77,8 +88,8 @@ class Transaction(ITransaction):
         return 0
 
 class NativeTransaction(Transaction):
-    def __init__(self, sender: str, receiver: str, amount: int, nonce: int, gasLimit: int) -> None:
-        super().__init__(sender, receiver, "native", nonce, gasLimit)
+    def __init__(self, sender: str, receiver: str, amount: int, timestamp: int, nonce: int, gas_limit: int) -> None:
+        super().__init__(sender, receiver, "native", timestamp, nonce, gas_limit)
         self.transactionData["amount"] = amount
 
 
@@ -136,8 +147,8 @@ class NativeTransaction(Transaction):
 #         self.transactionData["data"] = data
 #
 class MintBurnTransaction(Transaction):
-    def __init__(self, sender: str, receiver: str, amount: int, nonce: int, gasLimit: int) -> None:
-        super().__init__(sender, receiver, "mintburn", nonce, gasLimit)
+    def __init__(self, sender: str, receiver: str, amount: int, timestamp: int, nonce: int, gas_limit: int) -> None:
+        super().__init__(sender, receiver, "mintburn", timestamp, nonce, gas_limit)
         # self.transactionData["receiver"] = receiver
         self.transactionData["amount"] = amount
 
@@ -166,7 +177,7 @@ class MintBurnTransaction(Transaction):
 
 class NopTransaction(Transaction):
     def __init__(self):
-        super().__init__("0x0", "0x0", "nop", 0, 0)
+        super().__init__("0x0", "0x0", "nop", 0, 0, 0)
 
     def process(self, worldState) -> (bool, int):
         print("TransactionProcessor:process_nop_transaction: Process noop transaction")

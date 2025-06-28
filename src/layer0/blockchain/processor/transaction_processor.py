@@ -5,14 +5,15 @@ import json
 from rich import print
 
 
+# Implement more transaction type here!!!
 def cast_raw_transaction(transaction, transaction_data):
     match transaction["Txtype"]:
         case "mintburn":
-            return MintBurnTransaction(transaction["sender"] ,transaction["to"], transaction_data["amount"],
-                                       transaction["nonce"], transaction["gasLimit"])
+            return MintBurnTransaction(transaction["sender"] ,transaction["to"], transaction_data["amount"], transaction["timestamp"],
+                                       transaction["nonce"], transaction["gas_limit"])
         case "native":
             return NativeTransaction(transaction["sender"], transaction["to"],
-                                     transaction_data["amount"], transaction["nonce"], transaction["gasLimit"])
+                                     transaction_data["amount"], transaction["timestamp"], transaction["nonce"], transaction["gas_limit"])
         case _:
             return NopTransaction()
 
@@ -42,19 +43,19 @@ class TransactionProcessor:
         for tx in self.block.data:
             print("TransactionProcessor:process: Process " + tx.Txtype + " transaction")
 
-            if tx.gasLimit < tx.max_gas_usage():
+            if tx.gas_limit < tx.max_gas_usage():
                 print("TransactionProcessor:process: Transaction gas precomputed limit exceeded")
                 tx.status = "failed"
                 continue # Pass this transaction (aka fail safe)
 
             # Check if the user has enough gas
-            if self.worldState.get_eoa(tx.sender).balance < tx.gasLimit:
+            if self.worldState.get_eoa(tx.sender).balance < tx.gas_limit:
                 print("TransactionProcessor:process: Transaction sender does not have enough balance")
                 tx.status = "failed"
                 continue # Pass this transaction
 
             # Deduct the gas
-            gas_allowed = tx.gasLimit
+            gas_allowed = tx.gas_limit
             neoa = self.worldState.get_eoa(tx.sender)
             neoa.balance -= gas_allowed
             self.worldState.set_eoa(tx.sender, neoa)
@@ -143,13 +144,13 @@ class TransactionProcessor:
     #         print(f"[Skip] Tx {transaction.hash[:8]} is noop (sender == receiver)")
     #         return True
     #
-    #     print("TransactionProcessor:process_native_transaction: Process native transaction, gas fee: " + str(transaction.gasLimit))
+    #     print("TransactionProcessor:process_native_transaction: Process native transaction, gas fee: " + str(transaction.gas_limit))
     #
     #     # Update world state
     #     sender = transaction.sender
     #     receiver = transaction.to
     #     amount = transaction.transactionData["amount"]
-    #     gasPrice = transaction.gasLimit
+    #     gasPrice = transaction.gas_limit
     #
     #     # self.worldState.get_eoa(sender).balance -= amount + gasPrice
     #     # self.worldState.get_eoa(receiver).balance += amount

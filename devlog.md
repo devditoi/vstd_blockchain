@@ -64,11 +64,28 @@
 - Refactor gas for transaction 
 - Need some addition metadata for transaction tho :D
 - Very wierd worldstate mismatch for syncher ??
-- I think transaction need more data like timestamp and stuff lol\
+- I think transaction need more data like timestamp and stuff lol
 
 ## Solutions
 - [x] Implement blockscan REST API (Ok it fine)
 - [x] Save and search transaction
-- [ ] Implemnt wallet
+- [ ] Implement wallet
 - [x] Implement web interface for blockscan (Yo it so niceeeee)
 - [x] Yo we need to fix the test!!! (EZ:D)
+
+## June 28, 2025
+
+### Problems
+- Need some addition metadata for transaction tho :D
+- Very wierd worldstate mismatch for syncher ??
+- I think transaction need more data like timestamp and stuff lol
+- Make a chrome extension for a wallet (maybe :D)
+
+### Solutions
+- [ ] Implement wallet
+- [x] Check the worldstate mismatch
+- [x] Implement transaction metadata
+- [x] Fix intergration test for node (because of peer limit)
+- [x] Fix unit test when append metadata for transaction
+- [ ] Actually use those metadata for transaction
+- [ ] Fix why the node can't connect to the network (Or luck?)

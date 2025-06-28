@@ -20,8 +20,11 @@ class BlockEvent(EventHandler):
         if isinstance(block, str):
             block = BlockProcessor.cast_block(event.data["block"])
 
-        print(event.origin)
+        # print(event.origin)
         # inspect(block)
+
+        if block.hash == self.neh.node.blockchain.get_latest_block().hash: # Block is already exist
+            return False
 
         if not Validator.validate_block_without_chain(block, self.neh.node.blockchain.get_latest_block().hash):  # Not a valid block
             print("validator.py:validate_block_without_chain: Block is invalid")
