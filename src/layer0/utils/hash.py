@@ -1,17 +1,17 @@
 import hashlib
 import rsa
-from ecdsa import VerifyingKey
+from ecdsa import VerifyingKey, SigningKey, SECP256k1
 from rsa.key import PublicKey, PrivateKey
 import ecdsa
 # print(hashlib.sha256(b"Nobody inspects the spammish repetition").hexdigest())
 
 class HashUtils:
     @staticmethod
-    def sha256(data):
+    def sha256(data) -> str:
         return hashlib.sha256(data.encode('utf8')).hexdigest()
 
     @staticmethod
-    def sha256_nonencode(data):
+    def sha256_nonencode(data) -> str:
         return hashlib.sha256(data).hexdigest()
 
     @staticmethod
@@ -20,7 +20,7 @@ class HashUtils:
 
     @staticmethod
     def get_address_ecdsa(publicKey: VerifyingKey) -> str:
-        return HashUtils.sha256_nonencode(publicKey.to_string())
+        return HashUtils.sha256(publicKey.to_string().hex())
 
     @staticmethod
     def gen_key() -> tuple[PublicKey, PrivateKey]:
@@ -37,8 +37,8 @@ class HashUtils:
         return True if rsa.verify(encoded_data, signature, publicKey) else False
 
     @staticmethod
-    def ecdsa_keygen():
-        sk = ecdsa.SigningKey.generate()
+    def ecdsa_keygen() -> tuple[VerifyingKey, SigningKey]:
+        sk = ecdsa.SigningKey.generate(curve=SECP256k1)
         vk = sk.get_verifying_key()
         return vk, sk
 

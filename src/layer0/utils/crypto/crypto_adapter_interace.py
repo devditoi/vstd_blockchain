@@ -1,51 +1,52 @@
 from abc import ABC, abstractmethod
+from typing import Any
 
 class ICryptoAdapter(ABC):
 
     @staticmethod
-    def gen_key() -> tuple[any, any]:
-        pass
+    def gen_key() -> tuple[Any, Any]:
+        return NotImplemented
 
     @staticmethod
-    def sign(message: str, privateKey: any) -> bytes:
-        pass
+    def sign(message: str, privateKey: object) -> str:
+        return NotImplemented
 
     @staticmethod
-    def verify(message: str, signature: bytes, publicKey: any) -> bool:
-        pass
+    def verify(message: str, signature: str, publicKey: object) -> bool:
+        return NotImplemented
 
     @staticmethod
-    def save(filename: str, publicKey: any, privateKey: any):
-        pass
+    def save(filename: str, publicKey: object, privateKey: object):
+        return NotImplemented
 
     @staticmethod
-    def save_pub(filename: str, publicKey: any):
-        pass
+    def save_pub(filename: str, publicKey: object):
+        return NotImplemented
 
     @staticmethod
-    def save_priv(filename: str, privateKey: any):
-        pass
+    def save_priv(filename: str, privateKey: object):
+        return NotImplemented
 
     @staticmethod
     def load(filename: str):
-        pass
+        return NotImplemented
 
     @staticmethod
     def load_pub(filename: str):
-        pass
+        return NotImplemented
 
     @staticmethod
     def load_priv(filename: str):
-        pass
+        return NotImplemented
 
     @staticmethod
-    def address(publicKey) -> str:
-        pass
+    def address(publicKey: object) -> str:
+        return NotImplemented
 
     @staticmethod
-    def serialize(publicKey) -> str:
-        pass
+    def serialize(publicKey: object) -> str:
+        return NotImplemented
 
     @staticmethod
-    def deserialize(serialized) -> any:
-        pass
+    def deserialize(serialized) -> object:
+        return NotImplemented

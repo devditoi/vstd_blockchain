@@ -1,7 +1,9 @@
+from layer0.blockchain.core.worldstate import SmartContract
+from layer0.blockchain.core.worldstate import EOA
 import jsonlight
 import json
 import typing
-
+from typing import Any
 from rich import inspect
 
 from layer0.blockchain.processor.block_processor import BlockProcessor
@@ -46,7 +48,7 @@ class WorldStateSerializer:
             world_state (WorldState): The WorldState object to serialize.
 
         Returns:
-            str: A JSON string representation of the world state, including EOAs and smart contracts.
+            str: A JSON string representation of the world state, including EOA and smart contracts.
         """
         return jsonlight.dumps({
             "eoas": jsonlight.dumps(world_state.get_eoa_full()),
@@ -64,68 +66,78 @@ class WorldStateSerializer:
         Returns:
             WorldState: A WorldState object constructed from the given JSON string.
         """
-        data = json.loads(world_state_json)
+        data: Any = json.loads(world_state_json)
         return WorldStateSerializer.build_world_state(data)
 
     @staticmethod
-    def build_world_state(data: any) -> WorldState:
+    def build_world_state(data: Any) -> WorldState:
         """
         Builds a WorldState object from a JSON string or a dictionary.
 
         Args:
-            data (any): A JSON string or a dictionary containing the EOAs and smart contracts as keys "eoas" and "smartContracts" respectively.
+            data (any): A JSON string or a dictionary containing the EOA and smart contracts as keys "eoas" and "smartContracts" respectively.
 
         Returns:
             WorldState: A WorldState object constructed from the given data.
         """
-        world_state = WorldState()
-        eoas = json.loads(data["eoas"])
-        smartContracts = json.loads(data["smartContracts"])
-        world_state.set_eoa_and_smart_contract(eoas, smartContracts)
+        world_state: WorldState = WorldState()
+        raw_eoas_dict: dict[str, dict] = json.loads(data["eoas"])
+        raw_smart_contracts_dict: dict[str, dict] = json.loads(data["smartContracts"])
+        
+        converted_eoas: dict[str, EOA] = {}
+        for address, eoa_data_dict in raw_eoas_dict.items():
+            converted_eoas[address] = EOA(**eoa_data_dict) # Unpack dict to dataclass
+
+        # Convert smart contracts
+        converted_smart_contracts: dict[str, SmartContract] = {}
+        for address, sc_data_dict in raw_smart_contracts_dict.items():
+            converted_smart_contracts[address] = SmartContract(**sc_data_dict) # Unpack dict to dataclass
+        
+        world_state.set_eoa_and_smart_contract(converted_eoas, converted_smart_contracts)
         # inspect(world_state)
         return world_state
 
 
-class NodeSerializer:
-    @staticmethod
-    def to_json(node: "Node"):
-        """
-        Serialize a Node object to a JSON string.
+# class NodeSerializer:
+#     @staticmethod
+#     def to_json(node: "Node"):
+#         """
+#         Serialize a Node object to a JSON string.
 
-        Args:
-            node (Node): The Node object to serialize.
+#         Args:
+#             node (Node): The Node object to serialize.
 
-        Returns:
-            str: A JSON string representation of the given Node object.
-        """
-        return jsonlight.dumps({
-            "blockchain": ChainSerializer.serialize_chain(node.blockchain),
-            "worldstate": node.worldState.to_json(),
-            "version": node.version,
-            "address": node.address,
-            "publicKey": node.publicKey.to_string().hex()
-        })
+#         Returns:
+#             str: A JSON string representation of the given Node object.
+#         """
+#         return jsonlight.dumps({
+#             "blockchain": ChainSerializer.serialize_chain(node.blockchain),
+#             "worldstate": node.worldState.to_json(),
+#             "version": node.version,
+#             "address": node.address,
+#             "publicKey": node.publicKey.to_string().hex()
+#         })
 
-    @staticmethod
-    def deserialize_node(node_json: str) -> "Node":
-        """
-        Deserialize a JSON string representation of a Node object into a Node object.
+#     @staticmethod
+#     def deserialize_node(node_json: str) -> "Node":
+#         """
+#         Deserialize a JSON string representation of a Node object into a Node object.
 
-        Args:
-            node_json (str): The JSON string representing the Node object.
+#         Args:
+#             node_json (str): The JSON string representing the Node object.
 
-        Returns:
-            Node: A Node object constructed from the given JSON string.
-        """
-        data = json.loads(node_json)
-        print(data["publicKey"])
-        node = Node()
-        node.blockchain = ChainSerializer.deserialize_chain(data["blockchain"])
-        node.worldState = WorldStateSerializer.deserialize_world_state(data["worldstate"])
-        node.version = data["version"]
-        node.address = data["address"]
-        node.publicKey = data["publicKey"]
-        return node
+#         Returns:
+#             Node: A Node object constructed from the given JSON string.
+#         """
+#         data = json.loads(node_json)
+#         print(data["publicKey"])
+#         node = Node()
+#         node.blockchain = ChainSerializer.deserialize_chain(data["blockchain"])
+#         node.worldState = WorldStateSerializer.deserialize_world_state(data["worldstate"])
+#         node.version = data["version"]
+#         node.address = data["address"]
+#         node.publicKey = data["publicKey"]
+#         return node
 
 class PeerSerializer:
     @staticmethod

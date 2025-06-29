@@ -1,3 +1,4 @@
+from layer0.blockchain.core.worldstate import WorldState
 from layer0.config import ChainConfig
 from layer0.node.events.node_event import NodeEvent
 from layer0.p2p.peer_type.remote_peer import RemotePeer
@@ -10,6 +11,7 @@ import json
 import time
 from rich import inspect
 from layer0.utils.serializer import WorldStateSerializer
+from typing import Any
 
 
 class WalletRemote:
@@ -19,7 +21,7 @@ class WalletRemote:
         self.peer = main_peer
         self.address = self.signer.address(self.publicKey)
         self.nonce = 0
-        self.sock = None
+        self.sock: socket.socket | None = None
         self.ip = ip
         self.port = port
         self.stop_flag = False
@@ -27,14 +29,14 @@ class WalletRemote:
         self.listen_thread = threading.Thread(target=self.listen_loop, daemon=True)
         self.listen_thread.start()
         self.origin = ip + ":" + str(port)
-        self.world_state = None # TODO: Fetch every new block
+        self.world_state: WorldState | None = None
         self.get_balance_thread_start()
 
 
     def process_event(self, event):
         # print(event)
         if event.eventType == "getworldstate_finished":
-            world_state_raw = event.data
+            world_state_raw: dict = event.data
             # print(world_state_raw)
             self.world_state = WorldStateSerializer.deserialize_world_state(world_state_raw["worldstate"])
             # print(self.world_state.to_json())
@@ -47,9 +49,12 @@ class WalletRemote:
 
         while not self.stop_flag:
             try:
+                if not self.sock:
+                    print("Socket is None")
+                    return
                 data, addr = self.sock.recvfrom(65536)
-                message = json.loads(data.decode())
-                event = NodeEvent(
+                message: Any = json.loads(data.decode())
+                event: NodeEvent = NodeEvent(
                     eventType=message["eventType"],
                     data=message["data"],
                     origin=message["origin"]
@@ -66,11 +71,11 @@ class WalletRemote:
         self.nonce += 1
         sign: bytes = self.signer.sign(tx.to_verifiable_string(), self.privateKey)
         serialize_public_key = SignerFactory().get_signer().serialize(self.publicKey)
-        event = NodeEvent("tx", {"tx": tx, "signature": sign, "publicKey": serialize_public_key}, self.origin)
+        event: NodeEvent = NodeEvent("tx", {"tx": tx, "signature": sign, "publicKey": serialize_public_key}, self.origin)
         # inspect(event)
         self.peer.fire(event)
 
-    def pay(self, amount: any, payee_address: str) -> Transaction:
+    def pay(self, amount: Any, payee_address: str) -> Transaction:
         amount = int(amount)
         tx: Transaction = NativeTransaction(self.address, payee_address, amount, int(time.time() * 1000), self.nonce + 1, ChainConfig.NativeTokenGigaweiValue * 100)
         # self.sign_and_post_transaction(tx)
@@ -79,7 +84,7 @@ class WalletRemote:
     def get_balance_thread_start(self):
         def get_balance_thread():
             while True:
-                event = NodeEvent("getworldstate", {}, self.origin)
+                event: NodeEvent = NodeEvent("getworldstate", {}, self.origin)
                 self.peer.fire(event)
                 time.sleep(5)
 
@@ -92,11 +97,11 @@ class WalletRemote:
             return 0
         # print(self.world_state.get_eoa(self.address))
         try:
-            self.nonce = int(self.world_state.get_eoa(self.address)["nonce"])
-            return self.world_state.get_eoa(self.address)["balance"]
+            self.nonce = int(self.world_state.get_eoa(self.address).nonce)
+            return self.world_state.get_eoa(self.address).balance
         except TypeError as e:
-            # import traceback
-            # traceback.print_exc()
+            import traceback
+            traceback.print_exc()
             return 0
 
     def export_key(self, filename: str) -> None:

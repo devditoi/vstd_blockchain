@@ -91,10 +91,10 @@ def confirm_and_sign(tx: Transaction) -> bool:
 # ---- INIT WALLET ----
 
 # Choose random port
-PORT = random.randint(8000, 9999)
+PORT: int = random.randint(8000, 9999)
 
-master = RemotePeer("127.0.0.1", 5000)
-wallet = WalletRemote(master, "127.0.0.1", PORT)
+master: RemotePeer = RemotePeer("127.0.0.1", 5000)
+wallet: WalletRemote = WalletRemote(master, "127.0.0.1", PORT)
 
 if Confirm.ask("\n[bold]Do you want to be minter?[/bold]"):
     wallet.import_key("mint_key")

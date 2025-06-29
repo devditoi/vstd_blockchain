@@ -2,7 +2,7 @@ import pytest
 
 from layer0.blockchain.core.transaction_type import NativeTransaction
 from layer0.blockchain.core.validator import Validator
-from layer0.blockchain.core.worldstate import WorldState, EOAs
+from layer0.blockchain.core.worldstate import WorldState, EOA
 from layer0.blockchain.processor.transaction_processor import TransactionProcessor
 from layer0.config import ChainConfig
 import time
@@ -15,8 +15,8 @@ def data():
 
     ws = WorldState()
 
-    ws.set_eoa("0x0", EOAs("0x0", int(1 * ChainConfig.NativeTokenValue), 0))
-    ws.set_eoa("0x2", EOAs("0x0", int(99), 0))
+    ws.set_eoa("0x0", EOA("0x0", int(1 * ChainConfig.NativeTokenValue), 0))
+    ws.set_eoa("0x2", EOA("0x0", int(99), 0))
 
     data = {
         "world_state": ws,

@@ -1,13 +1,13 @@
 from dataclasses import dataclass, field
 import jsonlight
 import json
-
+from typing import Any
 from layer0.utils.hash import HashUtils
 
 
 # This is a single unit of the world state that only contains the data
 @dataclass
-class EOAs:
+class EOA:
     address: str
     balance: int
     nonce: int
@@ -19,7 +19,7 @@ class EOAs:
             "nonce": self.nonce
         }
     # def __str__(self) -> str:
-    #     return f"EOAs(address={self.address}, balance={self.balance}, nonce={self.nonce})"
+    #     return f"EOA(address={self.address}, balance={self.balance}, nonce={self.nonce})"
 
 @dataclass
 class SmartContract:
@@ -43,26 +43,26 @@ class SmartContract:
 
 @dataclass
 class WorldState:
-    __eoas: dict[str, EOAs]
+    __eoas: dict[str, EOA]
     __smartContracts: dict[str, SmartContract]
 
     def __init__(self):
         self.__eoas = {}
         self.__smartContracts = {}
 
-    def set_eoa_and_smart_contract(self, eoas: dict[str, EOAs], smartContracts: dict[str, SmartContract]):
+    def set_eoa_and_smart_contract(self, eoas: dict[str, EOA], smartContracts: dict[str, SmartContract]):
         self.__eoas = eoas
         self.__smartContracts = smartContracts
 
     def __str__(self) -> str:
         return f"WorldState(eoas={self.__eoas}, smartContracts={self.__smartContracts})"
 
-    def get_eoa(self, address: str) -> EOAs:
+    def get_eoa(self, address: str) -> EOA:
         if address not in self.__eoas:
-            self.__eoas[address] = EOAs(address, 0, 0)
+            self.__eoas[address] = EOA(address, 0, 0)
         return self.__eoas[address]
 
-    def set_eoa(self, address: str, eoa: EOAs):
+    def set_eoa(self, address: str, eoa: EOA):
         self.__eoas[address] = eoa
 
     def get_smart_contract(self, address: str) -> SmartContract:
@@ -80,7 +80,7 @@ class WorldState:
         })
 
     def build_worldstate(self, json_string: str):
-        data = json.loads(json_string)
+        data: Any = json.loads(json_string)
         self.__eoas = json.loads(data["eoas"])
         self.__smartContracts = json.loads(data["smartContracts"])
         print("worldstate.py:build_worldstate: built worldstate")

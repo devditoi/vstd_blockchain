@@ -88,5 +88,17 @@
 - [x] Implement transaction metadata
 - [x] Fix integration test for node (because of peer limit)
 - [x] Fix unit test when append metadata for transaction
-- [ ] Actually use those metadata for transaction
+- [x] Actually use those metadata for transaction
 - [x] Fix why the node can't connect to the network (Or luck?)
+
+## June 29, 2025
+
+### Problems
+- Make a chrome extension for a wallet (maybe :D)
+- Nah Just make a react app for wallet
+
+
+### Solutions
+- [x] Implement wallet UI
+- [x] Fix some wallet bugs (Because the UI is so cool (AI generated))
+- [x] Fix python typing because I switch to `vscode` :DD
