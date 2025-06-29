@@ -15,6 +15,7 @@ class Block:
 
         # For developing purpose
         self.world_state_hash = worldstate_hash
+        self.miner = None
 
         # Next we need state diff for a block. (aka record state different in a block)
         # Not planed
@@ -28,7 +29,8 @@ class Block:
             "hash": self.hash,
             "signature": self.signature,
             "address": self.address,
-            "world_state_hash": self.world_state_hash
+            "world_state_hash": self.world_state_hash,
+            "miner": self.miner
         }, indent=2)
 
     def get_string_for_signature(self) -> str:
@@ -38,7 +40,8 @@ class Block:
             "timestamp": self.timestamp,
             "data": self.data,
             "hash": self.hash,
-            "world_state_hash": self.world_state_hash
+            "world_state_hash": self.world_state_hash,
+            "miner": self.miner
         })
 
     def __repr__(self):

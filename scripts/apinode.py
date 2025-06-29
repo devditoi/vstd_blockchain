@@ -98,8 +98,17 @@ async def get_transactions(address: str) -> any:
     txs = master.query_tx(address, "sender")
     txs2 = master.query_tx(address, "to")
     txs.extend(txs2)
+    # Need to clear out duplicates hashes
+    # print(txs)
+    # print(type(txs[0]))
+    unique_hashes = set()
+    unique_txs = []
+    for tx in txs:
+        if tx["hash"] not in unique_hashes:
+            unique_hashes.add(tx["hash"])
+            unique_txs.append(tx)
     return {
-        "transactions": txs
+        "transactions": unique_txs
     }
 
 @app.get("/blocks/{height}", response_model=Dict[str, Any])
@@ -155,22 +164,22 @@ if __name__ == "__main__":
     # import threading
     
     # Start the FastAPI server in a separate thread
-    def run_api():
-        uvicorn.run(app, host="127.0.0.1", port=8000) # Just use main thread lol
+    # def run_api():
+    uvicorn.run(app, host="127.0.0.1", port=8000) # Just use main thread lol
 
-    api_thread = threading.Thread(target=run_api, daemon=True)
-    api_thread.start()
+    # api_thread = threading.Thread(target=run_api, daemon=True)
+    # api_thread.start()
 
-    RPeer = RemotePeer("127.0.0.1", 5000)
-    w = WalletRemote(RPeer, "127.0.0.1", 8001)
-    i = 1
-    while True:
-        time.sleep(5)
-        # Mock data (transaction) for test (aka add random transaction to mempool)
-        random_people = random.randint(1, 999999)
-        addr = HashUtils.sha256(str(random_people))
-        tx = MintBurnTransaction(w.address ,addr, 1000, i, 0)
-        i += 1
-
-        w.sign_and_post_transaction(tx)
+    # RPeer = RemotePeer("127.0.0.1", 5000)
+    # w = WalletRemote(RPeer, "127.0.0.1", 8001)
+    # i = 1
+    # while True:
+    #     time.sleep(5)
+    #     # Mock data (transaction) for test (aka add random transaction to mempool)
+    #     random_people = random.randint(1, 999999)
+    #     addr = HashUtils.sha256(str(random_people))
+    #     tx = MintBurnTransaction(w.address ,addr, 1000, int(time.time() * 1000), i, 0)
+    #     i += 1
+    #
+    #     w.sign_and_post_transaction(tx)
 

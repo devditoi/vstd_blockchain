@@ -11,6 +11,7 @@ from rich.console import Console
 from rich.prompt import Prompt, Confirm
 from rich.panel import Panel
 from rich.table import Table
+import time
 
 console = Console()
 app = typer.Typer()
@@ -110,7 +111,7 @@ def mint_tokens():
     amount_str = Prompt.ask("[yellow]Enter amount of VSTD to mint[/]")
     try:
         amount = int(float(amount_str) * ChainConfig.NativeTokenValue)
-        tx = MintBurnTransaction(wallet.address, amount, wallet.nonce + 1, 0)
+        tx = MintBurnTransaction(wallet.address, wallet.address, amount, int(time.time() * 1000), wallet.nonce + 1, 0)
         # wallet.sign_and_post_transaction(tx)
         if confirm_and_sign(tx):
             console.print(f"[green]✓ Minted {format_number_with_spaces(amount / ChainConfig.NativeTokenValue)} VSTD successfully.[/]")

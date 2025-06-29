@@ -81,4 +81,4 @@ def test_network_check(data):
     __protocol = UDPProtocol(node.node_event_handler, 2710)
 
     # check if all peers are connected
-    assert length_polling(node, min(peers, 10)), "Peer connection timeout"
+    assert length_polling(node, min(peers, 10, 60)), "Peer connection timeout"

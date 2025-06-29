@@ -131,7 +131,7 @@ class Node:
     def get_block(self, height: int) -> Block | None:
         return self.blockchain.get_block(height)
 
-    def query_tx(self, query: str, field: str | None = None) -> list[str]:
+    def query_tx(self, query: str, field: str | None = None) -> list[dict]:
         return self.blockchain.query_tx(query, field)
 
     def query_block(self, query: str, field: str | None = None) -> list[str]:

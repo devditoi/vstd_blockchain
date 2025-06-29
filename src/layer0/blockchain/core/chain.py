@@ -21,7 +21,7 @@ from layer0.utils.hash import HashUtils
 class Chain:
     def __init__(self, chain_id: str, dummy = True) -> None:
         print("chain.py:__init__: Initializing Chain")
-        self.genesis_tx = Transaction("0x0", "genesis", "0", 0, 0, 0) # Ts need same for every node so timestamp zero is fine :D
+        self.genesis_tx = Transaction("0", "genesis", "0", 0, 0, 0) # Ts need same for every node so timestamp zero is fine :D
         self.genesis_block: Block = Block(0, "0", 0, "0", [self.genesis_tx])
         self.chain = FilebaseSaver(FilebaseDatabase(
             f"chain_{chain_id}_blockchain",

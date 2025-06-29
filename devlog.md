@@ -80,6 +80,7 @@
 - Very wierd worldstate mismatch for syncher ??
 - I think transaction need more data like timestamp and stuff lol
 - Make a chrome extension for a wallet (maybe :D)
+- Need to fix network test, either implement multiserver testing or find a better way to test network
 
 ### Solutions
 - [ ] Implement wallet
@@ -88,4 +89,4 @@
 - [x] Fix integration test for node (because of peer limit)
 - [x] Fix unit test when append metadata for transaction
 - [ ] Actually use those metadata for transaction
-- [ ] Fix why the node can't connect to the network (Or luck?)
+- [x] Fix why the node can't connect to the network (Or luck?)

@@ -29,6 +29,8 @@ class ConsensusProcessor:
         # Sign block
         consensus.sign_block(block)
 
+        block.miner = consensus.get_validators() # Hardcoded
+
         # Broadcast block
         broadcast_callback(block)
 

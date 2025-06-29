@@ -66,6 +66,23 @@ class TransactionProcessor:
             # Subtract the gas
             gas_leftover = gas_allowed - gas_used
 
+            # Gas
+            # Half gone to miner wallet
+            # Half disapears
+
+            miner_reward = gas_used // 2
+            burned = gas_used - miner_reward
+
+            # Transfer to miner
+            neoa = self.worldState.get_eoa(self.block.miner)
+            neoa.balance += miner_reward
+            self.worldState.set_eoa(self.block.miner, neoa)
+
+            # Transfer to 0 (Burn address)
+            neoa = self.worldState.get_eoa("0")
+            neoa.balance += burned
+            self.worldState.set_eoa("0", neoa)
+
             if gas_leftover < 0:
                 print("TransactionProcessor:process: Transaction gas limit exceeded")
                 tx.status = "failed" # And still eat the gas
@@ -90,6 +107,10 @@ class TransactionProcessor:
             self.worldState.set_eoa(tx.sender, neoa)
 
             tx.status = "succeeded"
+            tx.gas_used = gas_used
+            tx.block_index = self.block.index
+
+            print(f"TransactionProcessor:process: Transaction succeeded, gas limit {tx.gas_limit}, gas used {tx.gas_used}, returned gas {gas_leftover}")
 
         return True
 

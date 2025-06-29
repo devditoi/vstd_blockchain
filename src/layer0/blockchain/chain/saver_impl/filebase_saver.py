@@ -140,9 +140,11 @@ class FilebaseSaver(ISaver):
             return None
         tx = TransactionProcessor.cast_transaction(tx_data)
 
-        # Cast special tx status
+        # Cast special tx status bruh need to index this shit
         tx_json = json.loads(tx_data)
         tx.status = tx_json["status"]
+        tx.gas_used = tx_json["gas_used"]
+        tx.block_index = tx_json["block_index"]
 
         return tx
 
