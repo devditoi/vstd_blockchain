@@ -1,3 +1,5 @@
+from builtins import staticmethod
+from builtins import staticmethod
 from rich import inspect
 
 from layer0.node.events.EventHandler import EventHandler
@@ -10,7 +12,9 @@ if typing.TYPE_CHECKING:
 
 # Remote side event
 class GetAncestorHashesEvent(EventHandler):
-    def require_field(self):
+    
+    @staticmethod
+    def require_field():
         return ["max_depth", "from_height"]
 
     @staticmethod
@@ -39,7 +43,9 @@ class GetAncestorHashesEvent(EventHandler):
 
 # Client side event
 class AncestorHashesEvent(EventHandler):
-    def require_field(self):
+    
+    @staticmethod
+    def require_field():
         return ["ancestor_hashes", "highest_height"]
 
     @staticmethod

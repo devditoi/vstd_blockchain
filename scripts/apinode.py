@@ -1,3 +1,6 @@
+from pydantic.main import BaseModel
+from layer0.blockchain.core.chain import Chain
+from layer0.blockchain.core.transaction_type import Transaction
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Dict, Any, List
@@ -23,6 +26,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:3000",
+        "http://localhost:5173"
     ],
     allow_credentials=False,
     allow_methods=["*"],
@@ -47,9 +51,11 @@ async def root() -> Dict[str, str]:
     return {"message": "Welcome to VSTD Blockchain Node API"}
 
 @app.get("/blocks/latest", response_model=Dict[str, Any])
-async def get_latest_block() -> any:
+async def get_latest_block() -> Any:
     """Get the latest block in the blockchain."""
-    latest_block = master.blockchain.get_latest_block()
+    latest_block: Block | None = master.blockchain.get_latest_block()
+    if latest_block is None:
+        raise HTTPException(status_code=404, detail="No blocks found in the blockchain")
     return {
         "block": block_to_dict(latest_block)
     }
@@ -62,31 +68,38 @@ async def get_blocks(skip: int = 0, limit: int = 10):
     actual_end = max(actual_start - limit, 0)
     print(actual_start, actual_end)
     for i in range(actual_start, actual_end, -1):
-        block = master.get_block(i)
+        block: Block | None = master.get_block(i)
+        if not block:
+            continue
         blocks.append(block_to_dict(block))
     return {"blocks": blocks}
 
 @app.get("/block/{height}/transactions", response_model=Dict[str, Any])
-async def get_block_transactions(height: int, skip: int = 0, limit: int = 10) -> any:
-    block = master.get_block(height)
+async def get_block_transactions(height: int, skip: int = 0, limit: int = 10) -> Any:
+    block: Block | None = master.get_block(height)
+    if not block:
+        raise HTTPException(status_code=404, detail="Block not found")
     return {
         "transactions": block.data
     }
 
 @app.get("/transaction/{tx_hash}", response_model=Dict[str, Any])
-async def get_transaction(tx_hash: str) -> any:
+async def get_transaction(tx_hash: str) -> Any:
+    tx: Transaction | None = master.get_tx(tx_hash)
+    if not tx:
+        raise HTTPException(status_code=404, detail="Transaction not found")
     return {
-        "transaction": master.get_tx(tx_hash).to_string_with_offchain_data()
+        "transaction": tx.to_string_with_offchain_data()
     }
 
 @app.get("/transactions", response_model=Dict[str, Any])
-async def get_transactions() -> any:
+async def get_transactions() -> Any:
     return {
         "transactions": master.get_txs()
     }
 
 @app.get("/address/{address}", response_model=Dict[str, Any])
-async def get_balance(address: str) -> any:
+async def get_balance(address: str) -> Any:
     return {
         "address": address,
         "balance": master.get_balance(address),
@@ -94,7 +107,7 @@ async def get_balance(address: str) -> any:
     }
 
 @app.get("/address/{address}/transactions", response_model=Dict[str, Any])
-async def get_transactions(address: str) -> any:
+async def get_transactions(address: str) -> Any:
     txs = master.query_tx(address, "sender")
     txs2 = master.query_tx(address, "to")
     txs.extend(txs2)
@@ -112,11 +125,11 @@ async def get_transactions(address: str) -> any:
     }
 
 @app.get("/blocks/{height}", response_model=Dict[str, Any])
-async def get_block_by_height(height: int) -> any:
+async def get_block_by_height(height: int) -> Any:
     """Get a block by its height."""
-    blockchain = master.blockchain
+    blockchain: Chain = master.blockchain
     try:
-        block = blockchain.get_block(height)
+        block: Block = blockchain.get_block(height)
         return {
             "block": block_to_dict(block)
         }
@@ -126,7 +139,7 @@ async def get_block_by_height(height: int) -> any:
 @app.get("/network-status", response_model=Dict[str, Any])
 async def get_blockchain_status() -> Dict[str, Any]:
     """Get the current status of the blockchain."""
-    blockchain = master.blockchain
+    blockchain: Chain = master.blockchain
     return {
         "height": blockchain.get_height(),
     }
@@ -134,8 +147,8 @@ async def get_blockchain_status() -> Dict[str, Any]:
 @app.get("/transaction/{tx_hash}", response_model=Dict[str, Any])
 async def get_transaction(tx_hash: str) -> Dict[str, Any]:
     """Get a transaction by its hash."""
-    blockchain = master.blockchain
-    transaction = blockchain.get_tx(tx_hash)
+    blockchain: Chain = master.blockchain
+    transaction: Transaction | None = blockchain.get_tx(tx_hash)
 
     if transaction is None:
         raise HTTPException(status_code=404, detail="Transaction not found")
@@ -144,15 +157,29 @@ async def get_transaction(tx_hash: str) -> Dict[str, Any]:
         "transaction": transaction.to_string()
     }
 
+# 1. Define a Pydantic model for your request body
+class TransactionBody(BaseModel):
+    transaction: str
+
 @app.post("/transaction/post", response_model=Dict[str, Any])
-async def post_transaction(transaction: str) -> Dict[str, Any]:
+async def post_transaction(transaction_data: TransactionBody) -> Dict[str, Any]:
     """Post a transaction to the blockchain."""
+    
+    transaction: str = transaction_data.transaction
+    
     if not TransactionProcessor.check_valid_transaction(transaction):
         raise HTTPException(status_code=400, detail="Invalid transaction format")
-    transaction = TransactionProcessor.cast_transaction(transaction)
+    sended_tx: Transaction = TransactionProcessor.cast_transaction(transaction)
+
+    print(transaction)
+
+    print(sended_tx.to_verifiable_string())
+    
+    master.propose_tx(sended_tx, sended_tx.signature, sended_tx.publicKey)
 
     return {
-        "transaction_hash": transaction.hash
+        "transaction_hash": HashUtils.sha256(sended_tx.to_verifiable_string()),
+        "fuck": sended_tx.to_verifiable_string()
     }
 
 

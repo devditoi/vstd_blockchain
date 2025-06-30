@@ -20,6 +20,8 @@ class HashUtils:
 
     @staticmethod
     def get_address_ecdsa(publicKey: VerifyingKey) -> str:
+        print(publicKey.to_string())
+        print(publicKey.to_string().hex())
         return HashUtils.sha256(publicKey.to_string().hex())
 
     @staticmethod

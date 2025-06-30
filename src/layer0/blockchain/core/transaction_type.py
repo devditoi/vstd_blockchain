@@ -1,3 +1,4 @@
+from typing_extensions import Literal
 from abc import ABC, abstractmethod
 import jsonlight
 from rsa import PublicKey
@@ -18,8 +19,8 @@ class Transaction(ITransaction):
         self.to = to
         self.Txtype = Txtype
         self.timestamp = timestamp
-        self.signature = None
-        self.publicKey = None
+        self.signature : str | None = None
+        self.publicKey : str | None = None
         self.transactionData: dict = {}
         self.gas_limit = gas_limit
         self.nonce = nonce
@@ -44,7 +45,7 @@ class Transaction(ITransaction):
             "signature": self.signature,
             "publicKey": self.publicKey,
             "timestamp": self.timestamp
-        })
+        }).replace(" ", "").replace("\n", "")
 
     def to_string_with_offchain_data(self) -> str:
         return jsonlight.dumps({
@@ -62,7 +63,7 @@ class Transaction(ITransaction):
             "status": self.status,
             "gas_used": self.gas_used,
             "block_index": self.block_index
-        })
+        }).replace(" ", "").replace("\n", "")
 
     def to_verifiable_string(self) -> str:
         return jsonlight.dumps({
@@ -72,16 +73,14 @@ class Transaction(ITransaction):
             "gas_limit": self.gas_limit,
             "data": self.transactionData,
             "timestamp": self.timestamp
-        })
+        }).replace(" ", "").replace("\n", "")
 
     def __repr__(self):
         return self.to_string()
 
     # Status, gas used
-    def process(self, worldState) -> (bool, int):
-        ws = worldState
-        sender = self.to
-        print("Transaction type is not supported")
+    def process(self, worldState) -> tuple[bool, int]:
+        return False, 0
 
     @staticmethod
     def max_gas_usage() -> int:
@@ -93,11 +92,11 @@ class NativeTransaction(Transaction):
         self.transactionData["amount"] = amount
 
 
-    def process(self, worldState) -> (bool, int):
+    def process(self, worldState) -> tuple[bool, int]:
 
         if self.sender == self.to:
             print(f"[Skip] Tx {self.hash[:8]} is noop (sender == receiver)")
-            return True
+            return True, self.max_gas_usage()
 
         print("TransactionProcessor:process_native_transaction: Process native transaction")
 
@@ -156,10 +155,10 @@ class MintBurnTransaction(Transaction):
     def max_gas_usage() -> int:
         return 0
 
-    def process(self, worldState) -> (bool, int):
+    def process(self, worldState) -> tuple[bool, int]:
         print("TransactionProcessor:process_mint_burn_transaction: Process mint burn transaction")
         # Update world state
-        receiver = self.to
+        receiver: str = self.to
         amount = self.transactionData["amount"]
 
         if worldState.get_eoa(receiver).balance + amount < 0: # Ahh this is burn transaction
@@ -176,9 +175,9 @@ class MintBurnTransaction(Transaction):
         return True, ChainConfig.NativeTokenGigaweiValue * 0 # Zero fees
 
 class NopTransaction(Transaction):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("0x0", "0x0", "nop", 0, 0, 0)
 
-    def process(self, worldState) -> (bool, int):
+    def process(self, worldState) -> tuple[bool, int]:
         print("TransactionProcessor:process_nop_transaction: Process noop transaction")
         return True, 0

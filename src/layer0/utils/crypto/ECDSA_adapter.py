@@ -1,4 +1,4 @@
-from ecdsa import VerifyingKey, SigningKey, BadSignatureError
+from ecdsa import VerifyingKey, SigningKey, BadSignatureError, SECP256k1
 from layer0.utils.crypto.crypto_adapter_interace import ICryptoAdapter
 from layer0.utils.hash import HashUtils
 
@@ -33,7 +33,10 @@ class ECDSAAdapter(ICryptoAdapter):
 
     @staticmethod
     def deserialize(serialized: str) -> VerifyingKey:
-        return VerifyingKey.from_string(bytes.fromhex(serialized))
+        return VerifyingKey.from_string(
+            bytes.fromhex(serialized),
+            curve=SECP256k1,
+        )
 
     @staticmethod
     def save(filename: str, publicKey: VerifyingKey, privateKey: SigningKey) -> None:
@@ -49,22 +52,25 @@ class ECDSAAdapter(ICryptoAdapter):
     def save_priv(filename: str, privateKey: SigningKey) -> None:
         with open(filename + ".priv", "w") as f:
             f.write(privateKey.to_string().hex())
-
-    @staticmethod
-    def load(filename: str):
         return ECDSAAdapter.load_pub(filename), ECDSAAdapter.load_priv(filename)
 
     @staticmethod
     def load_pub(filename: str):
         with open(filename, "r") as f:
-            publicKey = VerifyingKey.from_string(bytes.fromhex(f.read()))
+            publicKey = VerifyingKey.from_string(
+                bytes.fromhex(f.read()),
+                curve=SECP256k1,
+            )
 
         return publicKey
 
     @staticmethod
     def load_priv(filename: str):
         with open(filename + ".priv", "r") as f:
-            privateKey = SigningKey.from_string(bytes.fromhex(f.read()))
+            privateKey = SigningKey.from_string(
+                bytes.fromhex(f.read()),
+                curve=SECP256k1,
+            )
 
         return privateKey
 

@@ -71,6 +71,9 @@ class NodeEventHandler:
 
     def broadcast(self, event: NodeEvent):
         # time.sleep(1)
+        
+        # print(f"{self.node.origin}:node.py:broadcast: Process event: " + str(event.eventType))
+        
         if not self.process_event(event):  # Already processed and broadcast
             return
 

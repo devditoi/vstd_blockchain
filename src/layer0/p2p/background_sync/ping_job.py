@@ -6,7 +6,7 @@ from rich import print
 class PingSnycJob(BackgroundSyncJob):
 
     def setup(self):
-        print(f"[UDPProtocol - Ping Job] {self.event_handler.node.origin}: Waiting for peers")
+        # print(f"[UDPProtocol - Ping Job] {self.event_handler.node.origin}: Waiting for peers")
 
         while not self.event_handler.peers:
             time.sleep(1)

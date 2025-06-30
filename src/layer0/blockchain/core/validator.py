@@ -1,3 +1,4 @@
+from numba.core.types import Any
 from rsa import PublicKey
 
 import typing
@@ -15,14 +16,15 @@ from rich import print, inspect
 from layer0.blockchain.core.block import Block
 import time
 
-MAX_TRANSACTION_WAITING_TIME = 1000 * 60 * 60 # 1 Hours
+MAX_TRANSACTION_WAITING_TIME: int = 1000 * 60 * 60 # 1 Hours
 
 class Validator:
     @staticmethod
-    def validate_transaction_with_signature(tx: Transaction, signature: bytes, publicKey: any) -> bool:
+    def validate_transaction_with_signature(tx: Transaction, signature: str, publicKey: Any) -> bool:
         print(tx.to_verifiable_string())
         print(signature)
         print(publicKey)
+        print(tx.hash)
         if not SignerFactory().get_signer().verify(tx.to_verifiable_string(), signature, publicKey):
             print("validator.py:validate_transaction_with_signature: Transaction signature is invalid")
             # raise Exception("Transaction signature is invalid")
@@ -36,6 +38,7 @@ class Validator:
         tx.signature = signature
         # tx.publicKey = publicKey.to_string().hex()
         tx.publicKey = SignerFactory().get_signer().serialize(publicKey)
+        # tx.puib
 
         return True
 
@@ -47,9 +50,9 @@ class Validator:
             print("Validator.py:offchain_validate: Transaction gasPrice is below minimum")
             return False
 
-        if worldState.get_eoa(tx.sender).balance < tx.gas_limit and tx.Txtype != "mintburn":
-            print("Validator.py:offchain_validate: Transaction sender does not have enough balance")
-            return False
+        # if worldState.get_eoa(tx.sender).balance < tx.gas_limit and tx.Txtype != "mintburn":
+        #     print("Validator.py:offchain_validate: Transaction sender does not have enough balance")
+        #     return False
 
         if tx.transactionData["amount"] <= 0:
             print("Validator.py:offchain_validate: Transaction amount is negative")
@@ -71,6 +74,7 @@ class Validator:
             return False
 
         temp_public_key = SignerFactory().get_signer().deserialize(tx.publicKey)
+        
 
         if not SignerFactory().get_signer().verify(tx.to_verifiable_string(), tx.signature, temp_public_key):
             print("chain.py:process_block: Transaction signature is invalid")

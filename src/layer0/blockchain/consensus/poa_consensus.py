@@ -4,7 +4,7 @@ from layer0.utils.crypto.signer import SignerFactory
 
 class ProofOfAuthority(IConsensus):
     def __init__(self, address, privateKey):
-        self.hardcoded_validator = "6d76281a00dcd331628ce71c6a95480a23ff919786ee21fca8d82cfbac135d60"
+        self.hardcoded_validator = "d6772b22519ea4ad24776063156fddc539d1a57009bb188c0ff8788f06c417b2"
         self.address = address
         self.privateKey = privateKey
         self.publicKey = None
@@ -15,6 +15,8 @@ class ProofOfAuthority(IConsensus):
         return self.hardcoded_validator
 
     def is_valid(self, block: Block) -> bool:
+        print("ProofOfAuthority: validate block " + str(block.index))
+        print(block.signature)
         # Use the public key to validate the block signature
         return (
             self.signer.verify(block.get_string_for_signature(), block.signature, self.publicKey)

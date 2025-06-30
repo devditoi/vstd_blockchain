@@ -1,3 +1,4 @@
+from layer0.blockchain.core.worldstate import EOA
 from layer0.blockchain.core.block import Block
 from layer0.blockchain.core.transaction_type import Transaction, NativeTransaction, MintBurnTransaction, NopTransaction
 from layer0.blockchain.core.worldstate import WorldState
@@ -27,7 +28,7 @@ class TransactionProcessor:
     def process(self) -> bool:
 
         # Save the backup world state
-        backup = self.worldState.clone()
+        backup: WorldState = self.worldState.clone()
 
         # TODO After processing transaction, check the world state hash to match with the block worldstate hash
         # current_worldstate_hash = self.worldState.get_hash()
@@ -55,8 +56,8 @@ class TransactionProcessor:
                 continue # Pass this transaction
 
             # Deduct the gas
-            gas_allowed = tx.gas_limit
-            neoa = self.worldState.get_eoa(tx.sender)
+            gas_allowed: int = tx.gas_limit
+            neoa: EOA = self.worldState.get_eoa(tx.sender)
             neoa.balance -= gas_allowed
             self.worldState.set_eoa(tx.sender, neoa)
 
@@ -64,14 +65,21 @@ class TransactionProcessor:
             state, gas_used = tx.process(self.worldState)
 
             # Subtract the gas
-            gas_leftover = gas_allowed - gas_used
+            gas_leftover: int = gas_allowed - gas_used
 
             # Gas
             # Half gone to miner wallet
             # Half disapears
 
-            miner_reward = gas_used // 2
-            burned = gas_used - miner_reward
+            miner_reward: int = gas_used // 2
+            burned: int = gas_used - miner_reward
+
+            if not self.block.miner:
+                print("TransactionProcessor:process: Block miner is not set, cannot transfer gas to miner")
+                # Need to revert the whole transaction
+                self.worldState = backup.clone()
+                tx.status = "failed_revert"
+                continue
 
             # Transfer to miner
             neoa = self.worldState.get_eoa(self.block.miner)
@@ -120,20 +128,26 @@ class TransactionProcessor:
             transaction = json.loads(transaction_raw)
 
             if any([key not in transaction for key in ["Txtype", "data", "signature", "publicKey"]]):
+                
+                # Find missing keys
+                missing_keys = [key for key in ["Txtype", "data", "signature", "publicKey"] if key not in transaction]
+                print(f"TransactionProcessor:check_valid_transaction: Missing keys: {missing_keys}")
+                
                 return False
+            
 
             return True
         except json.JSONDecodeError:
             return False
 
     @staticmethod
-    def cast_transaction(transaction_raw: str):
+    def cast_transaction(transaction_raw: str) -> Transaction:
         transaction = json.loads(transaction_raw)
         # print(transaction)
         transaction_data = transaction["data"]
         # print(transaction)
 
-        tx = cast_raw_transaction(transaction, transaction_data)
+        tx: Transaction = cast_raw_transaction(transaction, transaction_data)
         tx.signature = transaction["signature"]
         tx.publicKey = transaction["publicKey"]
 

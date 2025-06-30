@@ -26,10 +26,11 @@ class ConsensusProcessor:
 
         print("chain.py:process_block: Block valid, signing")
 
+        block.miner = consensus.get_validators() # Hardcoded
+
+
         # Sign block
         consensus.sign_block(block)
-
-        block.miner = consensus.get_validators() # Hardcoded
 
         # Broadcast block
         broadcast_callback(block)

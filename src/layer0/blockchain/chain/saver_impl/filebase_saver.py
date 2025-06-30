@@ -49,7 +49,7 @@ class FilebaseDatabase:
 
     def load_block(self, block_height: int) -> str | None:
         """Load a block from the blockchain directory"""
-        block_path = os.path.join(self.blockchain_dir, f"Block#{block_height}.json")
+        block_path: str = os.path.join(self.blockchain_dir, f"Block#{block_height}.json")
         if not os.path.exists(block_path):
             # raise FileNotFoundError(f"Block {block_height} not found")
             return None
@@ -187,7 +187,7 @@ class FilebaseSaver(ISaver):
         else:
             self.delayed.append(block)
 
-    def get_block(self, height: int) -> "Block | None":
+    def get_block(self, height: int) -> "Block":
         """
         Retrieve a block from the blockchain at a given height.
 
@@ -201,9 +201,9 @@ class FilebaseSaver(ISaver):
             FileNotFoundError: If the block at the specified height does not exist.
         """
         # print("[FilebaseSaver] get_block " + str(height))
-        block_data = self.database.load_block(height) # TODO: Hmm fine
-        if block_data is None:
-            return None
+        block_data: str | None = self.database.load_block(height) # TODO: Hmm fine
+        # if block_data is None:
+        #     raise FileNotFoundError(f"Block at height {height} not found")
         return BlockProcessor.cast_block(block_data)
 
     def get_height(self) -> int:

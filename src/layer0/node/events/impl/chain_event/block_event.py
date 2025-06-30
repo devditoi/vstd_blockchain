@@ -1,3 +1,4 @@
+from layer0.blockchain.core.block import Block
 from rich import inspect
 
 from layer0.blockchain.core.validator import Validator
@@ -10,15 +11,16 @@ class BlockEvent(EventHandler):
     def event_name() -> str:
         return "block"
 
-    def require_field(self):
+    @staticmethod
+    def require_field() -> list[str]:
         return ["block"]
 
-    def handle(self, event: "NodeEvent"):
+    def handle(self, event: "NodeEvent") -> bool:
 
         block = event.data["block"]
 
         if isinstance(block, str):
-            block = BlockProcessor.cast_block(event.data["block"])
+            block: Block = BlockProcessor.cast_block(event.data["block"])
 
         # print(event.origin)
         # inspect(block)
@@ -34,6 +36,6 @@ class BlockEvent(EventHandler):
             print("consensus.py:is_valid: Block is invalid")
             return False
 
-        block = self.neh.node.blockchain.add_block(block)
+        final_block: Block | None = self.neh.node.blockchain.add_block(block)
 
-        return True if block else False
+        return True if final_block else False

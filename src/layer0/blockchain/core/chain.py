@@ -137,7 +137,7 @@ class Chain:
         # print("chain.py:get_block: Return block at index", index)
         return self.chain.get_block(index)
 
-    def get_latest_block(self) -> Block | None:
+    def get_latest_block(self) -> Block:
         # print("chain.py:get_last_block: Return last block")
         return self.chain.get_block(self.chain.get_height() - 1) # Get block at height is ineed last block
 
@@ -153,15 +153,16 @@ class Chain:
 
     def add_transaction(self, transaction: Transaction, signature: bytes, publicKey: str) -> None:
         if not Validator.validate_transaction_with_signature(transaction, signature, SignerFactory().get_signer().deserialize(publicKey)): # Validate transaction
-            self.mempool_lock.release()
+            # self.mempool_lock.release()
+            print("chain.py:add_transaction: Transaction is invalid, not added to mempool")
             return
 
         print("chain.py:add_transaction: Transaction valid, add to mempool")
         # print(transaction)
 
-        self.mempool_lock.acquire()
+        # self.mempool_lock.acquire()
         self.mempool.append(transaction)
-        self.mempool_lock.release()
+        # self.mempool_lock.release()
 
         # if not self.consensus.is_leader(): # Check if leader
         #     # print("chain.py:add_transaction: Not leader, return")
@@ -178,13 +179,19 @@ class Chain:
                 time.sleep(1)
             else:
                 break
+            
+        if self.consensus is None or self.broadcast_callback is None:
+            return; # For typing purposes
 
         # Check if leader
         if not self.consensus.is_leader():
-            # print("chain.py:__process_block_thread: Not leader, return")
+            print("chain.py:__process_block_thread: Not leader, return")
+            print()
             return
 
         # return # Testing purposes
+        
+        print("chain.py:__process_block_thread: Process block thread started, I'm leader")
 
         # Process block loop
         while True:
@@ -201,11 +208,13 @@ class Chain:
 
                 self.mempool_lock.acquire()
 
-                block_to_process = min(len(self.mempool), self.max_block_size)
-                pool = self.mempool[:block_to_process]
+                block_to_process: int = min(len(self.mempool), self.max_block_size)
+                pool: list[Transaction] = self.mempool[:block_to_process]
                 self.mempool = self.mempool[block_to_process:]
 
-                block = ConsensusProcessor.process_block(pool, self.get_latest_block(), self.consensus, self.broadcast_callback, self.world_state)
+                print(f"chain.py:__process_block_thread: Process block with {len(pool)} transactions")
+
+                block: Block | None = ConsensusProcessor.process_block(pool, self.get_latest_block(), self.consensus, self.broadcast_callback, self.world_state)
                 if block:
                     print("chain.py:__process_block_thread: Block processed, delete transactions from mempool")
                     # for tx in block.data:
@@ -244,7 +253,7 @@ class Chain:
     def debug_chain(self):
         # print("chain.py:debug_chain:----------------------Print chain----------------------------")
         # print("chain.py:debug_chain: Print chain")
-        for block in range(self.chain.get_height()):
+        for block in range(1, self.chain.get_height()):
             print(self.chain.get_block(block).to_string())
 
         print("chain.py:debug_chain: Print mempool")

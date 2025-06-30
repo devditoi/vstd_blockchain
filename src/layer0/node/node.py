@@ -1,4 +1,6 @@
 # 1 node has 1 blockchain and 1 WorldState
+from layer0.utils.hash import HashUtils
+from pydantic._internal._generate_schema import ValidateCallSupportedTypes
 import ecdsa
 
 from layer0.blockchain.core.chain import Chain
@@ -148,15 +150,33 @@ class Node:
             "tx": tx,
             "signature": signature,
             "publicKey": publicKey, #! Assume the public key are HEXDECIMAL
-        }, self.address))
+        }, self.origin))
 
     def process_tx(self, tx: Transaction, signature, publicKey):
         print(f"{self.address[:4]}:node.py:process_tx: Add pool " + tx.Txtype + " transaction")
 
         # self.blockchain.temporary_add_to_mempool(tx)
 
+        pK = SignerFactory().get_signer().deserialize(publicKey)
+        addr = SignerFactory().get_signer().address(pK)
+        print(f"{self.address[:4]}:node.py:process_tx: Transaction sender address: {addr}")
+        
+        print(HashUtils.sha256(tx.to_verifiable_string()))
+
+
         if not Validator.validate_transaction_with_worldstate(tx, self.worldState): # Validate transaction
             return
+        
+        if not Validator.validate_transaction_raw(tx):
+            print(f"{self.address[:4]}:node.py:process_tx: Transaction is invalid - raw validation failed")
+            return
+        
+        
+        if not Validator.validate_transaction_with_signature(tx, signature, pK):
+            print(f"{self.address[:4]}:node.py:process_tx: Transaction signature is invalid")
+            return
+        else:
+            print(f"{self.address[:4]}:node.py:process_tx: Transaction signature is valid")
 
         print(f"{self.address[:4]}:node.py:process_tx: Give transaction to blockchain nonce: " + str(tx.nonce))
         # print(tx, signature, publicKey)

@@ -96,9 +96,39 @@
 ### Problems
 - Make a chrome extension for a wallet (maybe :D)
 - Nah Just make a react app for wallet
+```python
+# Sign block
+consensus.sign_block(block)
+block.miner = consensus.get_validators() # Hardcoded
+```
+- This shit took me many hours to figure out
+- Not a error, Just signing (seal) block before setting the miner and it make me struggle :DDDD
 
 
 ### Solutions
 - [x] Implement wallet UI
 - [x] Fix some wallet bugs (Because the UI is so cool (AI generated))
 - [x] Fix python typing because I switch to `vscode` :DD
+- [x] Rewrite the address logic
+- [ ] Implement wallet connetivity to the network
+- [ ] Somewhere they need to implement miner that cause signature error
+
+## June 30, 2025
+### Problems
+- The address logic is so bad (ok my life is suck it I don't care anymore)
+- Continue interact react app for wallet
+- Very weird transaction mismatch for client to server (Client side signing fail!!!)
+- WHYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY
+- ok my life is suck
+- Javascript ECDSA SUCK
+- Why there is space between the string because of jsonlight dumps??????
+- {a: b} is not {a:b} ok my life is suckK
+- Nah this bug make me sick
+- Still not fixed it yet. The message is sync but still bad signature error
+- Again, ok my life is suck today
+
+### Solutions
+- [ ] Implement wallet connetivity to the network
+- [ ] Somewhere they need to implement miner that cause signature error
+- [ ] First step at smart contract
+- [ ] Dynamic config (mint, validator, ...) 

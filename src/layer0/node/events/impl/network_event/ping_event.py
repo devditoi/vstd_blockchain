@@ -1,3 +1,4 @@
+from builtins import staticmethod
 from layer0.node.events.EventHandler import EventHandler
 from layer0.p2p.peer import Peer
 import time
@@ -7,7 +8,9 @@ if typing.TYPE_CHECKING:
 from layer0.node.events.node_event import NodeEvent
 
 class PingEvent(EventHandler):
-    def require_field(self):
+    
+    @staticmethod
+    def require_field():
         return [] # Not required
 
     @staticmethod
@@ -27,7 +30,8 @@ class PongEvent(EventHandler):
     def event_name() -> str:
         return "pong"
 
-    def require_field(self):
+    @staticmethod
+    def require_field():
         return [] # Not required
 
     def handle(self, event: "NodeEvent"):

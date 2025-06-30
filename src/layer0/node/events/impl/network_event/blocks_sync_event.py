@@ -1,3 +1,4 @@
+from numpy import False_
 from layer0.blockchain.core.validator import Validator
 from layer0.blockchain.processor.block_processor import BlockProcessor
 from layer0.node.events.EventHandler import EventHandler
@@ -11,7 +12,8 @@ if typing.TYPE_CHECKING:
 
 
 class GetBlocksEvent(EventHandler):
-    def require_field(self):
+    @staticmethod
+    def require_field():
         return ["start_index", "end_index"]
 
     @staticmethod
@@ -24,8 +26,12 @@ class GetBlocksEvent(EventHandler):
 
         print(f"[{self.neh.node.origin}] GetBlocksEvent.handle: receiving request for blocks from {start_index} to {end_index} from {event.origin}")
 
+        if end_index > self.neh.node.blockchain.get_height():
+            print(f"[{self.neh.node.origin}] GetBlocksEvent.handle: end_index {end_index} is greater than current blockchain height {self.neh.node.blockchain.get_height()}. Adjusting to height.")
+            return False
+
         blocks = []
-        for i in range(start_index, end_index):
+        for i in range(start_index, min(start_index + 30, end_index)): # Send 50 blocks at a time
             blocks.append(self.neh.node.blockchain.get_block(i).to_string())
 
         print(f"[{self.neh.node.origin}] GetBlocksEvent.handle: sending back {len(blocks)} blocks to {event.origin}")

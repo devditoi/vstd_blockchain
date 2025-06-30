@@ -1,3 +1,4 @@
+from builtins import NotImplemented
 from abc import abstractmethod, ABC
 import typing
 if typing.TYPE_CHECKING:
@@ -21,8 +22,8 @@ class EventHandler(ABC):
 
     @staticmethod
     @abstractmethod
-    def require_field(self) -> list[str]:
-        return ""
+    def require_field() -> list[str]:
+        return NotImplemented
 
 class EventFactory:
     def __init__(self) -> None:
