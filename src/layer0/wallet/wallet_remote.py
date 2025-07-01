@@ -69,8 +69,10 @@ class WalletRemote:
 
     def sign_and_post_transaction(self, tx: Transaction):
         self.nonce += 1
-        sign: bytes = self.signer.sign(tx.to_verifiable_string(), self.privateKey)
+        sign: str = self.signer.sign(tx.to_verifiable_string(), self.privateKey)
         serialize_public_key = SignerFactory().get_signer().serialize(self.publicKey)
+        tx.signature = sign
+        tx.publicKey = serialize_public_key
         event: NodeEvent = NodeEvent("tx", {"tx": tx, "signature": sign, "publicKey": serialize_public_key}, self.origin)
         # inspect(event)
         self.peer.fire(event)

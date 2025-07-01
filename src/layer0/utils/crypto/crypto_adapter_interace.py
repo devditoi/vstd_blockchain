@@ -27,9 +27,8 @@ class ICryptoAdapter(ABC):
     def save_priv(filename: str, privateKey: object):
         return NotImplemented
 
-    @staticmethod
-    def load(filename: str):
-        return NotImplemented
+    def load(self, filename: str):
+        return self.load_pub(filename), self.load_priv(filename) 
 
     @staticmethod
     def load_pub(filename: str):

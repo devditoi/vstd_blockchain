@@ -32,5 +32,5 @@ class SignerFactory(object):
             cls.instance.signer = SignerFactory.__get_signer(signer_type)
         return cls.instance
 
-signer = SignerFactory("ecdsa")
+signer = SignerFactory("ecdsa").get_signer()
 # inspect(signer)

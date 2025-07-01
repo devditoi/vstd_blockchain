@@ -119,6 +119,12 @@ async def get_transactions(address: str) -> Any:
         if tx["hash"] not in unique_hashes:
             unique_hashes.add(tx["hash"])
             unique_txs.append(tx)
+            
+    
+    # Sort by times
+    # I mean reverse
+    unique_txs.sort(key=lambda x: x["timestamp"], reverse=True)
+    
     return {
         "transactions": unique_txs
     }
@@ -169,10 +175,6 @@ async def post_transaction(transaction_data: TransactionBody) -> Dict[str, Any]:
     if not TransactionProcessor.check_valid_transaction(transaction):
         raise HTTPException(status_code=400, detail="Invalid transaction format")
     sended_tx: Transaction = TransactionProcessor.cast_transaction(transaction)
-
-    print(transaction)
-
-    print(sended_tx.to_verifiable_string())
     
     master.propose_tx(sended_tx, sended_tx.signature, sended_tx.publicKey)
 

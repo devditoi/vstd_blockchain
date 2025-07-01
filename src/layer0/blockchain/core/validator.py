@@ -1,3 +1,4 @@
+from layer0.config import FeatureFlags
 from numba.core.types import Any
 from rsa import PublicKey
 
@@ -21,10 +22,12 @@ MAX_TRANSACTION_WAITING_TIME: int = 1000 * 60 * 60 # 1 Hours
 class Validator:
     @staticmethod
     def validate_transaction_with_signature(tx: Transaction, signature: str, publicKey: Any) -> bool:
-        print(tx.to_verifiable_string())
-        print(signature)
-        print(publicKey)
-        print(tx.hash)
+        
+        if FeatureFlags.DEBUG:
+            print(tx.to_verifiable_string())
+            print(signature)
+            print(publicKey)
+            print(tx.hash)
         if not SignerFactory().get_signer().verify(tx.to_verifiable_string(), signature, publicKey):
             print("validator.py:validate_transaction_with_signature: Transaction signature is invalid")
             # raise Exception("Transaction signature is invalid")

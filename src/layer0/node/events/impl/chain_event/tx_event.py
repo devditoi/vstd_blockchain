@@ -1,3 +1,4 @@
+from layer0.config import FeatureFlags
 from layer0.utils.hash import HashUtils
 from layer0.blockchain.core.transaction_type import Transaction
 from layer0.blockchain.processor.transaction_processor import TransactionProcessor
@@ -25,8 +26,9 @@ class TxEvent(EventHandler):
         if self.neh.node.blockchain.contain_transaction(event.data["tx"]):  # Already processed
             return False
         
-        print(event.data["tx"].to_verifiable_string())
-        print(HashUtils.sha256(event.data["tx"].to_verifiable_string()))
+        if FeatureFlags.DEBUG:
+            print(event.data["tx"].to_verifiable_string())
+            print(HashUtils.sha256(event.data["tx"].to_verifiable_string()))
 
         self.neh.node.blockchain.temporary_add_to_mempool(event.data["tx"])
         print(f"{self.neh.node.address[:4]}:node.py:process_event: Processing transaction")

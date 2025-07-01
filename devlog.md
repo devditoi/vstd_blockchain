@@ -156,9 +156,12 @@ There is no 0x so cutting the first 2 characters mean cut the whole signature. l
 > “Sometimes, it’s just a damn 1-line bug that makes you beg your entire ecosystem of JavaScript.”
 > — “Quanvndzai 2025”
 
+- Enough talking, let me make the sign page work
+
 ## Solutions
 ~~- [ ] Implement CLI daemon wallet that provide API for the wallet web app~~
 ~~- [ ] Rewrite the wallet web app.~~
 - [Status: FIXED] 
+- [x] Finishing web base wallet + signing + handle transaction
 - [ ] First step at smart contract
 - [ ] Dynamic config (mint, validator, ...) 

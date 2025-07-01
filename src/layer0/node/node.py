@@ -40,7 +40,7 @@ class Node:
         # self.version = open("node_ver.txt", "r").read()
         self.version = "v0.0.1"
 
-        self.signer = SignerFactory().instance.get_signer()
+        self.signer = SignerFactory().get_signer()
 
         self.publicKey, self.privateKey = self.signer.gen_key()
         self.address = self.signer.address(self.publicKey)
@@ -93,6 +93,8 @@ class Node:
 
 
     def import_key(self, filename: str) -> None:
+        self.signer = SignerFactory("ecdsa`").get_signer()
+        print(self.signer)
         self.publicKey, self.privateKey = self.signer.load(filename)
         self.address = self.signer.address(self.publicKey)
         self.consensus = ProofOfAuthority(self.address, self.privateKey)
