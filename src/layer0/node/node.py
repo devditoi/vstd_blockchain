@@ -1,7 +1,6 @@
 # 1 node has 1 blockchain and 1 WorldState
 from layer0.config import FeatureFlags
 from layer0.utils.hash import HashUtils
-from pydantic._internal._generate_schema import ValidateCallSupportedTypes
 import ecdsa
 
 from layer0.blockchain.core.chain import Chain
