@@ -1,5 +1,4 @@
 from layer0.config import FeatureFlags
-from numba.core.types import Any
 from rsa import PublicKey
 
 import typing
@@ -21,7 +20,7 @@ MAX_TRANSACTION_WAITING_TIME: int = 1000 * 60 * 60 # 1 Hours
 
 class Validator:
     @staticmethod
-    def validate_transaction_with_signature(tx: Transaction, signature: str, publicKey: Any) -> bool:
+    def validate_transaction_with_signature(tx: Transaction, signature: str, publicKey) -> bool:
         
         if FeatureFlags.DEBUG:
             print(tx.to_verifiable_string())

@@ -154,7 +154,7 @@ There is no 0x so cutting the first 2 characters mean cut the whole signature. l
 
 
 > “Sometimes, it’s just a damn 1-line bug that makes you beg your entire ecosystem of JavaScript.”
-> — “Quanvndzai 2025”
+> — “Quanvndzai 2025” 
 
 - Enough talking, let me make the sign page work
 

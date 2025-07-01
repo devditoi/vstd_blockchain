@@ -8,7 +8,7 @@ import uvicorn
 import threading
 import time
 import random
-from layer0.blockchain.core.transaction_type import MintBurnTransaction
+from layer0.blockchain.core.transaction_type import MintBurnTransaction 
 from layer0.blockchain.processor.transaction_processor import TransactionProcessor
 from layer0.node.node import Node
 from layer0.p2p.peer_type.remote_peer import RemotePeer
