@@ -132,3 +132,33 @@ block.miner = consensus.get_validators() # Hardcoded
 - [ ] Somewhere they need to implement miner that cause signature error
 - [ ] First step at smart contract
 - [ ] Dynamic config (mint, validator, ...) 
+
+
+## July 1, 2025
+
+## Problems
+- Swtich to daemon wallet, CLI wallet.
+- CLI wallet but UI is Webase (Nah you know what)
+- Cry, rage, scream into the logs — but don’t stop.
+- Because that bug?
+- It didn't beat you.
+- It forged you. 🔥
+- Now I fix the bug
+- No one can beat me.
+
+The bug is relatively simple
+```ts
+tx.signature = signature.slice(2); // Assumes signature starts with '0x'
+```
+There is no 0x so cutting the first 2 characters mean cut the whole signature. lol
+
+
+> “Sometimes, it’s just a damn 1-line bug that makes you beg your entire ecosystem of JavaScript.”
+> — “Quanvndzai 2025”
+
+## Solutions
+~~- [ ] Implement CLI daemon wallet that provide API for the wallet web app~~
+~~- [ ] Rewrite the wallet web app.~~
+- [Status: FIXED] 
+- [ ] First step at smart contract
+- [ ] Dynamic config (mint, validator, ...) 

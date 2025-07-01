@@ -6,7 +6,7 @@ from layer0.utils.crypto.rsa_adapter import RSAAdapter
 
 class SignerFactory(object):
     signer_type = None
-    signer: ICryptoAdapter = None
+    signer: ICryptoAdapter | None = None
 
     @staticmethod
     def __get_signer(signer_type) -> ICryptoAdapter:
@@ -17,7 +17,12 @@ class SignerFactory(object):
         else:
             raise Exception("Signer type not supported")
 
+    
     def get_signer(self) -> ICryptoAdapter:
+        if not self.signer:
+            if not self.signer_type:
+                raise Exception("Signer type must be specified")
+            self.signer = SignerFactory.__get_signer(self.signer_type)
         return self.signer
 
     def __new__(cls, signer_type: str | None = None):

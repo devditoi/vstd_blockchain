@@ -163,9 +163,20 @@ class Node:
         
         print(HashUtils.sha256(tx.to_verifiable_string()))
 
+            
+        print("------------------------------------------------------- START THE HARD PART GG")
 
         if not Validator.validate_transaction_with_worldstate(tx, self.worldState): # Validate transaction
             return
+        
+        # 3 thing need to verify
+        # 1. Trnansaction hash
+        # 2. Signature
+        # 3. Public key
+        
+        print (f"{self.address[:4]}:node.py:process_tx: Transaction hash: {HashUtils.sha256(tx.to_verifiable_string())}")
+        print (f"{self.address[:4]}:node.py:process_tx: Transaction signature: {signature}")
+        print (f"{self.address[:4]}:node.py:process_tx: Transaction public key: {publicKey}")
         
         if not Validator.validate_transaction_raw(tx):
             print(f"{self.address[:4]}:node.py:process_tx: Transaction is invalid - raw validation failed")

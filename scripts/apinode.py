@@ -19,13 +19,13 @@ from layer0.wallet.wallet import Wallet
 from layer0.wallet.wallet_remote import WalletRemote
 
 # Initialize FastAPI app
-app = FastAPI(title="VSTD Blockchain Node API", version="1.0.0")
+app = FastAPI(title="VSTD Blockchain LOCAL Node API", version="1.0.0")
 
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:3000",
+        "http://localhost:3000", # Only allow localhost 
         "http://localhost:5173"
     ],
     allow_credentials=False,
@@ -35,7 +35,6 @@ app.add_middleware(
 
 # Initialize node
 master = Node()
-# master.import_key("validator_key")
 master.debug()
 
 # Setup P2P network
