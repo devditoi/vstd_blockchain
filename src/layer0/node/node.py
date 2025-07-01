@@ -1,4 +1,5 @@
 # 1 node has 1 blockchain and 1 WorldState
+from layer0.config import FeatureFlags
 from layer0.utils.hash import HashUtils
 from pydantic._internal._generate_schema import ValidateCallSupportedTypes
 import ecdsa
@@ -156,15 +157,15 @@ class Node:
         print(f"{self.address[:4]}:node.py:process_tx: Add pool " + tx.Txtype + " transaction")
 
         # self.blockchain.temporary_add_to_mempool(tx)
-
         pK = SignerFactory().get_signer().deserialize(publicKey)
-        addr = SignerFactory().get_signer().address(pK)
-        print(f"{self.address[:4]}:node.py:process_tx: Transaction sender address: {addr}")
-        
-        print(HashUtils.sha256(tx.to_verifiable_string()))
-
+        if FeatureFlags.DEBUG:
+            addr = SignerFactory().get_signer().address(pK)
+            print(f"{self.address[:4]}:node.py:process_tx: Transaction sender address: {addr}")
             
-        print("------------------------------------------------------- START THE HARD PART GG")
+            print(HashUtils.sha256(tx.to_verifiable_string()))
+
+                
+            print("------------------------------------------------------- START THE HARD PART GG")
 
         if not Validator.validate_transaction_with_worldstate(tx, self.worldState): # Validate transaction
             return
@@ -173,10 +174,10 @@ class Node:
         # 1. Trnansaction hash
         # 2. Signature
         # 3. Public key
-        
-        print (f"{self.address[:4]}:node.py:process_tx: Transaction hash: {HashUtils.sha256(tx.to_verifiable_string())}")
-        print (f"{self.address[:4]}:node.py:process_tx: Transaction signature: {signature}")
-        print (f"{self.address[:4]}:node.py:process_tx: Transaction public key: {publicKey}")
+        if FeatureFlags.DEBUG:
+            print (f"{self.address[:4]}:node.py:process_tx: Transaction hash: {HashUtils.sha256(tx.to_verifiable_string())}")
+            print (f"{self.address[:4]}:node.py:process_tx: Transaction signature: {signature}")
+            print (f"{self.address[:4]}:node.py:process_tx: Transaction public key: {publicKey}")
         
         if not Validator.validate_transaction_raw(tx):
             print(f"{self.address[:4]}:node.py:process_tx: Transaction is invalid - raw validation failed")
