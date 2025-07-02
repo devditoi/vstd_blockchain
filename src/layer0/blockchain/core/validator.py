@@ -52,9 +52,9 @@ class Validator:
             print("Validator.py:offchain_validate: Transaction gasPrice is below minimum")
             return False
 
-        # if worldState.get_eoa(tx.sender).balance < tx.gas_limit and tx.Txtype != "mintburn":
-        #     print("Validator.py:offchain_validate: Transaction sender does not have enough balance")
-        #     return False
+        if worldState.get_eoa(tx.sender).balance < tx.gas_limit and tx.Txtype != "mintburn":
+            print("Validator.py:offchain_validate: Transaction sender does not have enough balance")
+            return False
 
         if tx.transactionData["amount"] <= 0:
             print("Validator.py:offchain_validate: Transaction amount is negative")

@@ -165,3 +165,14 @@ There is no 0x so cutting the first 2 characters mean cut the whole signature. l
 - [x] Finishing web base wallet + signing + handle transaction
 - [ ] First step at smart contract
 - [ ] Dynamic config (mint, validator, ...) 
+
+## July 2, 2025
+
+### Problems
+- Smart contract first implementation and syntax
+
+### Solutions
+- [ ] Syntax of smart contract
+- [ ] Storage and state of smart contract
+- [ ] First smart contract implementation
+- [ ] Dynamic config (mint, validator, ...) 
