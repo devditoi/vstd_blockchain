@@ -173,3 +173,12 @@ class Validator:
 
             prev_hash = block.hash
         return True
+    
+    @staticmethod
+    def validate_receipts(block: Block, receipts: list[Transaction]) -> bool:
+        receipts_root = HashUtils.sha256("".join([ x.get_receipt_hash() for x in receipts ]))
+        if block.receipts_root != receipts_root:
+            print("chain.py:validate_receipts: Receipts root hash does not match")
+            print(block.receipts_root, receipts_root)
+            return False
+        return True

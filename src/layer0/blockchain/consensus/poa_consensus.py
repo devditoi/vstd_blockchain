@@ -15,8 +15,8 @@ class ProofOfAuthority(IConsensus):
         return self.hardcoded_validator
 
     def is_valid(self, block: Block) -> bool:
-        print("ProofOfAuthority: validate block " + str(block.index))
-        print(block.signature)
+        # print("ProofOfAuthority: validate block " + str(block.index))
+        # print(block.signature)
         # Use the public key to validate the block signature
         return (
             self.signer.verify(block.get_string_for_signature(), block.signature, self.publicKey)

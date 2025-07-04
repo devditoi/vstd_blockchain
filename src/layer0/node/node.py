@@ -1,8 +1,13 @@
 # 1 node has 1 blockchain and 1 WorldState
+from layer0.blockchain.core.transaction_type import ValidatorTransactionData
+from typing import cast
+from layer0.blockchain.core.transaction_type import ValidatorTransaction
+from layer0.smart_contract.sc_storage import CentralStorageConstructor
+from typing import Any
 from layer0.config import FeatureFlags
 from layer0.utils.hash import HashUtils
 import ecdsa
-
+import time
 from layer0.blockchain.core.chain import Chain
 from layer0.blockchain.consensus.poa_consensus import ProofOfAuthority
 from layer0.blockchain.core.transaction_type import Transaction, MintBurnTransaction
@@ -45,6 +50,8 @@ class Node:
         self.address = self.signer.address(self.publicKey)
 
         self.blockchain: Chain = Chain(self.address, dummy)
+        
+        self.isValidator = False
 
         # self.node_subscribtions = []
         # self.peers: list["Peer"] = []
@@ -58,7 +65,11 @@ class Node:
         #
         # TODO: Refactor this shit right here
         self.consensus = ProofOfAuthority(self.address, self.privateKey)
-        self.blockchain.set_initial_data(self.consensus, self.execution, self.propose_block, self.worldState)
+        
+        # TODO: Add the leader as a validator
+        self.worldState.add_validator(self.consensus.hardcoded_validator)
+        
+        self.blockchain.set_initial_data(self.consensus, self.execution, self.propose_block, self.worldState, self.node_event_handler)
 
         self.origin = ""
 
@@ -70,6 +81,12 @@ class Node:
 
         # TODO: Debugging purposes
         # self.load_chain_from_disk()
+        
+        # TODO: Smart contract
+        # Node need a list of available smart contract and mapping them with their address
+        # Because each smart contract will return a instance for the function
+        self.smart_contract: dict[str, Any] = {}
+        self.sc_storage = CentralStorageConstructor() # TODO: This is too good:D
 
     # def set_saver(self, saver: ISaver) -> None:
     #     self.saver = saver
@@ -89,7 +106,20 @@ class Node:
 
     def set_origin(self, origin: str) -> None:
         self.origin = origin
-
+        
+    def became_validator(self):
+        # self.isValidator = True
+        # self.blockchain.isValidator = True
+        
+        # TODO: Here need to send custom transaction that confirm you are validator
+        data: ValidatorTransactionData = cast(ValidatorTransactionData, {
+            "validator": self.address,
+            "proof": "0x0"
+        })
+        tx: ValidatorTransaction = ValidatorTransaction(self.address, data, int(time.time() * 1000), 0, 0)
+        
+        # Propose the transaction
+        self.propose_tx(tx, tx.signature, self.publicKey)
 
     def import_key(self, filename: str) -> None:
         self.signer = SignerFactory("ecdsa`").get_signer()
@@ -97,7 +127,7 @@ class Node:
         self.publicKey, self.privateKey = self.signer.load(filename)
         self.address = self.signer.address(self.publicKey)
         self.consensus = ProofOfAuthority(self.address, self.privateKey)
-        self.blockchain.set_initial_data(self.consensus, self.execution, self.node_event_handler.propose_block, self.worldState)
+        self.blockchain.set_initial_data(self.consensus, self.execution, self.node_event_handler.propose_block, self.worldState, self.node_event_handler)
         print(f"{self.address[:4]}:node.py:import_key: Imported key " + self.address)
 
     def export_key(self, filename: str) -> None:
@@ -141,7 +171,7 @@ class Node:
     def query_block(self, query: str, field: str | None = None) -> list[str]:
         return self.blockchain.query_block(query, field)
 
-    def propose_tx(self, tx: Transaction, signature, publicKey: any):
+    def propose_tx(self, tx: Transaction, signature, publicKey):
         """
         :param tx: Transaction
         :param signature: Signature (HEX)

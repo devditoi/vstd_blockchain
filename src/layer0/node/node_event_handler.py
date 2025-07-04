@@ -1,3 +1,4 @@
+from layer0.node.events.impl.chain_event.bft_block_event import BFTBlockEvent
 from random import choice
 from rich import print
 import typing
@@ -8,7 +9,7 @@ from layer0.node.events.impl.chain_event.block_event import BlockEvent
 from layer0.node.events.impl.network_event.peer_discovery_event import PeerDiscoveryEvent, PeerDiscoveryFullfilledEvent
 from layer0.node.events.impl.chain_event.tx_event import TxEvent
 from .events.impl.chain_event.chain_head import ChainHeadEvent, ChainHeadFullfilledEvent
-from .events.impl.chain_event.full_chain import FullChainEvent, FullChainFullfilledEvent
+# from .events.impl.chain_event.full_chain import FullChainEvent, FullChainFullfilledEvent
 from .events.impl.network_event.find_common_ancestor_event import GetAncestorHashesEvent, AncestorHashesEvent
 from .events.impl.network_event.get_worldstate_event import GetWorldStateEvent
 from .events.impl.network_event.ping_event import PingEvent, PongEvent
@@ -28,7 +29,8 @@ class NodeEventHandler:
         self.peers: list["Peer"] = []
         self.ef = EventFactory()
 
-        # Register events
+        handler: NodeEventHandler = self
+    
         self.ef.register_event(TxEvent(self))
         self.ef.register_event(BlockEvent(self))
 
@@ -38,8 +40,10 @@ class NodeEventHandler:
         self.ef.register_event(ChainHeadEvent(self))
         self.ef.register_event(ChainHeadFullfilledEvent(self))
 
-        self.ef.register_event(FullChainEvent(self))
-        self.ef.register_event(FullChainFullfilledEvent(self))
+        # self.ef.register_event(FullChainEvent(self))
+        # self.ef.register_event(FullChainFullfilledEvent(self))
+        
+        self.ef.register_event(BFTBlockEvent(self))
 
         self.ef.register_event(PingEvent(self))
         self.ef.register_event(PongEvent(self))

@@ -72,7 +72,7 @@ class BlocksEvent(EventHandler):
             if block.index == 0:
                 continue # Pass genesis block
             print(f"[{self.neh.node.origin}] BlocksEvent.handle: adding block {block.index} to blockchain")
-            self.neh.node.blockchain.add_block(block) # Perment write to disk
+            self.neh.node.blockchain.add_block(block, already_finalized=True)
 
         status_request_event = NodeEvent("get_status", {}, self.neh.node.origin)
         self.neh.fire_to_random(status_request_event)

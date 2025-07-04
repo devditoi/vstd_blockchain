@@ -1,3 +1,9 @@
+from typing import final
+from layer0.utils.ThreadUtils import defer
+from layer0.node.node_event_handler import NodeEventHandler
+from layer0.node.events.node_event import NodeEvent
+from layer0.blockchain.consensus.poa_consensus import ProofOfAuthority
+from rich.jupyter import print
 import time
 
 # from ecdsa import VerifyingKey
@@ -34,11 +40,20 @@ class Chain:
         self.interval = 10 # 10 seconds before try to send and validate
         self.max_block_size = 1 #maximum number of transactions in a block
         self.last_block_time = time.time()
+        
+        self.block_bft_pool: list[Block] = [] # Not finalized block
+        self.block_bft_sign: dict[str, list[str]] = {}
+        
+        self.isValidator = False
 
-        self.consensus = None
+        self.consensus: ProofOfAuthority | None = None
         self.execution_callback = None
         self.broadcast_callback = None
         self.world_state = None
+        
+        # Nah that kinda cringe
+        # TODO: Need to refactor how broadcast callback works with every type of packet
+        self.neh: NodeEventHandler | None = None
 
         self.reset_chain()
         if not dummy:
@@ -68,15 +83,16 @@ class Chain:
     def query_block(self, query: str, field: str | None = None):
         return self.chain.query_block(query, field)
 
-    def set_initial_data(self, consensus, execution_callback, broadcast_callback, world_state):
+    def set_initial_data(self, consensus, execution_callback, broadcast_callback, world_state, neh):
         self.consensus = consensus
         self.execution_callback = execution_callback
         self.broadcast_callback = broadcast_callback
         self.world_state = world_state
+        self.neh = neh
 
         print("chain.py:set_initial_data: Set callbacks")
 
-    def add_block(self, block: Block, initially = False, delay_flush = False) -> Block | None:
+    def add_block(self, block: Block, initially = False, delay_flush = False, already_finalized = False) -> Block | None:
         #** Delay flush: Delay the flush of the block to the next flush interval (manually)
         if not Validator.validate_block_on_chain(block, self, initially): # Validate block
             print("chain.py:add_block: Block is invalid")
@@ -84,13 +100,16 @@ class Chain:
         if not Validator.validate_block_without_chain(block, self.get_latest_block().hash): # Validate block
             print("chain.py:add_block: Block is invalid")
             return None
-        print(f"chain.py:add_block: Block #{block.index} valid, add to chain")
+        if block.hash in self.block_bft_sign:
+            return None # In the pool
+        
+        print(f"chain.py:add_block: Block #{block.index} valid, add to pool")
 
         # Execute first, add later
         if self.execution_callback:
             # Execute block
             self.execution_callback(block)
-
+            
         # inspect(block)
         # inspect(block.data[0])
         # inspect(self.world_state)
@@ -98,15 +117,70 @@ class Chain:
         # inspect(self.world_state)
 
         # print(block)
-        self.chain.add_block(block, delay_flush)
+        # execute and add block
+        
+        # Check the receipts root hash
+        if not Validator.validate_receipts(block, block.data):
+            print("chain.py:add_block: Receipts root hash does not match")
+            return None
+        
+        # Don't directly add to the chain, need to BFT finalized first
+        # Send block receipts to consensus
+        
+        block.receipts_root = block.get_receipts_root()
+        
+        self.block_bft_pool.append(block) # Add to pool
+        
+        self.block_bft_sign[block.hash] = []
+        # print("FUCK IT HEREREREREEEERER")
+        # print(self.block_bft_count[block.hash])
+    
+        if not self.consensus:
+            return block # We done
+        
+        if not self.neh:
+            # Wait waaaat
+            raise Exception("NodeEventHandler not set !!!")
+        
+        if already_finalized:
+            
+            # Finalized block
+            self.finalize_block(block)
+            
+            return None # This absolutely come from event, not likely to happend
+
+    
+        # Send confirmation to consensus
+        if self.isValidator or self.consensus.is_leader():
+            # Send a custom transaction to confirm the block
+            
+            sig: str = SignerFactory().get_signer().sign(block.get_string_for_signature(), self.neh.node.privateKey)
+            
+            event = NodeEvent("bft_confirm", {
+                "block": block.to_string(),
+                "receipts_root": block.receipts_root,
+                "signatures": sig,
+                "address": self.neh.node.address,
+                "publicKey": SignerFactory().get_signer().serialize(self.neh.node.publicKey),
+            }, self.neh.node.origin)
+            
+            # self.neh.broadcast(event)
+            defer(self.neh.broadcast, 1, event)
+
+        return block
+
+    def finalize_block(self, block: Block):
+        print(f"bft_block_event.py:handle: Block #{block.index} is finalized")
+        block.finalized = True
+        self.chain.add_block(block, False)
         self.height += 1
 
         # If the length is greater than max block history, remove the first block
         # Not DELETE Old block, delete the data (Somehow)
-        if self.height > ChainConfig.BLOCK_HISTORY_LIMIT:
-            # TODO: Implement this later
-            pass
-            # self.chain[self.height - ChainConfig.BLOCK_HISTORY_LIMIT].data = None
+        # if self.height > ChainConfig.BLOCK_HISTORY_LIMIT:
+        #     # TODO: Implement this later
+        #     pass
+        #     self.chain[self.height - ChainConfig.BLOCK_HISTORY_LIMIT].data = None
 
         # Remove transactions from mempool
         for tx in block.data:
@@ -114,9 +188,13 @@ class Chain:
                 if tx.hash == tx2.hash:
                     self.mempool.remove(tx2)
                     self.mempool_tx_id.remove(tx2.hash)
-
-
-        return block
+        
+        # print(blockchain_instance.block_bft_pool)
+        # print(block.to_string())
+        
+        for block2 in self.block_bft_pool:
+            if block2.hash == block.hash:
+                self.block_bft_pool.remove(block2)
 
     def get_block(self, index) -> Block:
         """
@@ -151,7 +229,7 @@ class Chain:
     def temporary_add_to_mempool(self, transaction: Transaction) -> None:
         self.mempool_tx_id.add(transaction.hash)
 
-    def add_transaction(self, transaction: Transaction, signature: bytes, publicKey: str) -> None:
+    def add_transaction(self, transaction: Transaction, signature: str, publicKey: str) -> None:
         if not Validator.validate_transaction_with_signature(transaction, signature, SignerFactory().get_signer().deserialize(publicKey)): # Validate transaction
             # self.mempool_lock.release()
             print("chain.py:add_transaction: Transaction is invalid, not added to mempool")

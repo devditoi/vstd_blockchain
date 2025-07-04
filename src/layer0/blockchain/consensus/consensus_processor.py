@@ -17,7 +17,7 @@ class ConsensusProcessor:
 
         worldstate_hash = world_state.get_hash()
 
-        block = Block(last_block.index + 1, last_block.hash, time.time() * 1000, worldstate_hash, data)
+        block: Block = Block(last_block.index + 1, last_block.hash, time.time() * 1000, worldstate_hash, data)
 
         # Validate block
         if not Validator.validate_block_without_chain(block, last_block.hash):
@@ -27,7 +27,8 @@ class ConsensusProcessor:
         print("chain.py:process_block: Block valid, signing")
 
         block.miner = consensus.get_validators() # Hardcoded
-
+        
+        # Receipts root are auto include?
 
         # Sign block
         consensus.sign_block(block)

@@ -45,10 +45,18 @@ class SmartContract:
 class WorldState:
     __eoas: dict[str, EOA]
     __smartContracts: dict[str, SmartContract]
+    __validator: list[str]
 
     def __init__(self):
         self.__eoas = {}
         self.__smartContracts = {}
+        self.__validator = []
+        
+    def add_validator(self, validator: str):
+        self.__validator.append(validator)
+        
+    def get_validators(self) -> list[str]:
+        return self.__validator
 
     def set_eoa_and_smart_contract(self, eoas: dict[str, EOA], smartContracts: dict[str, SmartContract]):
         self.__eoas = eoas

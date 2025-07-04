@@ -36,6 +36,7 @@ class BlockEvent(EventHandler):
             print("consensus.py:is_valid: Block is invalid")
             return False
 
+        
         final_block: Block | None = self.neh.node.blockchain.add_block(block)
 
         return True if final_block else False

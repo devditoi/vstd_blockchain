@@ -5,13 +5,12 @@ import ast
 FORBIDDEN_MODULES = {"os", "sys", "random", "time", "socket", "subprocess"}
 FORBIDDEN_FUNCTIONS = {"eval", "exec", "open", "input", "__import__"}
 
-def check_contract_safety(file_path: str):
-    with open(file_path, "r", encoding="utf-8") as f:
-        source = f.read()
-
+def check_contract_safety(source: str) -> list[str]:
     tree = ast.parse(source)
 
-    issues = []
+    issues: list[str] = []
+    
+    isValid = True
 
     for node in ast.walk(tree):
 
@@ -60,5 +59,3 @@ def check_contract_safety(file_path: str):
                     print(f"  Method: {item.name}")
 
     return issues
-
-check_contract_safety("syntax_test.py")

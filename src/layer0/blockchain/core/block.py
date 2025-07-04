@@ -12,13 +12,13 @@ class Block:
         self.hash = HashUtils.sha256(str(self.index) + str(self.previous_hash) + str(self.timestamp) + str(self.data))
         self.signature = None
         self.address = None
-
-        # For developing purpose
         self.world_state_hash = worldstate_hash
+        self.receipts_root: str | None = None # None before finalized
         self.miner = None
+        self.finalized = False
 
-        # Next we need state diff for a block. (aka record state different in a block)
-        # Not planed
+    def get_receipts_root(self) -> str:
+        return HashUtils.sha256("".join([ x.get_receipt_hash() for x in self.data ]))
 
     def to_string(self) -> str:
         return jsonlight.dumps({
@@ -30,7 +30,7 @@ class Block:
             "signature": self.signature,
             "address": self.address,
             "world_state_hash": self.world_state_hash,
-            "miner": self.miner
+            "miner": self.miner,
         }, indent=2)
 
     def get_string_for_signature(self) -> str:

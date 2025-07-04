@@ -1,3 +1,4 @@
+from layer0.blockchain.core.transaction_type import SmartContractDeployTransaction
 from layer0.blockchain.core.worldstate import EOA
 from layer0.blockchain.core.block import Block
 from layer0.blockchain.core.transaction_type import Transaction, NativeTransaction, MintBurnTransaction, NopTransaction
@@ -11,10 +12,12 @@ def cast_raw_transaction(transaction, transaction_data):
     match transaction["Txtype"]:
         case "mintburn":
             return MintBurnTransaction(transaction["sender"] ,transaction["to"], transaction_data["amount"], transaction["timestamp"],
-                                       transaction["nonce"], transaction["gas_limit"])
+                                        transaction["nonce"], transaction["gas_limit"])
         case "native":
             return NativeTransaction(transaction["sender"], transaction["to"],
-                                     transaction_data["amount"], transaction["timestamp"], transaction["nonce"], transaction["gas_limit"])
+                                        transaction_data["amount"], transaction["timestamp"], transaction["nonce"], transaction["gas_limit"])
+        case "smartcontractdeploy":
+            return SmartContractDeployTransaction(transaction["sender"], transaction_data, transaction["timestamp"], transaction["nonce"], transaction["gas_limit"])
         case _:
             return NopTransaction()
 
@@ -44,7 +47,7 @@ class TransactionProcessor:
         for tx in self.block.data:
             print("TransactionProcessor:process: Process " + tx.Txtype + " transaction")
 
-            if tx.gas_limit < tx.max_gas_usage():
+            if tx.gas_limit < tx.estimated_gas():
                 print("TransactionProcessor:process: Transaction gas precomputed limit exceeded")
                 tx.status = "failed"
                 continue # Pass this transaction (aka fail safe)
@@ -118,7 +121,10 @@ class TransactionProcessor:
             tx.gas_used = gas_used
             tx.block_index = self.block.index
 
-            print(f"TransactionProcessor:process: Transaction succeeded, gas limit {tx.gas_limit}, gas used {tx.gas_used}, returned gas {gas_leftover}")
+            print(f"TransactionProcessor:process: Transaction succeeded, gas limit {tx.gas_limit}, gas used {tx.gas_used}, returned gas {gas_leftover}, burned {burned}")
+
+        # set block receipts root
+        self.block.receipts_root = self.block.get_receipts_root()
 
         return True
 

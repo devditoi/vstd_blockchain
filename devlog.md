@@ -176,3 +176,26 @@ There is no 0x so cutting the first 2 characters mean cut the whole signature. l
 - [ ] Storage and state of smart contract
 - [ ] First smart contract implementation
 - [ ] Dynamic config (mint, validator, ...) 
+
+## July 3, 2025
+
+### Problems
+- Reconfig consensus to use BFT
+- BFT confirmation
+- Because the BFT, also because the transaction process after the block is sended,
+so we need to send the receipts root to all nodes if we are validator
+leader are validator
+any node that receive > 2/3 of the receipts root can mark a block finalized
+
+### Solutions
+- [] Implement BFT confirmation
+
+## July 4, 2025
+
+### Problems
+- BFT confirmation
+- Continue implementing smart contract
+
+### Solutions
+- [ ] Implement smart contract
+- [ ] Implement BFT confirmation

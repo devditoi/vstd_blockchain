@@ -7,7 +7,7 @@ from typing import Any
 from rich import inspect
 
 from layer0.blockchain.processor.block_processor import BlockProcessor
-from layer0.blockchain.core.chain import Chain
+# from layer0.blockchain.core.chain import Chain
 from layer0.p2p.peer_type.remote_peer import RemotePeer
 
 if typing.TYPE_CHECKING:

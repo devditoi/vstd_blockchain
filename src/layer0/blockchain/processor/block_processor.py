@@ -23,4 +23,5 @@ class BlockProcessor:
         raw_block.address = block_data["address"]
         raw_block.world_state_hash = block_data["world_state_hash"]
         raw_block.miner = block_data["miner"]
+        # raw_block.receipts_root = block_data["receipts_root"]
         return raw_block
