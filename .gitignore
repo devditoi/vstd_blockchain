@@ -14,8 +14,8 @@ build/
 *.pem
 *.key
 *.pub
-validator_key*
-mint_key*
+validator_key.priv
+mint_key.priv
 
 # Logs
 *.log
