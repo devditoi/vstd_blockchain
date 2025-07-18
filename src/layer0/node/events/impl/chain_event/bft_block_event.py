@@ -29,7 +29,7 @@ class BFTBlockEvent(EventHandler):
         return None
     
     def handle(self, event: "NodeEvent") -> bool:
-        print("Send from "+ str(event.origin))
+        # print("Send from "+ str(event.origin))
         block = event.data["block"]
         receipts_root: str = event.data["receipts_root"]
         if isinstance(block, str):

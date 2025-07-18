@@ -1,6 +1,6 @@
 import ipaddress
 
-def is_valid_origin(origin):
+def is_valid_origin(origin) -> tuple[str, int] | None:
     try:
         ip_str, port_str = origin.split(":")
         ipaddress.ip_address(ip_str)  # Raise ValueError nếu IP không hợp lệ

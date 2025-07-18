@@ -4,7 +4,7 @@ from dataclasses import dataclass
 class ChainConfig:
     decimals: int = 9
     NativeTokenWeiValue: int = 1
-    NativeTokenGigaweiValue: int = 1e6
+    NativeTokenGigaweiValue: int = int(1e6)
     NativeToken: str = 'Vietnam Stable Digital'
     NativeTokenSymbol: str = 'VSTD'
     NativeTokenValue = 1e9
