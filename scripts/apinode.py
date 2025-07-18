@@ -76,14 +76,14 @@ async def get_block_transactions(height: int, skip: int = 0, limit: int = 10) ->
         "transactions": block.data
     }
 
-@app.get("/transaction/{tx_hash}", response_model=Dict[str, Any])
-async def get_transaction(tx_hash: str) -> Any:
-    tx: Transaction | None = master.get_tx(tx_hash)
-    if not tx:
-        raise HTTPException(status_code=404, detail="Transaction not found")
-    return {
-        "transaction": tx.to_string_with_offchain_data()
-    }
+# @app.get("/transaction/{tx_hash}", response_model=Dict[str, Any])
+# async def get_transaction(tx_hash: str) -> Any:
+#     tx: Transaction | None = master.get_tx(tx_hash)
+#     if not tx:
+#         raise HTTPException(status_code=404, detail="Transaction not found")
+#     return {
+#         "transaction": tx.to_string_with_offchain_data()
+#     }
 
 @app.get("/transactions", response_model=Dict[str, Any])
 async def get_transactions() -> Any:
@@ -100,7 +100,7 @@ async def get_balance(address: str) -> Any:
     }
 
 @app.get("/address/{address}/transactions", response_model=Dict[str, Any])
-async def get_transactions(address: str) -> Any:
+async def get_transactions_of_address(address: str) -> Any:
     txs = master.query_tx(address, "sender")
     txs2 = master.query_tx(address, "to")
     txs.extend(txs2)

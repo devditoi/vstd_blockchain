@@ -2,7 +2,6 @@ from layer0.utils.ThreadUtils import defer
 from layer0.node.node_event_handler import NodeEventHandler
 from layer0.node.events.node_event import NodeEvent
 from layer0.blockchain.consensus.poa_consensus import ProofOfAuthority
-from rich.jupyter import print
 import time
 
 # from ecdsa import VerifyingKey

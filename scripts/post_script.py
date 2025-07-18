@@ -1,5 +1,8 @@
 # This scripts is a automated process to push a commit to a remote repository
 # Also to change the version and upload the packet to the pypi server
+from rich.console import Console
+from rich.theme import Theme
+from rich.prompt import Prompt
 import os
 import subprocess
 import sys
@@ -8,10 +11,6 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Import rich for colorful output
-from rich.console import Console
-from rich.theme import Theme
-from rich.prompt import Prompt
-
 
 # Define a custom theme for rich console output
 release_theme = Theme({
@@ -111,8 +110,10 @@ def run_command(command, cwd=None, shell=False, check=True, capture_output=False
         return result
     except subprocess.CalledProcessError as e:
         console.print(f"[error]Command failed with error code {e.returncode}[/error]")
-        if e.stdout: console.print("[command_output]STDOUT:[/command_output]\n", e.stdout)
-        if e.stderr: console.print("[warning]STDERR:[/warning]\n", e.stderr)
+        if e.stdout:
+            console.print("[command_output]STDOUT:[/command_output]\n", e.stdout)
+        if e.stderr:
+            console.print("[warning]STDERR:[/warning]\n", e.stderr)
         sys.exit(e.returncode)
     except FileNotFoundError:
         console.print(f"[error]Error: Command not found. Make sure '{command[0]}' is in your PATH.[/error]")

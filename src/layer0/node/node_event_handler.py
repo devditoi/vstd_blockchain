@@ -29,7 +29,6 @@ class NodeEventHandler:
         self.peers: list["Peer"] = []
         self.ef = EventFactory()
 
-        handler: NodeEventHandler = self
     
         self.ef.register_event(TxEvent(self))
         self.ef.register_event(BlockEvent(self))

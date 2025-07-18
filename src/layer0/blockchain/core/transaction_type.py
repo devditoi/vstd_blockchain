@@ -172,7 +172,7 @@ class SmartContractDeployTransaction(Transaction):
             print("TransactionProcessor:process_smart_contract_deploy_transaction: Contract name or contract code is empty")
             return False, self.estimated_gas()
         
-        contract_address: str = HashUtils.sha256( contract_name + contract_code)
+        HashUtils.sha256( contract_name + contract_code)
         
         # Examine the contract code
         

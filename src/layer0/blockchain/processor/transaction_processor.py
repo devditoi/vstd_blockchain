@@ -3,7 +3,7 @@ from layer0.blockchain.core.block import Block
 from layer0.blockchain.core.transaction_type import Transaction, NativeTransaction, MintBurnTransaction, NopTransaction
 from layer0.blockchain.core.worldstate import WorldState
 from rich import print
-
+import json
 
 # Implement more transaction type here!!!
 def cast_raw_transaction(transaction, transaction_data):

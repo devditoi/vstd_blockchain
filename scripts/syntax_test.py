@@ -6,7 +6,7 @@
 
 
 class Storage:
-    def __init__(self, parent: StorageConstructor):
+    def __init__(self, parent: "StorageConstructor"):
         self.data = {}
         self.parent = parent
     

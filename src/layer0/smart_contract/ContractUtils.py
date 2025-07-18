@@ -10,7 +10,6 @@ def check_contract_safety(source: str) -> list[str]:
 
     issues: list[str] = []
     
-    isValid = True
 
     for node in ast.walk(tree):
 

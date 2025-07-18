@@ -24,7 +24,7 @@ def data():
     master.import_key("validator_key")
     master.debug()
 
-    protocol = UDPProtocol(master.node_event_handler, 5000)
+    UDPProtocol(master.node_event_handler, 5000)
     master.set_origin("127.0.0.1:5000")
     # other = RemotePeer("127.0.0.1", 5000)
     # master.subscribe(other)

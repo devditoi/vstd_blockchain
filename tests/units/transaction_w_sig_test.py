@@ -42,7 +42,7 @@ def data():
 
 
 def test_sig_transfer(data):
-    ws = data["world_state"]
+    data["world_state"]
 
     assert not Validator.validate_transaction_with_signature(data["tx1"], data["tx1_sign"], None), "Invalid signature"
     assert Validator.validate_transaction_with_signature(data["tx2"], data["tx2_sign"], data["wallet_1"].publicKey), "Valid signature"
