@@ -1,9 +1,7 @@
 from layer0.blockchain.core.transaction_type import SmartContractDeployTransaction
-from layer0.blockchain.core.worldstate import EOA
 from layer0.blockchain.core.block import Block
 from layer0.blockchain.core.transaction_type import Transaction, NativeTransaction, MintBurnTransaction, NopTransaction
 from layer0.blockchain.core.worldstate import WorldState
-import json
 from rich import print
 
 
