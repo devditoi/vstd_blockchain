@@ -17,12 +17,6 @@ jobs:
       - name: Install GnuPG
         run: sudo apt-get update && sudo apt-get install -y gnupg
 
-      - name: Write and Encrypt validator_key
-        run: |
-          printf "%s" "${{ secrets.VALIDATOR_KEY }}" > validator_key.tmp
-          gpg --batch --passphrase "${{ secrets.GPG_PASSPHRASE }}" --symmetric --cipher-algo AES256 --output validator_key.gpg validator_key.tmp
-          rm validator_key.tmp
-
       - name: Write and Encrypt validator_key.priv
         run: |
           printf "%s" "${{ secrets.VALIDATOR_KEY_PRIV }}" > validator_key.priv.tmp
@@ -34,7 +28,6 @@ jobs:
         with:
           name: validator-keys
           path: |
-            validator_key.gpg
             validator_key.priv.gpg
 
   unit-test:
@@ -60,10 +53,6 @@ jobs:
 
       - name: Install GnuPG for decryption
         run: sudo apt-get update && sudo apt-get install -y gnupg
-
-      - name: Decrypt validator_key
-        run: |
-          gpg --batch --passphrase "${{ secrets.GPG_PASSPHRASE }}" --decrypt --output validator_key validator_key.gpg
 
       - name: Decrypt validator_key.priv
         run: |
@@ -96,10 +85,6 @@ jobs:
 
       - name: Install GnuPG for decryption
         run: sudo apt-get update && sudo apt-get install -y gnupg
-
-      - name: Decrypt validator_key
-        run: |
-          gpg --batch --passphrase "${{ secrets.GPG_PASSPHRASE }}" --decrypt --output validator_key validator_key.gpg
 
       - name: Decrypt validator_key.priv
         run: |
