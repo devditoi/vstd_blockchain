@@ -42,148 +42,127 @@ class TransactionProcessor:
         #     self.worldState = backup.clone()
         #     return False
 
-        print(f"TransactionProcessor:process: Process block #{self.block.index}")
+        #     )
+        #
+        # print(
+        #     f"TransactionProcessor:process: Process block #{self.block.index}"
+        # )
         # print(self.block)
-        for tx in self.block.data:
-            print("TransactionProcessor:process: Process " + tx.Txtype + " transaction")
-
-            if tx.gas_limit < tx.estimated_gas():
-                print("TransactionProcessor:process: Transaction gas precomputed limit exceeded")
-                tx.status = "failed"
-                continue # Pass this transaction (aka fail safe)
-
-            # Check if the user has enough gas
-            if self.worldState.get_eoa(tx.sender).balance < tx.gas_limit:
-                print("TransactionProcessor:process: Transaction sender does not have enough balance")
-                tx.status = "failed"
-                continue # Pass this transaction
-
-            # Deduct the gas
-            gas_allowed: int = tx.gas_limit
-            neoa: EOA = self.worldState.get_eoa(tx.sender)
-            neoa.balance -= gas_allowed
-            self.worldState.set_eoa(tx.sender, neoa)
-
-            # Execute transaction and calculate gas used
-            state, gas_used = tx.process(self.worldState)
-
-            # Subtract the gas
-            gas_leftover: int = gas_allowed - gas_used
-
-            # Gas
-            # Half gone to miner wallet
-            # Half disapears
-
-            miner_reward: int = gas_used // 2
-            burned: int = gas_used - miner_reward
-
-            if not self.block.miner:
-                print("TransactionProcessor:process: Block miner is not set, cannot transfer gas to miner")
-                # Need to revert the whole transaction
-                self.worldState = backup.clone()
-                tx.status = "failed_revert"
+        for tx in self.block.transactions:
+            print(f"[bold blue]TransactionProcessor:process:[/] Process {tx.Txtype} transaction")
+            if tx.gas_limit > self.block.gas_limit - self.block.gas_used:
+                print("[bold red]TransactionProcessor:process:[/] Transaction gas precomputed limit exceeded")
                 continue
 
-            # Transfer to miner
-            neoa = self.worldState.get_eoa(self.block.miner)
-            neoa.balance += miner_reward
-            self.worldState.set_eoa(self.block.miner, neoa)
+            # Snapshot the world state
+            # self.worldState.snapshot()
 
-            # Transfer to 0 (Burn address)
-            neoa = self.worldState.get_eoa("0")
-            neoa.balance += burned
-            self.worldState.set_eoa("0", neoa)
-
-            if gas_leftover < 0:
-                print("TransactionProcessor:process: Transaction gas limit exceeded")
-                tx.status = "failed" # And still eat the gas
+            if not self.worldState.get_eoa(tx.sender).balance >= tx.gas_limit:
+                print("[bold red]TransactionProcessor:process:[/] Transaction sender does not have enough balance")
                 continue
 
-            # Transfer back gas to the sender
-            neoa = self.worldState.get_eoa(tx.sender)
-            neoa.balance += gas_leftover
-            self.worldState.set_eoa(tx.sender, neoa)
+            # Deduct gas from sender
+            self.worldState.get_eoa(tx.sender).balance -= tx.gas_limit
 
-            if not state: # Deep fail, require revert
-                print("TransactionProcessor:process: Transaction failed, reverse the transaction")
-                self.worldState = backup.clone()
-                tx.status = "failed_revert"
-                continue # After reverse the transaction, everything is fine
-
-            backup = self.worldState.clone() # Backup the world state of current transaction
-
-            # Update nonce
-            neoa = self.worldState.get_eoa(tx.sender)
-            neoa.nonce += 1
-            self.worldState.set_eoa(tx.sender, neoa)
-
-            tx.status = "succeeded"
+            # Process the transaction
+            result, gas_used = tx.process(self.worldState)
             tx.gas_used = gas_used
-            tx.block_index = self.block.index
-
-            print(f"TransactionProcessor:process: Transaction succeeded, gas limit {tx.gas_limit}, gas used {tx.gas_used}, returned gas {gas_leftover}, burned {burned}")
-
-        # set block receipts root
-        self.block.receipts_root = self.block.get_receipts_root()
-
-        return True
-
-    @staticmethod
-    def check_valid_transaction(transaction_raw: str) -> bool:
-        try:
-            transaction = json.loads(transaction_raw)
-
-            if any([key not in transaction for key in ["Txtype", "data", "signature", "publicKey"]]):
-                
-                # Find missing keys
-                missing_keys = [key for key in ["Txtype", "data", "signature", "publicKey"] if key not in transaction]
-                print(f"TransactionProcessor:check_valid_transaction: Missing keys: {missing_keys}")
-                
-                return False
+            gas_leftover = tx.gas_limit - gas_used
             
+            # Burn 1/2 of the leftover gas, and refund the other 1/2
+            burned = gas_leftover // 2
+            refund = gas_leftover - burned
+            
+            self.worldState.get_eoa(tx.sender).balance += refund
 
-            return True
-        except json.JSONDecodeError:
-            return False
+            # Transfer the gas used to the miner
+            if self.block.miner:
+                self.worldState.get_eoa(self.block.miner).balance += tx.gas_used
+            else:
+                print("[bold red]TransactionProcessor:process:[/] Block miner is not set, cannot transfer gas to miner")
+
+            # Update the block gas used
+            self.block.gas_used += tx.gas_used
+
+            # Check if the transaction was successful
+            if not result:
+                # Revert the world state
+                # self.worldState.revert()
+                print("[bold red]TransactionProcessor:process:[/] Transaction failed, reverse the transaction")
+                continue
+
+            # Check if the block gas limit is exceeded
+            if self.block.gas_used > self.block.gas_limit:
+                # Revert the world state
+                # self.worldState.revert()
+                print("[bold red]TransactionProcessor:process:[/] Transaction gas limit exceeded")
+                continue
+
+            # Add the transaction to the list of processed transactions
+            self.processed_transactions.append(tx)
+            
+            # Update the transaction status
+            tx.status = "success"
+            
+            print(f"[bold green]TransactionProcessor:process:[/] Transaction succeeded, gas limit {tx.gas_limit}, gas used {tx.gas_used}, returned gas {gas_leftover}, burned {burned}")
+
+        return self.processed_transactions
+
+    def get_receipts_root(self) -> str:
+        return HashUtils.sha256("".join([tx.get_receipt_hash() for tx in self.processed_transactions]))
 
     @staticmethod
-    def cast_transaction(transaction_raw: str) -> Transaction:
-        transaction = json.loads(transaction_raw)
+    def check_valid_transaction(transaction: dict) -> bool:
+        required_keys = ["sender", "to", "Txtype", "timestamp", "nonce", "gas_limit", "transactionData", "hash", "signature", "publicKey"]
+        missing_keys = [key for key in required_keys if key not in transaction]
+        if missing_keys:
+            print(f"[bold red]TransactionProcessor:check_valid_transaction:[/] Missing keys: {missing_keys}")
+            return False
+        return True
+    
+    @staticmethod
+    def from_dict(transaction: dict) -> 'Transaction':
         # print(transaction)
-        transaction_data = transaction["data"]
+        if not TransactionProcessor.check_valid_transaction(transaction):
+            raise ValueError("Invalid transaction format")
         # print(transaction)
-
-        tx: Transaction = cast_raw_transaction(transaction, transaction_data)
+        
+        tx = Transaction(
+            sender=transaction["sender"],
+            to=transaction["to"],
+            Txtype=transaction["Txtype"],
+            timestamp=transaction["timestamp"],
+            nonce=transaction["nonce"],
+            gas_limit=transaction["gas_limit"]
+        )
+        tx.transactionData = transaction["transactionData"]
+        tx.hash = transaction["hash"]
         tx.signature = transaction["signature"]
         tx.publicKey = transaction["publicKey"]
-
         return tx
 
-    # def process_mint_burn_transaction(self, transaction: Transaction) -> (bool, int):
+    @staticmethod
+    def cast_transaction(transaction: dict) -> 'Transaction':
+        return TransactionProcessor.from_dict(transaction)
+        
+
+    # @staticmethod
+    # def process_mint_burn_transaction(transaction: 'MintBurnTransaction', worldState: 'WorldState') -> None:
     #     print("TransactionProcessor:process_mint_burn_transaction: Process mint burn transaction")
-    #
     #     # Update world state
     #     receiver = transaction.to
     #     amount = transaction.transactionData["amount"]
     #
-    #     if self.worldState.get_eoa(receiver).balance + amount < 0:
-    #         # Clear the balance
-    #         neoa = self.worldState.get_eoa(receiver)
-    #         neoa.balance = 0
-    #         self.worldState.set_eoa(receiver, neoa)
-    #         return False
-    #
-    #     neoa = self.worldState.get_eoa(receiver)
+    #     neoa = worldState.get_eoa(receiver)
     #     neoa.balance += amount
-    #     self.worldState.set_eoa(receiver, neoa)
+    #     worldState.set_eoa(receiver, neoa)
     #
-    #     return True
-
-    # def process_native_transaction(self, transaction: NativeTransaction) -> (bool, int):
+    # @staticmethod
+    # def process_native_transaction(transaction: 'NativeTransaction', worldState: 'WorldState') -> None:
     #
-    #     if transaction.sender == transaction.transactionData["receiver"]:
+    #     if transaction.sender == transaction.to:
     #         print(f"[Skip] Tx {transaction.hash[:8]} is noop (sender == receiver)")
-    #         return True
+    #         return
     #
     #     print("TransactionProcessor:process_native_transaction: Process native transaction, gas fee: " + str(transaction.gas_limit))
     #
@@ -191,17 +170,13 @@ class TransactionProcessor:
     #     sender = transaction.sender
     #     receiver = transaction.to
     #     amount = transaction.transactionData["amount"]
-    #     gasPrice = transaction.gas_limit
     #
-    #     # self.worldState.get_eoa(sender).balance -= amount + gasPrice
-    #     # self.worldState.get_eoa(receiver).balance += amount
+    #     # Deduct the sender
+    #     neoa = worldState.get_eoa(sender)
+    #     neoa.balance -= amount
+    #     worldState.set_eoa(sender, neoa)
     #
-    #     neoa = self.worldState.get_eoa(sender)
-    #     neoa.balance -= amount + gasPrice
-    #     self.worldState.set_eoa(sender, neoa)
-    #
-    #     neoa = self.worldState.get_eoa(receiver)
+    #     # Add the receiver
+    #     neoa = worldState.get_eoa(receiver)
     #     neoa.balance += amount
-    #     self.worldState.set_eoa(receiver, neoa)
-    #
-    #     return True
+    #     worldState.set_eoa(receiver, neoa)

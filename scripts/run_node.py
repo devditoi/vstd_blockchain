@@ -1,12 +1,8 @@
-from layer0.config import ChainConfig
+from layer0.utils.logger import Logger
 from layer0.node.node import Node
-from layer0.p2p.peer_type.local_peer import LocalPeer
 from layer0.p2p.peer_type.remote_peer import RemotePeer
 from layer0.p2p.udp_protocol import UDPProtocol
-from layer0.utils.crypto.signer import SignerFactory
-from layer0.wallet.wallet import Wallet
-from rich import print, inspect
-import time
+from rich import print
 import os
 import shutil
 
@@ -77,7 +73,7 @@ def start_node(port: int):
     __other = RemotePeer("127.0.0.1", 5000)
     # inspect(__other)
     node.node_event_handler.subscribe(__other)
-    __protocol = UDPProtocol(node.node_event_handler, port)  # auto listen in background
+    __protocol = UDPProtocol(node.node_event_handler, port, node.logger)  # auto listen in background
 
     while True:
         pass
@@ -85,22 +81,23 @@ def start_node(port: int):
 def clear_blockchain_node():
     for path in os.listdir():
         if path.startswith("chain_") and path.endswith("_blockchain"):
-            print("Try to remove:", path)
+            print(f"[bold yellow]Removing directory:[/] {path}")
             shutil.rmtree(path)
 
         if path.startswith("chain_") and path.endswith("_transaction"):
-            print("Try to remove:", path)
+            print(f"[bold yellow]Removing directory:[/] {path}")
             shutil.rmtree(path)
 
 
 if __name__ == '__main__':
+    logger = Logger("run_node")
     clear_blockchain_node()
 
     master = Node()
     master.import_key("validator_key")
     master.debug()
 
-    protocol = UDPProtocol(master.node_event_handler, 5000)
+    protocol = UDPProtocol(master.node_event_handler, 5000, master.logger)
     master.set_origin("127.0.0.1:5000")
     # other = RemotePeer("127.0.0.1", 5000)
     # master.subscribe(other)

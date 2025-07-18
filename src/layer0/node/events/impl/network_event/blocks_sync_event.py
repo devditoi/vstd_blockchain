@@ -1,14 +1,11 @@
-from numpy import False_
-from layer0.blockchain.core.validator import Validator
 from layer0.blockchain.processor.block_processor import BlockProcessor
 from layer0.node.events.EventHandler import EventHandler
 from layer0.node.events.node_event import NodeEvent
 import typing
 from rich import print
-from layer0.blockchain.core.block import Block
 
 if typing.TYPE_CHECKING:
-    from layer0.node.node_event_handler import NodeEventHandler
+    pass
 
 
 class GetBlocksEvent(EventHandler):
@@ -45,37 +42,36 @@ class GetBlocksEvent(EventHandler):
 
 
 class BlocksEvent(EventHandler):
-    def require_field(self):
+    @staticmethod
+    def require_field():
         return ["blocks"]
 
     @staticmethod
     def event_name() -> str:
         return "blocks"
 
-    def handle(self, event: "NodeEvent"):
-        blocks_data = event.data["blocks"]
-        print(f"[{self.neh.node.origin}] BlocksEvent.handle: received {len(blocks_data)} blocks from {event.origin}")
+    def handle(self, event: NodeEvent) -> bool:
+        blocks_data = event.data['blocks']
+        self.neh.node.logger.log(f"[bold blue][{self.neh.node.origin}] BlocksEvent.handle:[/] received {len(blocks_data)} blocks from {event.origin}")
 
-        # Need to check where to overwrite and remove all block in that case
-        # TODO: Find smallest height block and start purging from top to there height before add new block
-        # TODO: Need to implement state diff logic for reverse
+        if not blocks_data:
+            return False
 
-        # print(blocks_data)
-        if len(blocks_data) > 1:
-            highest_point = BlockProcessor.cast_block(blocks_data[1]).index
-            if highest_point < self.neh.node.blockchain.get_height():
-                print("[BlocksEvent.handle] Received block with lower index than current blockchain height, Not implemented yet")
+        blocks = [Block.from_json(block_data) for block_data in blocks_data]
+        
+        for block in blocks:
+            if self.neh.node.blockchain.get_block(block.index) and self.neh.node.blockchain.get_block(block.index).hash == block.hash:
+                self.neh.node.logger.log(f"[bold yellow][{self.neh.node.origin}] BlocksEvent.handle:[/] Block #{block.index} from {event.origin} already exists")
+                continue
+
+            if block.index <= self.neh.node.blockchain.get_height():
+                self.neh.node.logger.log(f"[bold yellow][{self.neh.node.origin}] BlocksEvent.handle:[/] Received block with lower or equal index than current blockchain height, Not implemented yet")
+                continue
+
+            self.neh.node.logger.log(f"[bold blue][{self.neh.node.origin}] BlocksEvent.handle:[/] adding block {block.index} to blockchain")
+            if not self.neh.node.blockchain.add_block(block, self.neh.node.worldState):
+                self.neh.node.logger.log(f"[bold red][{self.neh.node.origin}] BlocksEvent.handle:[/] Failed to add block #{block.index} from {event.origin} to chain")
                 return False
-
-        for block_data in blocks_data:
-            block = BlockProcessor.cast_block(block_data)
-            if block.index == 0:
-                continue # Pass genesis block
-            print(f"[{self.neh.node.origin}] BlocksEvent.handle: adding block {block.index} to blockchain")
-            self.neh.node.blockchain.add_block(block, already_finalized=True)
-
-        status_request_event = NodeEvent("get_status", {}, self.neh.node.origin)
-        self.neh.fire_to_random(status_request_event)
-
-
-        return False
+        
+        self.neh.node.logger.log(f"[bold green][{self.neh.node.origin}] BlocksEvent.handle:[/] Successfully added {len(blocks)} blocks from {event.origin} to chain")
+        return True

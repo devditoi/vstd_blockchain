@@ -1,11 +1,8 @@
 from layer0.blockchain.core.worldstate import WorldState
 from typing import cast
-from typing import Any
 from typing import TypedDict
-from typing_extensions import Literal
 from abc import ABC, abstractmethod
 import jsonlight
-from rsa import PublicKey
 from rich import print
 
 from layer0.config import ChainConfig
@@ -109,10 +106,10 @@ class NativeTransaction(Transaction):
     def process(self, worldState) -> tuple[bool, int]:
 
         if self.sender == self.to:
-            print(f"[Skip] Tx {self.hash[:8]} is noop (sender == receiver)")
+            print(f"[bold yellow][Skip][/] Tx {self.hash[:8]} is noop (sender == receiver)")
             return True, self.estimated_gas()
 
-        print("TransactionProcessor:process_native_transaction: Process native transaction")
+        print("[bold blue]TransactionProcessor:process_native_transaction:[/] Process native transaction")
 
         # Update world state
         sender = self.sender
@@ -121,7 +118,7 @@ class NativeTransaction(Transaction):
 
         # Check if the user has enough balance
         if worldState.get_eoa(sender).balance < amount:
-            print("TransactionProcessor:process_native_transaction: Transaction sender does not have enough balance")
+            print("[bold red]TransactionProcessor:process_native_transaction:[/] Transaction sender does not have enough balance")
             return True, self.estimated_gas()
 
         # Deduct the sender
@@ -172,7 +169,7 @@ class SmartContractDeployTransaction(Transaction):
         contract_code: str = cast(str, self.transactionData.get("contract_code", ""))
         
         if contract_name == "" or contract_code == "":
-            print("TransactionProcessor:process_smart_contract_deploy_transaction: Contract name or contract code is empty")
+            print("[bold red]TransactionProcessor:process_smart_contract_deploy_transaction:[/] Contract name or contract code is empty")
             return False, self.estimated_gas()
         
         contract_address: str = HashUtils.sha256( contract_name + contract_code)
@@ -201,7 +198,7 @@ class MintBurnTransaction(Transaction):
         return 0
 
     def process(self, worldState) -> tuple[bool, int]:
-        print("TransactionProcessor:process_mint_burn_transaction: Process mint burn transaction")
+        print("[bold blue]TransactionProcessor:process_mint_burn_transaction:[/] Process mint burn transaction")
         # Update world state
         receiver: str = self.to
         amount = self.transactionData["amount"]
@@ -235,16 +232,16 @@ class ValidatorTransaction(Transaction):
         validator = cast(str, self.transactionData.get("validator", ""))
         
         if validator == "":
-            print("TransactionProcessor:process_validator_transaction: Validator is empty")
+            print("[bold red]TransactionProcessor:process_validator_transaction:[/] Validator is empty")
 
         if self.sender == validator:
-            print("TransactionProcessor:process_validator_transaction: Process validator transaction")
+            print("[bold blue]TransactionProcessor:process_validator_transaction:[/] Process validator transaction")
             
             worldState.add_validator(validator)
             
             return True, self.estimated_gas()
 
-        print("TransactionProcessor:process_validator_transaction: Validator is not the sender")
+        print("[bold red]TransactionProcessor:process_validator_transaction:[/] Validator is not the sender")
         return False, self.estimated_gas()
     
     def estimated_gas(self) -> int:
@@ -255,5 +252,5 @@ class NopTransaction(Transaction):
         super().__init__("0x0", "0x0", "nop", 0, 0, 0)
 
     def process(self, worldState) -> tuple[bool, int]:
-        print("TransactionProcessor:process_nop_transaction: Process noop transaction")
+        print("[bold blue]TransactionProcessor:process_nop_transaction:[/] Process noop transaction")
         return True, 0

@@ -4,12 +4,10 @@ from layer0.node.events.node_event import NodeEvent
 from layer0.p2p.peer_type.remote_peer import RemotePeer
 from layer0.utils.crypto.signer import SignerFactory
 from layer0.blockchain.core.transaction_type import Transaction, NativeTransaction
-from layer0.node.node import Node
 import threading
 import socket
 import json
 import time
-from rich import inspect
 from layer0.utils.serializer import WorldStateSerializer
 from typing import Any
 
@@ -60,11 +58,11 @@ class WalletRemote:
                     origin=message["origin"]
                 )
                 self.process_event(event)
-            except:
+            except Exception as e:
                 # print stack trace
                 import traceback
                 traceback.print_exc()
-                print(f"[UDPProtocol] Error in receive")
+                print(f"[UDPProtocol] Error in receive: {e}")
 
 
     def sign_and_post_transaction(self, tx: Transaction):
@@ -101,7 +99,7 @@ class WalletRemote:
         try:
             self.nonce = int(self.world_state.get_eoa(self.address).nonce)
             return self.world_state.get_eoa(self.address).balance
-        except TypeError as e:
+        except TypeError:
             import traceback
             traceback.print_exc()
             return 0

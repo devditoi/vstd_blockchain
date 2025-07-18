@@ -1,10 +1,8 @@
 from layer0.utils.crypto.signer import SignerFactory
 from math import floor
 from layer0.blockchain.core.block import Block
-from rich import inspect
-from ecdsa import VerifyingKey, SigningKey, BadSignatureError, SECP256k1
+from ecdsa import VerifyingKey
 
-from layer0.blockchain.core.validator import Validator
 from layer0.blockchain.processor.block_processor import BlockProcessor
 from layer0.node.events.EventHandler import EventHandler
 from layer0.node.events.node_event import NodeEvent

@@ -1,7 +1,10 @@
+from typing import Any
 from layer0.node.events.impl.chain_event.bft_block_event import BFTBlockEvent
 from random import choice
 from rich import print
 import typing
+import queue
+import threading
 from layer0.blockchain.core.block import Block
 from layer0.p2p.peer import Peer
 from .events.EventHandler import EventFactory
@@ -28,6 +31,12 @@ class NodeEventHandler:
         self.node = node
         self.peers: list["Peer"] = []
         self.ef = EventFactory()
+        self.sync_queue = queue.Queue()
+        self.async_queue = queue.Queue()
+        self.sync_thread = threading.Thread(target=self.process_sync_queue, daemon=True)
+        self.async_thread = threading.Thread(target=self.process_async_queue, daemon=True)
+        self.sync_thread.start()
+        self.async_thread.start()
 
         handler: NodeEventHandler = self
     
@@ -57,6 +66,30 @@ class NodeEventHandler:
         self.ef.register_event(GetAncestorHashesEvent(self))
         self.ef.register_event(AncestorHashesEvent(self))
 
+    def process_sync_queue(self):
+        while True:
+            event = self.sync_queue.get()
+            self.process_event_and_broadcast(event)
+
+    def process_async_queue(self):
+        while True:
+            event = self.async_queue.get()
+            self.process_event_and_broadcast(event)
+
+    def process_event_and_broadcast(self, event: NodeEvent):
+        self.node.logger.log(f"[bold blue]{self.node.origin}:node.py:process_event_and_broadcast:[/] Processing event: {event.eventType} from {event.origin}")
+        if not self.process_event(event):  # Already processed and broadcast
+            return
+
+        event.origin = self.node.origin # Update origin
+
+        self.node.logger.log(f"{self.node.origin}:node.py:broadcast: Broadcasting event: " + str(event.eventType))
+
+        for peer in self.peers:
+            # time.sleep(1)
+            if peer.address == event.origin:
+                continue
+            peer.fire(event)
 
     # EVENT MANAGER
     def subscribe(self, peer: "Peer"):
@@ -74,22 +107,11 @@ class NodeEventHandler:
         print(f"{self.node.origin}:node.py:subscribe: Subscribed to {peer.address}")
 
     def broadcast(self, event: NodeEvent):
-        # time.sleep(1)
-        
-        # print(f"{self.node.origin}:node.py:broadcast: Process event: " + str(event.eventType))
-        
-        if not self.process_event(event):  # Already processed and broadcast
-            return
-
-        event.origin = self.node.origin # Update origin
-
-        print(f"{self.node.origin}:node.py:broadcast: Broadcasting event: " + str(event.eventType))
-
-        for peer in self.peers:
-            # time.sleep(1)
-            if peer.address == event.origin:
-                continue
-            peer.fire(event)
+        sync_events = ["tx", "block", "bft_block", "chain_head", "chain_head_fullfilled", "get_blocks", "blocks", "get_ancestor_hashes", "ancestor_hashes"]
+        if event.eventType in sync_events:
+            self.sync_queue.put(event)
+        else:
+            self.async_queue.put(event)
 
     def fire_to_random(self, event: NodeEvent):
         if not self.peers:
@@ -103,7 +125,7 @@ class NodeEventHandler:
         # print(f"{self.node.origin}:node.py:fire_to_random: Firing to {peer.address} - event: " + str(event.eventType))
 
     # @staticmethod
-    def fire_to(self, peer_origin: any, event: NodeEvent):
+    def fire_to(self, peer_origin: Any, event: NodeEvent):
         if not is_valid_origin(peer_origin):
             return
 

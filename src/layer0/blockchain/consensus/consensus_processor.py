@@ -1,4 +1,3 @@
-import threading
 
 from layer0.blockchain.core.block import Block
 from ..core.validator import Validator

@@ -136,7 +136,7 @@ def main():
 
     # Get bump type from user using rich.prompt
     bump_type = Prompt.ask(
-        f"[prompt]Enter bump type[/prompt]",
+        "[prompt]Enter bump type[/prompt]",
         choices=VERSION_CHOICES,
         default="patch"
     ).lower()

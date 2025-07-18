@@ -16,7 +16,6 @@ class JsonChainRepository(IChainRepository):
             f.write(data)
 
     def load(self) -> Chain:
-        chain = Chain()
         with open(self.filename, "r") as f:
             data_raw = f.read()
 

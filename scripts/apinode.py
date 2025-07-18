@@ -3,20 +3,14 @@ from layer0.blockchain.core.chain import Chain
 from layer0.blockchain.core.transaction_type import Transaction
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from typing import Dict, Any, List
+from typing import Dict, Any
 import uvicorn
-import threading
-import time
-import random
-from layer0.blockchain.core.transaction_type import MintBurnTransaction 
 from layer0.blockchain.processor.transaction_processor import TransactionProcessor
 from layer0.node.node import Node
 from layer0.p2p.peer_type.remote_peer import RemotePeer
 from layer0.p2p.udp_protocol import UDPProtocol
 from layer0.blockchain.core.block import Block  # Assuming this is the correct import for Block
 from layer0.utils.hash import HashUtils
-from layer0.wallet.wallet import Wallet
-from layer0.wallet.wallet_remote import WalletRemote
 
 # Initialize FastAPI app
 app = FastAPI(title="VSTD Blockchain LOCAL Node API", version="1.0.0")
