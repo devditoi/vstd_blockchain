@@ -1,7 +1,6 @@
 import socket
 import threading
 import json
-import time
 from rich import print
 from layer0.node.node_event_handler import NodeEventHandler
 from layer0.node.events.node_event import NodeEvent
@@ -46,11 +45,11 @@ class UDPProtocol(Protocol):
                         origin=message["origin"]
                     )
                     self.event_handler.broadcast(event)
-            except Exception as e:
+            except Exception:
                 # print stack trace
                 import traceback
                 traceback.print_exc()
-                print(f"[UDPProtocol] Error in receive")
+                print("[UDPProtocol] Error in receive")
 
     def stop(self):
         self.stop_flag = True

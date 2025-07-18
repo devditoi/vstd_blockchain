@@ -1,4 +1,3 @@
-from layer0.blockchain.core.chain import Chain
 
 
 class ChainSyncServices:

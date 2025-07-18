@@ -1,5 +1,4 @@
 from layer0.blockchain.core.block import Block
-from rich import inspect
 
 from layer0.blockchain.core.validator import Validator
 from layer0.blockchain.processor.block_processor import BlockProcessor

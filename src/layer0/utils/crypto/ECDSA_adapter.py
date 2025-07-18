@@ -17,7 +17,7 @@ class ECDSAAdapter(ICryptoAdapter):
     def verify(message: str, signature: str, publicKey: VerifyingKey) -> bool:
         try:
             return HashUtils.ecdsa_verify(message, bytes.fromhex(signature), publicKey)
-        except TypeError as e: # TypeError: fromhex() argument must be str, not ...
+        except TypeError: # TypeError: fromhex() argument must be str, not ...
             print("TypeError")
             return False
         except BadSignatureError:

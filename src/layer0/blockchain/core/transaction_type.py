@@ -1,11 +1,8 @@
 from layer0.blockchain.core.worldstate import WorldState
 from typing import cast
-from typing import Any
 from typing import TypedDict
-from typing_extensions import Literal
 from abc import ABC, abstractmethod
 import jsonlight
-from rsa import PublicKey
 from rich import print
 
 from layer0.config import ChainConfig

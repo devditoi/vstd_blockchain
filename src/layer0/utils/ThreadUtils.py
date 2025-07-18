@@ -1,5 +1,4 @@
 import threading
-import time
 
 def defer(func, delay_seconds, *args, **kwargs):
     """

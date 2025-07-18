@@ -1,12 +1,7 @@
-from layer0.config import ChainConfig
 from layer0.node.node import Node
-from layer0.p2p.peer_type.local_peer import LocalPeer
 from layer0.p2p.peer_type.remote_peer import RemotePeer
 from layer0.p2p.udp_protocol import UDPProtocol
-from layer0.utils.crypto.signer import SignerFactory
-from layer0.wallet.wallet import Wallet
-from rich import print, inspect
-import time
+from rich import print
 import os
 import shutil
 

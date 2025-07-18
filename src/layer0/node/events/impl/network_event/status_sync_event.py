@@ -3,7 +3,7 @@ from layer0.node.events.node_event import NodeEvent
 import typing
 
 if typing.TYPE_CHECKING:
-    from layer0.node.node_event_handler import NodeEventHandler
+    pass
 
 
 class GetStatusEvent(EventHandler):

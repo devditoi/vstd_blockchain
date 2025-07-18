@@ -6,27 +6,22 @@ from layer0.smart_contract.sc_storage import CentralStorageConstructor
 from typing import Any
 from layer0.config import FeatureFlags
 from layer0.utils.hash import HashUtils
-import ecdsa
 import time
 from layer0.blockchain.core.chain import Chain
 from layer0.blockchain.consensus.poa_consensus import ProofOfAuthority
-from layer0.blockchain.core.transaction_type import Transaction, MintBurnTransaction
-from layer0.blockchain.processor.block_processor import BlockProcessor
+from layer0.blockchain.core.transaction_type import Transaction
 from layer0.blockchain.processor.transaction_processor import TransactionProcessor
 from layer0.blockchain.core.validator import Validator
 from layer0.blockchain.core.worldstate import WorldState
 from layer0.config import ChainConfig
 import typing
-import os
 from layer0.node.node_event_handler import NodeEventHandler
-from layer0.utils.serializer import ChainSerializer
 
 if typing.TYPE_CHECKING:
-    from layer0.p2p.peer_type.remote_peer import RemotePeer
-    from layer0.p2p.peer import Peer
+    pass
 from layer0.node.events.node_event import NodeEvent
 from layer0.utils.crypto.signer import SignerFactory
-from rich import print, inspect
+from rich import print
 from layer0.blockchain.core.block import Block
 
 class Node:

@@ -1,14 +1,11 @@
-from numpy import False_
-from layer0.blockchain.core.validator import Validator
 from layer0.blockchain.processor.block_processor import BlockProcessor
 from layer0.node.events.EventHandler import EventHandler
 from layer0.node.events.node_event import NodeEvent
 import typing
 from rich import print
-from layer0.blockchain.core.block import Block
 
 if typing.TYPE_CHECKING:
-    from layer0.node.node_event_handler import NodeEventHandler
+    pass
 
 
 class GetBlocksEvent(EventHandler):

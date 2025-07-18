@@ -1,13 +1,11 @@
 from builtins import staticmethod
-from builtins import staticmethod
-from rich import inspect
 
 from layer0.node.events.EventHandler import EventHandler
 from layer0.node.events.node_event import NodeEvent
 import typing
 
 if typing.TYPE_CHECKING:
-    from layer0.node.node_event_handler import NodeEventHandler
+    pass
 
 
 # Remote side event

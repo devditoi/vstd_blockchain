@@ -1,4 +1,3 @@
-from typing import final
 from layer0.utils.ThreadUtils import defer
 from layer0.node.node_event_handler import NodeEventHandler
 from layer0.node.events.node_event import NodeEvent
@@ -8,20 +7,16 @@ import time
 
 # from ecdsa import VerifyingKey
 # import json
-from rsa import PublicKey
 # import jsonlight
-from rich import print, inspect
+from rich import print
 import threading
-import random
 from layer0.blockchain.chain.saver_impl.filebase_saver import FilebaseSaver, FilebaseDatabase
 from layer0.blockchain.consensus.consensus_processor import ConsensusProcessor
 # from layer0.blockchain.transaction_processor import TransactionProcessor
 from layer0.blockchain.core.validator import Validator
 from layer0.blockchain.core.block import Block
-from layer0.blockchain.core.transaction_type import Transaction, MintBurnTransaction
-from layer0.config import ChainConfig
+from layer0.blockchain.core.transaction_type import Transaction
 from layer0.utils.crypto.signer import SignerFactory
-from layer0.utils.hash import HashUtils
 
 
 class Chain:
@@ -259,7 +254,7 @@ class Chain:
                 break
             
         if self.consensus is None or self.broadcast_callback is None:
-            return; # For typing purposes
+            return # For typing purposes
 
         # Check if leader
         if not self.consensus.is_leader():

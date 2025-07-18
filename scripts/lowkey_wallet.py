@@ -1,4 +1,3 @@
-from layer0.blockchain.core.transaction_type import MintBurnTransaction
 from layer0.config import ChainConfig
 from layer0.p2p.peer_type.remote_peer import RemotePeer
 from layer0.wallet.wallet_remote import WalletRemote

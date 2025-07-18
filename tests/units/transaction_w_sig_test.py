@@ -2,9 +2,8 @@ import pytest
 
 from layer0.blockchain.core.transaction_type import NativeTransaction
 from layer0.blockchain.core.validator import Validator
-from layer0.blockchain.core.worldstate import WorldState, EOA
+from layer0.blockchain.core.worldstate import EOA
 from layer0.config import ChainConfig
-from layer0.utils.crypto.signer import SignerFactory
 from layer0.wallet.wallet import Wallet
 from layer0.node.node import Node
 

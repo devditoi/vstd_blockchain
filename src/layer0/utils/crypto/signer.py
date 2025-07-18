@@ -1,4 +1,3 @@
-from rich import inspect
 
 from layer0.utils.crypto.ECDSA_adapter import ECDSAAdapter
 from layer0.utils.crypto.crypto_adapter_interace import ICryptoAdapter

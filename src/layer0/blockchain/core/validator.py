@@ -1,18 +1,16 @@
 from layer0.config import FeatureFlags
-from rsa import PublicKey
 
 import typing
 
 if typing.TYPE_CHECKING:
     from layer0.blockchain.consensus.consensus import IConsensus
-    from layer0.blockchain.consensus.consensus_processor import ConsensusProcessor
     from layer0.blockchain.core.chain import Chain
 from layer0.blockchain.core.transaction_type import Transaction
 from layer0.blockchain.core.worldstate import WorldState
 from layer0.config import ChainConfig
 from layer0.utils.crypto.signer import SignerFactory
 from layer0.utils.hash import HashUtils
-from rich import print, inspect
+from rich import print
 from layer0.blockchain.core.block import Block
 import time
 
