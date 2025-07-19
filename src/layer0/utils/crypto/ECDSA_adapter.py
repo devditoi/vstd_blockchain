@@ -1,4 +1,6 @@
 from ecdsa import VerifyingKey, SigningKey, BadSignatureError, SECP256k1
+from layer0.utils.logging_config import get_logger
+logger = get_logger(__name__)
 from layer0.utils.crypto.crypto_adapter_interace import ICryptoAdapter
 from layer0.utils.hash import HashUtils
 
@@ -18,13 +20,13 @@ class ECDSAAdapter(ICryptoAdapter):
         try:
             return HashUtils.ecdsa_verify(message, bytes.fromhex(signature), publicKey)
         except TypeError: # TypeError: fromhex() argument must be str, not ...
-            print("TypeError")
+            logger.error("TypeError")
             return False
         except BadSignatureError:
-            print("BadSignatureError")
+            logger.error("BadSignatureError")
             return False
         except ValueError:
-            print("ValueError")
+            logger.error("ValueError")
             return False
 
     @staticmethod
@@ -52,7 +54,7 @@ class ECDSAAdapter(ICryptoAdapter):
     def save_priv(filename: str, privateKey: SigningKey) -> None:
         with open(filename + ".priv", "w") as f:
             f.write(privateKey.to_string().hex())
-        return ECDSAAdapter.load_pub(filename), ECDSAAdapter.load_priv(filename)
+        return ECDSAAdapter.load_pub(filename), ECDSAAdapter.load_priv(filename)  # type: ignore
 
     @staticmethod
     def load_pub(filename: str):

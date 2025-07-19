@@ -1,3 +1,4 @@
+import logging
 from builtins import staticmethod
 from layer0.node.events.EventHandler import EventHandler
 from layer0.p2p.peer import Peer
@@ -6,6 +7,8 @@ import typing
 if typing.TYPE_CHECKING:
     from layer0.node.node_event_handler import NodeEventHandler
 from layer0.node.events.node_event import NodeEvent
+
+logger = logging.getLogger(__name__)
 
 class PingEvent(EventHandler):
     
@@ -54,5 +57,5 @@ class PongEvent(EventHandler):
             self.neh.peers.remove(p)
             self.peer_timer.pop(p.address)
         except Exception as e:
-            print("[PongEvent] Safe remove Error!: " + str(e))
+            logger.error("[PongEvent] Safe remove Error!: " + str(e))
             pass

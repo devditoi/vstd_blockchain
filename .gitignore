@@ -20,6 +20,9 @@ mint_key.priv
 # Logs
 *.log
 
+# logs folder
+logs/
+
 # Poetry
 poetry.lock
 

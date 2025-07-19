@@ -29,7 +29,6 @@ jobs:
 
       - name: Release
         uses: softprops/action-gh-release@v1
-#        if: github.ref_type == 'tag'
         with:
           # Automatically generate release notes based on commits and PRs since the last tag
           generate_release_notes: true

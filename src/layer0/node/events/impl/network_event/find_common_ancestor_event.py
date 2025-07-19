@@ -1,3 +1,4 @@
+import logging
 from builtins import staticmethod
 
 from layer0.node.events.EventHandler import EventHandler
@@ -6,6 +7,8 @@ import typing
 
 if typing.TYPE_CHECKING:
     pass
+
+logger = logging.getLogger(__name__)
 
 
 # Remote side event
@@ -68,7 +71,7 @@ class AncestorHashesEvent(EventHandler):
                 break
 
         if common_ancestor_height is not None:
-            print(f"[SYNC] Common ancestor found at height {common_ancestor_height}")
+            logger.info(f"[SYNC] Common ancestor found at height {common_ancestor_height}")
             # Gửi request block sync từ ancestor đến head
             get_blocks_event = NodeEvent("get_blocks", {
                 "start_index": common_ancestor_height,
@@ -77,6 +80,6 @@ class AncestorHashesEvent(EventHandler):
             # inspect(get_blocks_event)
             self.neh.fire_to(event.origin, get_blocks_event) # Send back where this came from to request a full sync
         else:
-            print("[SYNC] No common ancestor found — full resync might be needed.")
+            logger.warning("[SYNC] No common ancestor found — full resync might be needed.")
 
 

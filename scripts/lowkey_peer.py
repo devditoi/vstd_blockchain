@@ -3,8 +3,10 @@ from layer0.p2p.peer_type.remote_peer import RemotePeer
 from layer0.p2p.udp_protocol import UDPProtocol
 from layer0.utils.crypto.signer import SignerFactory
 from layer0.wallet.wallet import Wallet
-from rich import print
+from layer0.utils.logging_config import get_logger
 import time
+
+logger = get_logger(__name__)
 
 if __name__ == '__main__':
     master = Node()
@@ -24,14 +26,14 @@ if __name__ == '__main__':
     master.debug()
     while True:
         # mint to self
-        print("Minting...")
+        logger.info("Minting...")
         master.mint(w.address, mint_key, pmint_key)
         master.debug()
 
-        print("--------------------------------Waiting for confirm transaction...")
+        logger.info("--------------------------------Waiting for confirm transaction...")
         currentMempool = len(master.node_event_handler.node.blockchain.mempool)
         while len(master.node_event_handler.node.blockchain.mempool) == currentMempool:
             time.sleep(1)
-        print("--------------------------------Done. Transaction confirmed.")
+        logger.info("--------------------------------Done. Transaction confirmed.")
         master.debug()
         time.sleep(3)

@@ -1,9 +1,12 @@
 from layer0.blockchain.core.transaction_type import SmartContractDeployTransaction
 from layer0.blockchain.core.block import Block
 from layer0.blockchain.core.transaction_type import Transaction, NativeTransaction, MintBurnTransaction, NopTransaction
-from layer0.blockchain.core.worldstate import WorldState
-from rich import print
+from layer0.blockchain.core.worldstate import WorldState, EOA
 import json
+import logging
+
+from layer0.utils.logging_config import get_logger
+logger = get_logger(__name__)
 
 # Implement more transaction type here!!!
 def cast_raw_transaction(transaction, transaction_data):
@@ -34,25 +37,25 @@ class TransactionProcessor:
         # TODO After processing transaction, check the world state hash to match with the block worldstate hash
         # current_worldstate_hash = self.worldState.get_hash()
         # if current_worldstate_hash != self.block.world_state_hash:
-        #     print(
-        #         "World state hash does not match with block worldstate hash, Either block invalid or world state corrupted")
+        #     logger.error(
+        #         "World state hash does not match with block worldstate hash. Either block invalid or world state corrupted")
         #     # Reverse the transaction
         #     self.worldState = backup.clone()
         #     return False
 
-        print(f"TransactionProcessor:process: Process block #{self.block.index}")
-        # print(self.block)
+        logger.info(f"Processing block #{self.block.index}")
+        logger.debug(f"Processing block data: {self.block}")
         for tx in self.block.data:
-            print("TransactionProcessor:process: Process " + tx.Txtype + " transaction")
+            logger.info(f"Processing {tx.Txtype} transaction")
 
             if tx.gas_limit < tx.estimated_gas():
-                print("TransactionProcessor:process: Transaction gas precomputed limit exceeded")
+                logger.error("Transaction gas precomputed limit exceeded")
                 tx.status = "failed"
                 continue # Pass this transaction (aka fail safe)
 
             # Check if the user has enough gas
             if self.worldState.get_eoa(tx.sender).balance < tx.gas_limit:
-                print("TransactionProcessor:process: Transaction sender does not have enough balance")
+                logger.error("Transaction sender does not have enough balance")
                 tx.status = "failed"
                 continue # Pass this transaction
 
@@ -76,7 +79,7 @@ class TransactionProcessor:
             burned: int = gas_used - miner_reward
 
             if not self.block.miner:
-                print("TransactionProcessor:process: Block miner is not set, cannot transfer gas to miner")
+                logger.error("Block miner not set - cannot transfer gas")
                 # Need to revert the whole transaction
                 self.worldState = backup.clone()
                 tx.status = "failed_revert"
@@ -93,7 +96,7 @@ class TransactionProcessor:
             self.worldState.set_eoa("0", neoa)
 
             if gas_leftover < 0:
-                print("TransactionProcessor:process: Transaction gas limit exceeded")
+                logger.error("Transaction gas limit exceeded")
                 tx.status = "failed" # And still eat the gas
                 continue
 
@@ -103,7 +106,7 @@ class TransactionProcessor:
             self.worldState.set_eoa(tx.sender, neoa)
 
             if not state: # Deep fail, require revert
-                print("TransactionProcessor:process: Transaction failed, reverse the transaction")
+                logger.error("Transaction failed - reverting changes")
                 self.worldState = backup.clone()
                 tx.status = "failed_revert"
                 continue # After reverse the transaction, everything is fine
@@ -119,7 +122,7 @@ class TransactionProcessor:
             tx.gas_used = gas_used
             tx.block_index = self.block.index
 
-            print(f"TransactionProcessor:process: Transaction succeeded, gas limit {tx.gas_limit}, gas used {tx.gas_used}, returned gas {gas_leftover}, burned {burned}")
+            logger.info(f"Transaction completed - Gas: limit={tx.gas_limit}, used={tx.gas_used}, returned={gas_leftover}, burned={burned}")
 
         # set block receipts root
         self.block.receipts_root = self.block.get_receipts_root()
@@ -135,7 +138,7 @@ class TransactionProcessor:
                 
                 # Find missing keys
                 missing_keys = [key for key in ["Txtype", "data", "signature", "publicKey"] if key not in transaction]
-                print(f"TransactionProcessor:check_valid_transaction: Missing keys: {missing_keys}")
+                logger.debug(f"Missing transaction keys: {missing_keys}")
                 
                 return False
             
@@ -180,10 +183,10 @@ class TransactionProcessor:
     # def process_native_transaction(self, transaction: NativeTransaction) -> (bool, int):
     #
     #     if transaction.sender == transaction.transactionData["receiver"]:
-    #         print(f"[Skip] Tx {transaction.hash[:8]} is noop (sender == receiver)")
+    #         logger.debug(f"Skipping no-op transaction {transaction.hash[:8]} (sender == receiver)")
     #         return True
     #
-    #     print("TransactionProcessor:process_native_transaction: Process native transaction, gas fee: " + str(transaction.gas_limit))
+    #     logger.info(f"Processing native transaction with gas fee: {transaction.gas_limit}")
     #
     #     # Update world state
     #     sender = transaction.sender

@@ -10,9 +10,11 @@ from layer0.blockchain.core.worldstate import WorldState
 from layer0.config import ChainConfig
 from layer0.utils.crypto.signer import SignerFactory
 from layer0.utils.hash import HashUtils
-from rich import print
+from layer0.utils.logging_config import get_logger
 from layer0.blockchain.core.block import Block
 import time
+
+logger = get_logger(__name__)
 
 MAX_TRANSACTION_WAITING_TIME: int = 1000 * 60 * 60 # 1 Hours
 
@@ -21,23 +23,23 @@ class Validator:
     def validate_transaction_with_signature(tx: Transaction, signature: str, publicKey) -> bool:
         
         if FeatureFlags.DEBUG:
-            print(tx.to_verifiable_string())
-            print(signature)
-            print(publicKey)
-            print(tx.hash)
+            logger.debug(f"Transaction verifiable string: {tx.to_verifiable_string()}")
+            logger.debug(f"Signature: {signature}")
+            logger.debug(f"Public key: {publicKey}")
+            logger.debug(f"Transaction hash: {tx.hash}")
         if not SignerFactory().get_signer().verify(tx.to_verifiable_string(), signature, publicKey):
-            print("validator.py:validate_transaction_with_signature: Transaction signature is invalid")
+            logger.error("Transaction signature is invalid")
             # raise Exception("Transaction signature is invalid")
             return False
 
         if not SignerFactory().get_signer().address(publicKey) == tx.sender and tx.Txtype != "mintburn":
-            print("validator.py:validate_transaction_with_signature: Transaction sender is invalid")
+            logger.error("Transaction sender is invalid")
             # raise Exception("Transaction sender is invalid")
             return False
 
-        tx.signature = signature
+        tx.signature = signature  # type: ignore[assignment]
         # tx.publicKey = publicKey.to_string().hex()
-        tx.publicKey = SignerFactory().get_signer().serialize(publicKey)
+        tx.publicKey = SignerFactory().get_signer().serialize(publicKey)  # type: ignore[assignment]
         # tx.puib
 
         return True
@@ -47,15 +49,15 @@ class Validator:
     def validate_transaction_with_worldstate(tx: Transaction, worldState: WorldState) -> bool:
 
         if tx.gas_limit < ChainConfig.MinimumGasPrice:
-            print("Validator.py:offchain_validate: Transaction gasPrice is below minimum")
+            logger.warning("Transaction gasPrice is below minimum")
             return False
 
         if worldState.get_eoa(tx.sender).balance < tx.gas_limit and tx.Txtype != "mintburn":
-            print("Validator.py:offchain_validate: Transaction sender does not have enough balance")
+            logger.warning("Transaction sender does not have enough balance")
             return False
 
         if tx.transactionData["amount"] <= 0:
-            print("Validator.py:offchain_validate: Transaction amount is negative")
+            logger.warning("Transaction amount is negative")
             return False
 
         return True
@@ -70,18 +72,18 @@ class Validator:
 
         # Yeah wtf?
         if not tx.publicKey:
-            print("chain.py:process_block: Transaction public key is missing")
+            logger.error("Transaction public key is missing")
             return False
 
         temp_public_key = SignerFactory().get_signer().deserialize(tx.publicKey)
         
 
         if not SignerFactory().get_signer().verify(tx.to_verifiable_string(), tx.signature, temp_public_key):
-            print("chain.py:process_block: Transaction signature is invalid")
+            logger.error("Transaction signature is invalid")
             return False
 
         if not SignerFactory().get_signer().address(temp_public_key) == tx.sender:
-            print("chain.py:process_block: Transaction sender is invalid")
+            logger.error("Transaction sender is invalid")
             return False
 
         # Check if transaction aren't too old or in the futures
@@ -90,7 +92,7 @@ class Validator:
 
         if pre_nonce_check:
             if tx.sender in pre_nonce_check and tx.nonce != pre_nonce_check[tx.sender] + 1:
-                print("chain.py:process_block: Transaction nonce is not valid")
+                logger.error("Transaction nonce is not valid")
                 return False
 
         return True
@@ -109,16 +111,15 @@ class Validator:
     @staticmethod
     def validate_block_on_chain(block: Block, chain, initially=False) -> bool:
         if block.index != chain.get_height() and not initially:
-            print("chain.py:add_block: Block index does not match chain length of " + str(chain.get_height()))
-            print(block.index, chain.get_height())
+            logger.error(f"Block index {block.index} does not match chain length {chain.get_height()}")
             return False
 
         if block.previous_hash != chain.get_latest_block().hash:
-            print("chain.py:add_block: Block previous hash does not match last block hash")
+            logger.error("Block previous hash does not match last block hash")
             return False
 
         if block.hash == chain.get_latest_block().hash:
-            print("chain.py:add_block: Block hash already exists")
+            logger.error("Block hash already exists")
             return False
 
         for tx in block.data:
@@ -176,7 +177,6 @@ class Validator:
     def validate_receipts(block: Block, receipts: list[Transaction]) -> bool:
         receipts_root = HashUtils.sha256("".join([ x.get_receipt_hash() for x in receipts ]))
         if block.receipts_root != receipts_root:
-            print("chain.py:validate_receipts: Receipts root hash does not match")
-            print(block.receipts_root, receipts_root)
+            logger.error(f"Receipts root hash mismatch: block={block.receipts_root} vs calculated={receipts_root}")
             return False
         return True

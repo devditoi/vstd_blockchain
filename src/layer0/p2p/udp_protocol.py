@@ -1,13 +1,15 @@
 import socket
 import threading
 import json
-from rich import print
 from layer0.node.node_event_handler import NodeEventHandler
 from layer0.node.events.node_event import NodeEvent
 from layer0.p2p.background_sync.chain_sync_job import ChainSyncJob
 from layer0.p2p.background_sync.peer_sync_job import PeerSyncJob
 from layer0.p2p.background_sync.ping_job import PingSnycJob
 from layer0.p2p.protocol import Protocol
+from layer0.utils.logging_config import get_logger
+
+logger = get_logger(__name__)
 
 class UDPProtocol(Protocol):
     def __init__(self, event_handler: "NodeEventHandler", port: int):
@@ -15,7 +17,8 @@ class UDPProtocol(Protocol):
         self.port = port
         self.stop_flag = False
         self.lock = threading.Lock()
-        self.sock = None
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.listen_thread = threading.Thread(target=self.listen_loop, daemon=True)
         self.listen_thread.start()
 
@@ -32,7 +35,7 @@ class UDPProtocol(Protocol):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.sock.bind(("0.0.0.0", self.port))
-        print(f"[UDPProtocol] Listening on port {self.port}")
+        logger.info(f"UDP protocol initialized on port {self.port}")
 
         while not self.stop_flag:
             try:
@@ -46,10 +49,7 @@ class UDPProtocol(Protocol):
                     )
                     self.event_handler.broadcast(event)
             except Exception:
-                # print stack trace
-                import traceback
-                traceback.print_exc()
-                print("[UDPProtocol] Error in receive")
+                logger.error("Error receiving UDP packet", exc_info=True)
 
     def stop(self):
         self.stop_flag = True

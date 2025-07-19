@@ -1,4 +1,6 @@
 from layer0.config import FeatureFlags
+from layer0.utils.logging_config import get_logger
+logger = get_logger(__name__)
 import hashlib
 import rsa
 from ecdsa import VerifyingKey, SigningKey, SECP256k1
@@ -22,8 +24,8 @@ class HashUtils:
     @staticmethod
     def get_address_ecdsa(publicKey: VerifyingKey) -> str:
         if FeatureFlags.DEBUG:
-            print(publicKey.to_string())
-            print(publicKey.to_string().hex())
+            logger.debug(f"ECDSA PublicKey raw: {publicKey.to_string()}")
+            logger.debug(f"ECDSA PublicKey hex: {publicKey.to_string().hex()}")
         return HashUtils.sha256(publicKey.to_string().hex())
 
     @staticmethod

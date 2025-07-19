@@ -21,13 +21,15 @@ if typing.TYPE_CHECKING:
     pass
 from layer0.node.events.node_event import NodeEvent
 from layer0.utils.crypto.signer import SignerFactory
-from rich import print
+from layer0.utils.logging_config import get_logger
+
+logger = get_logger(__name__)
 from layer0.blockchain.core.block import Block
 
 class Node:
     def __init__(self, dummy = False) -> None:
 
-        print("node.py:__init__: Initializing Node")
+        logger.info("Initializing Node")
 
         self.worldState: WorldState = WorldState()
 
@@ -53,7 +55,7 @@ class Node:
 
         # self.mintburn_nonce = 1
 
-        print(f"{self.address[:4]}:node.py:__init__: Initialized node")
+        logger.info(f"Initialized node")
 
         self.node_event_handler = NodeEventHandler(self)
 
@@ -118,16 +120,16 @@ class Node:
 
     def import_key(self, filename: str) -> None:
         self.signer = SignerFactory("ecdsa`").get_signer()
-        print(self.signer)
+        logger.debug(f"Signer: {self.signer}")
         self.publicKey, self.privateKey = self.signer.load(filename)
         self.address = self.signer.address(self.publicKey)
         self.consensus = ProofOfAuthority(self.address, self.privateKey)
         self.blockchain.set_initial_data(self.consensus, self.execution, self.node_event_handler.propose_block, self.worldState, self.node_event_handler)
-        print(f"{self.address[:4]}:node.py:import_key: Imported key " + self.address)
+        logger.info(f"Imported key {self.address}")
 
     def export_key(self, filename: str) -> None:
         self.signer.save(filename, self.publicKey, self.privateKey)
-        print(f"{self.address[:4]}:node.py:export_key: Exported key " + self.address)
+        logger.info(f"Exported key {self.address}")
 
     #! Depricated, not called by node anymore, typical admin wallet, address, contract.
     # TODO: When approuch smart contract. This will be use to overcollateral.V
@@ -180,18 +182,18 @@ class Node:
         }, self.origin))
 
     def process_tx(self, tx: Transaction, signature, publicKey):
-        print(f"{self.address[:4]}:node.py:process_tx: Add pool " + tx.Txtype + " transaction")
+        logger.info(f"Add pool {tx.Txtype} transaction")
 
         # self.blockchain.temporary_add_to_mempool(tx)
         pK = SignerFactory().get_signer().deserialize(publicKey)
         if FeatureFlags.DEBUG:
             addr = SignerFactory().get_signer().address(pK)
-            print(f"{self.address[:4]}:node.py:process_tx: Transaction sender address: {addr}")
+            logger.debug(f"Transaction sender address: {addr}")
             
-            print(HashUtils.sha256(tx.to_verifiable_string()))
+            logger.debug(f"Transaction hash: {HashUtils.sha256(tx.to_verifiable_string())}")
 
                 
-            print("------------------------------------------------------- START THE HARD PART GG")
+            logger.debug("------------------------------------------------------- START THE HARD PART GG")
 
         if not Validator.validate_transaction_with_worldstate(tx, self.worldState): # Validate transaction
             return
@@ -201,22 +203,22 @@ class Node:
         # 2. Signature
         # 3. Public key
         if FeatureFlags.DEBUG:
-            print (f"{self.address[:4]}:node.py:process_tx: Transaction hash: {HashUtils.sha256(tx.to_verifiable_string())}")
-            print (f"{self.address[:4]}:node.py:process_tx: Transaction signature: {signature}")
-            print (f"{self.address[:4]}:node.py:process_tx: Transaction public key: {publicKey}")
+            logger.debug(f"Transaction hash: {HashUtils.sha256(tx.to_verifiable_string())}")
+            logger.debug(f"Transaction signature: {signature}")
+            logger.debug(f"Transaction public key: {publicKey}")
         
         if not Validator.validate_transaction_raw(tx):
-            print(f"{self.address[:4]}:node.py:process_tx: Transaction is invalid - raw validation failed")
+            logger.warning("Transaction is invalid - raw validation failed")
             return
         
         
         if not Validator.validate_transaction_with_signature(tx, signature, pK):
-            print(f"{self.address[:4]}:node.py:process_tx: Transaction signature is invalid")
+            logger.warning("Transaction signature is invalid")
             return
         else:
-            print(f"{self.address[:4]}:node.py:process_tx: Transaction signature is valid")
+            logger.info("Transaction signature is valid")
 
-        print(f"{self.address[:4]}:node.py:process_tx: Give transaction to blockchain nonce: " + str(tx.nonce))
+        logger.debug(f"Give transaction to blockchain nonce: {tx.nonce}")
         # print(tx, signature, publicKey)
 
 
@@ -255,8 +257,8 @@ class Node:
 
 
     def debug(self):
-        print(f"{self.address[:4]}:node.py:debug:-------------------------------Debug node----------------------")
+        logger.debug("-------------------------------Debug node----------------------")
         self.blockchain.debug_chain()
-        print(self.worldState)
-        print(self.address, self.publicKey, self.privateKey)
-        print(f"{self.address[:4]}:node.py:debug:-------------------------------Debug node----------------------")
+        logger.debug(f"WorldState: {self.worldState}")
+        logger.debug(f"Address: {self.address}, PublicKey: {self.publicKey}")
+        logger.debug("-------------------------------Debug node----------------------")

@@ -1,4 +1,7 @@
 import hashlib
+from layer0.utils.logging_config import get_logger
+
+logger = get_logger(__name__)
 
 def keccak(data: str) -> str:
     return hashlib.sha256(data.encode()).hexdigest()  # Dùng SHA256 thay vì Keccak256 cho đơn giản
@@ -59,6 +62,6 @@ if __name__ == "__main__":
     trie.insert("0xabd", "200")
     trie.insert("0xade", "300")
 
-    print("Get 0xabc:", trie.get("0xabc"))
-    print("Get 0xade:", trie.get("0xade"))
-    print("Root Hash:", trie.hash_node())
+    logger.info("Get 0xabc: %s", trie.get("0xabc"))
+    logger.info("Get 0xade: %s", trie.get("0xade"))
+    logger.info("Root Hash: %s", trie.hash_node())

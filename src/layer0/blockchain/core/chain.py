@@ -7,7 +7,6 @@ import time
 # from ecdsa import VerifyingKey
 # import json
 # import jsonlight
-from rich import print
 import threading
 from layer0.blockchain.chain.saver_impl.filebase_saver import FilebaseSaver, FilebaseDatabase
 from layer0.blockchain.consensus.consensus_processor import ConsensusProcessor
@@ -16,11 +15,14 @@ from layer0.blockchain.core.validator import Validator
 from layer0.blockchain.core.block import Block
 from layer0.blockchain.core.transaction_type import Transaction
 from layer0.utils.crypto.signer import SignerFactory
+from layer0.utils.logging_config import get_logger
+
+logger = get_logger(__name__)
 
 
 class Chain:
     def __init__(self, chain_id: str, dummy = True) -> None:
-        print("chain.py:__init__: Initializing Chain")
+        logger.info("Initializing Chain")
         self.genesis_tx = Transaction("0", "genesis", "0", 0, 0, 0) # Ts need same for every node so timestamp zero is fine :D
         self.genesis_block: Block = Block(0, "0", 0, "0", [self.genesis_tx])
         self.chain = FilebaseSaver(FilebaseDatabase(
@@ -60,7 +62,7 @@ class Chain:
         return self.chain.get_height()
 
     def reset_chain(self):
-        print("chain.py:reset_chain: Reset chain")
+        logger.info("Reset chain")
         # self.chain = [self.genesis_block]
         self.chain.clear()
         self.chain.add_block(self.genesis_block)
@@ -84,20 +86,20 @@ class Chain:
         self.world_state = world_state
         self.neh = neh
 
-        print("chain.py:set_initial_data: Set callbacks")
+        logger.info("Set callbacks")
 
     def add_block(self, block: Block, initially = False, delay_flush = False, already_finalized = False) -> Block | None:
         #** Delay flush: Delay the flush of the block to the next flush interval (manually)
         if not Validator.validate_block_on_chain(block, self, initially): # Validate block
-            print("chain.py:add_block: Block is invalid")
+            logger.warning("Block is invalid")
             return None
         if not Validator.validate_block_without_chain(block, self.get_latest_block().hash): # Validate block
-            print("chain.py:add_block: Block is invalid")
+            logger.warning("Block is invalid")
             return None
         if block.hash in self.block_bft_sign:
             return None # In the pool
         
-        print(f"chain.py:add_block: Block #{block.index} valid, add to pool")
+        logger.info(f"Block #{block.index} valid, add to pool")
 
         # Execute first, add later
         if self.execution_callback:
@@ -115,7 +117,7 @@ class Chain:
         
         # Check the receipts root hash
         if not Validator.validate_receipts(block, block.data):
-            print("chain.py:add_block: Receipts root hash does not match")
+            logger.warning("Receipts root hash does not match")
             return None
         
         # Don't directly add to the chain, need to BFT finalized first
@@ -164,7 +166,7 @@ class Chain:
         return block
 
     def finalize_block(self, block: Block):
-        print(f"bft_block_event.py:handle: Block #{block.index} is finalized")
+        logger.info(f"Block #{block.index} is finalized")
         block.finalized = True
         self.chain.add_block(block, False)
         self.height += 1
@@ -204,7 +206,7 @@ class Chain:
             Exception: If the index is out of range
         """
         if index >= self.get_height():
-            print("chain.py:get_block: Index out of range")
+            logger.error("Index out of range")
             raise Exception("Index out of range")
         # print("chain.py:get_block: Return block at index", index)
         return self.chain.get_block(index)
@@ -226,10 +228,10 @@ class Chain:
     def add_transaction(self, transaction: Transaction, signature: str, publicKey: str) -> None:
         if not Validator.validate_transaction_with_signature(transaction, signature, SignerFactory().get_signer().deserialize(publicKey)): # Validate transaction
             # self.mempool_lock.release()
-            print("chain.py:add_transaction: Transaction is invalid, not added to mempool")
+            logger.warning("Transaction is invalid - not added to mempool")
             return
 
-        print("chain.py:add_transaction: Transaction valid, add to mempool")
+        logger.info("Transaction is valid - adding to mempool")
         # print(transaction)
 
         # self.mempool_lock.acquire()
@@ -246,8 +248,7 @@ class Chain:
         # Check some conditions
         while True:
             if self.consensus is None or self.broadcast_callback is None:
-                print(
-                    "chain.py:__process_block_thread: Consensus or  broadcast callback is not set, return")
+                logger.warning("Consensus or broadcast callback not set - retrying")
                 time.sleep(1)
             else:
                 break
@@ -257,18 +258,17 @@ class Chain:
 
         # Check if leader
         if not self.consensus.is_leader():
-            print("chain.py:__process_block_thread: Not leader, return")
-            print()
+            logger.info("Not leader - exiting block processing thread")
             return
 
         # return # Testing purposes
         
-        print("chain.py:__process_block_thread: Process block thread started, I'm leader")
+        logger.info("Block processing thread started - acting as leader")
 
         # Process block loop
         while True:
             if len(self.mempool) >= self.max_block_size or float(time.time() - self.last_block_time) >= self.interval:
-                print("chain.py:__process_block_thread: Process block")
+                logger.debug("Processing new block")
                 self.last_block_time = time.time()
                 if len(self.mempool) == 0:
                     # TODO Disable filling block for now
@@ -284,11 +284,11 @@ class Chain:
                 pool: list[Transaction] = self.mempool[:block_to_process]
                 self.mempool = self.mempool[block_to_process:]
 
-                print(f"chain.py:__process_block_thread: Process block with {len(pool)} transactions")
+                logger.debug(f"Processing block with {len(pool)} transactions")
 
                 block: Block | None = ConsensusProcessor.process_block(pool, self.get_latest_block(), self.consensus, self.broadcast_callback, self.world_state)
                 if block:
-                    print("chain.py:__process_block_thread: Block processed, delete transactions from mempool")
+                    logger.debug("Block processed - removing transactions from mempool")
                     # for tx in block.data:
                     #     print(f"chain.py:__process_block_thread: Delete transaction " + tx.hash + " from mempool")
                         # for mtx in self.mempool:
@@ -323,12 +323,11 @@ class Chain:
     #     }
 
     def debug_chain(self):
-        # print("chain.py:debug_chain:----------------------Print chain----------------------------")
-        # print("chain.py:debug_chain: Print chain")
+        logger.debug("----------------------Print chain----------------------------")
         for block in range(1, self.chain.get_height()):
-            print(self.chain.get_block(block).to_string())
+            logger.debug(self.chain.get_block(block).to_string())
 
-        print("chain.py:debug_chain: Print mempool")
+        logger.debug("Print mempool")
         for tx in self.mempool:
-            print(tx.to_string())
-        # print("chain.py:debug_chain:--------------------------------------------------")
+            logger.debug(tx.to_string())
+        logger.debug("--------------------------------------------------")

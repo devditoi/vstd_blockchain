@@ -1,9 +1,12 @@
+import logging
 from layer0.node.events.EventHandler import EventHandler
 from layer0.node.events.node_event import NodeEvent
 import typing
 
 if typing.TYPE_CHECKING:
     pass
+
+logger = logging.getLogger(__name__)
 
 
 class GetStatusEvent(EventHandler):
@@ -44,10 +47,10 @@ class StatusEvent(EventHandler):
         remote_height = event.data.get("height")
         remote_hash = event.data.get("hash")
 
-        # print("[StatusEvent] handle: local_height:", local_height, "remote_height:", remote_height, "remote_hash:", remote_hash)
+        # logger.debug("[StatusEvent] handle: local_height:", local_height, "remote_height:", remote_height, "remote_hash:", remote_hash)
 
         if remote_height > local_height:
-            print("[StatusEvent] handle: Remote node is ahead, requesting blocks")
+            logger.info("[StatusEvent] handle: Remote node is ahead, requesting blocks")
             # We are behind, request blocks (Find common ancestor first!!! and also send in batch not send all at once)
             # get_blocks_event = NodeEvent("get_blocks", {
             #     "start_index": local_height,
@@ -68,5 +71,5 @@ class StatusEvent(EventHandler):
             return False
         if remote_hash != local_hash:
             # Reorg logic, currently ignore
-            print("[StatusEvent] handle: Reorg, wait for more confirmation")
+            logger.warning("[StatusEvent] handle: Reorg, wait for more confirmation")
         return False

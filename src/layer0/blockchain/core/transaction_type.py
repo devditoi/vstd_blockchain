@@ -1,12 +1,14 @@
+import logging
 from layer0.blockchain.core.worldstate import WorldState
 from typing import cast
 from typing import TypedDict
 from abc import ABC, abstractmethod
 import jsonlight
-from rich import print
 
 from layer0.config import ChainConfig
 from layer0.utils.hash import HashUtils
+
+logger = logging.getLogger(__name__)
 
 
 class ITransaction(ABC):
@@ -104,12 +106,11 @@ class NativeTransaction(Transaction):
 
 
     def process(self, worldState) -> tuple[bool, int]:
-
         if self.sender == self.to:
-            print(f"[Skip] Tx {self.hash[:8]} is noop (sender == receiver)")
+            logger.info(f"[Skip] Tx {self.hash[:8]} is noop (sender == receiver)")
             return True, self.estimated_gas()
 
-        print("TransactionProcessor:process_native_transaction: Process native transaction")
+        logger.info("TransactionProcessor:process_native_transaction: Process native transaction")
 
         # Update world state
         sender = self.sender
@@ -118,7 +119,7 @@ class NativeTransaction(Transaction):
 
         # Check if the user has enough balance
         if worldState.get_eoa(sender).balance < amount:
-            print("TransactionProcessor:process_native_transaction: Transaction sender does not have enough balance")
+            logger.warning("TransactionProcessor:process_native_transaction: Transaction sender does not have enough balance")
             return True, self.estimated_gas()
 
         # Deduct the sender
@@ -169,13 +170,12 @@ class SmartContractDeployTransaction(Transaction):
         contract_code: str = cast(str, self.transactionData.get("contract_code", ""))
         
         if contract_name == "" or contract_code == "":
-            print("TransactionProcessor:process_smart_contract_deploy_transaction: Contract name or contract code is empty")
+            logger.error("TransactionProcessor:process_smart_contract_deploy_transaction: Contract name or contract code is empty")
             return False, self.estimated_gas()
         
         HashUtils.sha256( contract_name + contract_code)
         
         # Examine the contract code
-        
         
         return True, self.estimated_gas()
     
@@ -198,7 +198,7 @@ class MintBurnTransaction(Transaction):
         return 0
 
     def process(self, worldState) -> tuple[bool, int]:
-        print("TransactionProcessor:process_mint_burn_transaction: Process mint burn transaction")
+        logger.info("TransactionProcessor:process_mint_burn_transaction: Process mint burn transaction")
         # Update world state
         receiver: str = self.to
         amount = self.transactionData["amount"]
@@ -228,20 +228,18 @@ class ValidatorTransaction(Transaction):
         self.transactionData = cast(ValidatorTransactionData, validator)
 
     def process(self, worldState: WorldState) -> tuple[bool, int]:
-
         validator = cast(str, self.transactionData.get("validator", ""))
         
         if validator == "":
-            print("TransactionProcessor:process_validator_transaction: Validator is empty")
+            logger.error("TransactionProcessor:process_validator_transaction: Validator is empty")
+            return False, self.estimated_gas()
 
         if self.sender == validator:
-            print("TransactionProcessor:process_validator_transaction: Process validator transaction")
-            
+            logger.info("TransactionProcessor:process_validator_transaction: Process validator transaction")
             worldState.add_validator(validator)
-            
             return True, self.estimated_gas()
-
-        print("TransactionProcessor:process_validator_transaction: Validator is not the sender")
+        
+        logger.warning("TransactionProcessor:process_validator_transaction: Validator is not the sender")
         return False, self.estimated_gas()
     
     def estimated_gas(self) -> int:
@@ -252,5 +250,5 @@ class NopTransaction(Transaction):
         super().__init__("0x0", "0x0", "nop", 0, 0, 0)
 
     def process(self, worldState) -> tuple[bool, int]:
-        print("TransactionProcessor:process_nop_transaction: Process noop transaction")
+        logger.info("TransactionProcessor:process_nop_transaction: Process noop transaction")
         return True, 0

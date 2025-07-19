@@ -44,8 +44,10 @@ class StorageConstructor:
     
     def event(self, name: str, data):
         # Log
-        print(f"Event: {name}")
-        print(data)
+        from layer0.utils.logging_config import get_logger
+        logger = get_logger(__name__)
+        logger.debug(f"Event: {name}")
+        logger.debug(data)
     
     def export(self):
         storage = {}

@@ -4,6 +4,11 @@ from layer0.p2p.udp_protocol import UDPProtocol
 from rich import print
 import os
 import shutil
+from layer0.utils.logging_config import get_logger, setup_logging
+# Initialize logging with both console and file handlers
+# Initialize basic logging first
+setup_logging(console_log=True, file_log=True)
+logger = get_logger(__name__)
 
 # Test 1
 # node = Node()
@@ -65,9 +70,15 @@ import shutil
 
 # Test 4
 import multiprocessing
+from layer0.utils.logging_config import get_logger, setup_logging
 def start_node(port: int):
     node = Node()
     node.debug()
+    setup_logging(
+        node_address=node.address,
+        console_log=True,
+        file_log=True
+    )
     node.set_origin(f"127.0.0.1:{port}")
     __other = RemotePeer("127.0.0.1", 5000)
     # inspect(__other)
@@ -77,14 +88,16 @@ def start_node(port: int):
     while True:
         pass
 
+logger = get_logger(__name__)
+
 def clear_blockchain_node():
     for path in os.listdir():
         if path.startswith("chain_") and path.endswith("_blockchain"):
-            print("Try to remove:", path)
+            logger.info(f"Try to remove: {path}")
             shutil.rmtree(path)
 
         if path.startswith("chain_") and path.endswith("_transaction"):
-            print("Try to remove:", path)
+            logger.info(f"Try to remove: {path}")
             shutil.rmtree(path)
 
 
@@ -94,6 +107,13 @@ if __name__ == '__main__':
     master = Node()
     master.import_key("validator_key")
     master.debug()
+    
+    # Reconfigure logging with node address
+    setup_logging(
+        node_address=master.address,
+        console_log=True,
+        file_log=True
+    )
 
     protocol = UDPProtocol(master.node_event_handler, 5000)
     master.set_origin("127.0.0.1:5000")
@@ -108,7 +128,10 @@ if __name__ == '__main__':
     peers_test = 1
     for i in range(peers_test):
         port = 5001 + i
-        p = multiprocessing.Process(target=start_node, args=(port,))
+        p = multiprocessing.Process(
+            target=start_node,
+            args=(port,)
+        )
         p.start()
 
     while True:

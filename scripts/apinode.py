@@ -11,6 +11,8 @@ from layer0.p2p.peer_type.remote_peer import RemotePeer
 from layer0.p2p.udp_protocol import UDPProtocol
 from layer0.blockchain.core.block import Block  # Assuming this is the correct import for Block
 from layer0.utils.hash import HashUtils
+from layer0.utils.logging_config import get_logger
+logger = get_logger(__name__)
 
 # Initialize FastAPI app
 app = FastAPI(title="VSTD Blockchain LOCAL Node API", version="1.0.0")
@@ -59,7 +61,7 @@ async def get_blocks(skip: int = 0, limit: int = 10):
     # Actually Skips are down movement
     actual_start = master.blockchain.get_height() - skip - 1 # Offset by 1
     actual_end = max(actual_start - limit, 0)
-    print(actual_start, actual_end)
+    logger.debug(f"Block range: {actual_start} to {actual_end}")
     for i in range(actual_start, actual_end, -1):
         block: Block | None = master.get_block(i)
         if not block:

@@ -1,8 +1,11 @@
+import logging
 from layer0.node.events.EventHandler import EventHandler
 from layer0.p2p.peer_type.remote_peer import RemotePeer
 from layer0.utils.network_utils import is_valid_origin
 from layer0.utils.serializer import PeerSerializer
 from layer0.node.events.node_event import NodeEvent
+
+logger = logging.getLogger(__name__)
 
 
 class PeerDiscoveryEvent(EventHandler):
@@ -52,7 +55,7 @@ class PeerDiscoveryFullfilledEvent(EventHandler):
                 continue
             self.neh.subscribe(peer)
 
-        print(f"[NodeEventHandler] [bold green]{self.neh.node.origin}[/bold green]: Subscribed to {len(self.neh.peers)} peers")
+        logger.info(f"[NodeEventHandler] {self.neh.node.origin}: Subscribed to {len(self.neh.peers)} peers")
         # inspect(self.peers)
 
         return False  # Don't relay

@@ -1,7 +1,7 @@
+import logging
 from typing import Any
 from layer0.node.events.impl.chain_event.bft_block_event import BFTBlockEvent
 from random import choice
-from rich import print
 import typing
 import queue
 import threading
@@ -12,7 +12,6 @@ from layer0.node.events.impl.chain_event.block_event import BlockEvent
 from layer0.node.events.impl.network_event.peer_discovery_event import PeerDiscoveryEvent, PeerDiscoveryFullfilledEvent
 from layer0.node.events.impl.chain_event.tx_event import TxEvent
 from .events.impl.chain_event.chain_head import ChainHeadEvent, ChainHeadFullfilledEvent
-# from .events.impl.chain_event.full_chain import FullChainEvent, FullChainFullfilledEvent
 from .events.impl.network_event.find_common_ancestor_event import GetAncestorHashesEvent, AncestorHashesEvent
 from .events.impl.network_event.get_worldstate_event import GetWorldStateEvent
 from .events.impl.network_event.ping_event import PingEvent, PongEvent
@@ -25,6 +24,8 @@ from .events.node_event import NodeEvent
 
 if typing.TYPE_CHECKING:
     from .node import Node
+
+logger = logging.getLogger(__name__)
 
 class NodeEventHandler:
     def __init__(self, node: "Node"):
@@ -76,8 +77,7 @@ class NodeEventHandler:
             return
 
         self.peers.append(peer)
-        # return peer
-        print(f"{self.node.origin}:node.py:subscribe: Subscribed to {peer.address}")
+        logger.info(f"{self.node.origin}:node.py:subscribe: Subscribed to {peer.address}")
 
     def broadcast(self, event: NodeEvent) -> bool:
         """Public broadcast that queues event for processing"""
@@ -164,7 +164,7 @@ class NodeEventHandler:
                                 peer.fire(event)
                 callback(result)
             except Exception as e:
-                print(f"Error processing event {event.eventType}: {str(e)}")
+                logger.error(f"Error processing event {event.eventType}: {str(e)}")
                 callback(False)
             finally:
                 self.event_queue.task_done()

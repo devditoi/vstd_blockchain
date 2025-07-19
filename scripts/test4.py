@@ -1,6 +1,9 @@
 from typing import cast
 from torch.jit import isinstance
 import ast
+from layer0.utils.logging_config import get_logger
+
+logger = get_logger(__name__)
 
 FORBIDDEN_MODULES = {"os", "sys", "random", "time", "socket", "subprocess"}
 FORBIDDEN_FUNCTIONS = {"eval", "exec", "open", "input", "__import__"}
@@ -49,15 +52,15 @@ def check_contract_safety(file_path: str):
                     mod = obj.id
                     if mod in FORBIDDEN_MODULES:
                         issues.append(f"❌ Cấm gọi: {mod}.{node.func.attr}")
-                        
+         
         if isinstance(node, ast.ClassDef):
             node = cast(ast.ClassDef, node)
-            print(f"Class: {node.name}")
+            logger.info("Class: %s", node.name)
             
             for item in node.body:
                 if isinstance(item, ast.FunctionDef):
                     item = cast(ast.FunctionDef, item)
-                    print(f"  Method: {item.name}")
+                    logger.info("  Method: %s", item.name)
 
     return issues
 

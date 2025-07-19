@@ -1,3 +1,7 @@
+from layer0.utils.logging_config import get_logger
+
+logger = get_logger(__name__)
+
 class StorageConstructor:
     def __init__(self, storage = None):
         self.storages: dict[str, "Storage"] = {}
@@ -18,8 +22,8 @@ class StorageConstructor:
     
     def event(self, name: str, data):
         # Log
-        print(f"Event: {name}")
-        print(data)
+        logger.debug(f"Event: {name}")
+        logger.debug(data)
     
     def export(self):
         storage = {}
