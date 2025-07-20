@@ -40,6 +40,22 @@ The system is organized into **three primary layers**:
 - [x] Cryptographic adapter system (RSA, ECDSA)
 - [x] Minting restricted to authorized keys
 - [x] Hex-encoded block outputs for readability
+- [x] Validator configuration via TOML file
+
+---
+
+## ⚙️ Configuration
+
+The blockchain uses a TOML configuration file for validator management:
+
+1. Create `config/validators.toml`
+2. Add validator public keys in the format:
+```toml
+validators = [
+    "public_key_1",
+    "public_key_2"
+]
+```
 
 ---
 

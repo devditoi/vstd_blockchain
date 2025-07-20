@@ -2,6 +2,8 @@
 from layer0.blockchain.core.block import Block
 from ..core.validator import Validator
 import time
+from layer0.config import ChainConfig
+
 class ConsensusProcessor:
     @staticmethod
     def process_block(data, last_block: Block, consensus, broadcast_callback, world_state) -> Block | None:
@@ -15,7 +17,19 @@ class ConsensusProcessor:
 
         worldstate_hash = world_state.get_hash()
 
-        block: Block = Block(last_block.index + 1, last_block.hash, time.time() * 1000, worldstate_hash, data)
+        # Create block with miner already set
+        # Calculate next proposer index
+        last_index = last_block.proposer_index
+        next_index = (last_index + 1) % len(ChainConfig.validators)
+        block = Block(
+            index=last_block.index + 1,
+            previous_hash=last_block.hash,
+            timestamp=time.time() * 1000,
+            worldstate_hash=worldstate_hash,
+            data=data,
+            miner=ChainConfig.validators[next_index],
+            proposer_index=next_index
+        )
 
         # Validate block
         if not Validator.validate_block_without_chain(block, last_block.hash):
@@ -23,10 +37,6 @@ class ConsensusProcessor:
             return None
 
         print("chain.py:process_block: Block valid, signing")
-
-        block.miner = consensus.get_validators() # Hardcoded
-        
-        # Receipts root are auto include?
 
         # Sign block
         consensus.sign_block(block)

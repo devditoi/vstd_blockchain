@@ -4,7 +4,7 @@ from layer0.utils.hash import HashUtils
 import jsonlight
 # from rich import print
 class Block:
-    def __init__(self, index, previous_hash, timestamp, worldstate_hash, data: list[Transaction]):
+    def __init__(self, index, previous_hash, timestamp, worldstate_hash, data: list[Transaction], miner: str | None = None, proposer_index: int = 0):
         self.index = index
         self.previous_hash = previous_hash
         self.timestamp = timestamp
@@ -14,7 +14,8 @@ class Block:
         self.address = None
         self.world_state_hash = worldstate_hash
         self.receipts_root: str | None = None # None before finalized
-        self.miner = None
+        self.miner = miner
+        self.proposer_index = proposer_index
         self.finalized = False
 
     def get_receipts_root(self) -> str:
@@ -31,6 +32,7 @@ class Block:
             "address": self.address,
             "world_state_hash": self.world_state_hash,
             "miner": self.miner,
+            "proposer_index": self.proposer_index,
         }, indent=2)
 
     def get_string_for_signature(self) -> str:
@@ -41,7 +43,8 @@ class Block:
             "data": self.data,
             "hash": self.hash,
             "world_state_hash": self.world_state_hash,
-            "miner": self.miner
+            "miner": self.miner,
+            "proposer_index": self.proposer_index
         })
 
     def __repr__(self):

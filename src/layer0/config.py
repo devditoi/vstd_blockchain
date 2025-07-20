@@ -1,4 +1,6 @@
+import toml
 from dataclasses import dataclass
+from typing import List
 
 @dataclass
 class ChainConfig:
@@ -14,7 +16,14 @@ class ChainConfig:
     MINT_KEY = "public_key.pem"
     BLOCK_HISTORY_LIMIT = 1000
     MAX_PEERS = 10
-    
+    validators: List[str] = []
+    try:
+        with open('config/validators.toml', 'r') as f:
+            config = toml.load(f)
+            validators = config['validators']
+    except FileNotFoundError:
+        validators = []
+
 @dataclass
 class FeatureFlags:
     DEBUG = False

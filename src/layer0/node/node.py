@@ -63,13 +63,23 @@ class Node:
         # TODO: Refactor this shit right here
         self.consensus = ProofOfAuthority(self.address, self.privateKey)
         
-        # TODO: Add the leader as a validator
-        self.worldState.add_validator(self.consensus.hardcoded_validator)
+        # Check if validators are configured
+        if not ChainConfig.validators:
+            raise RuntimeError("No validators configured. Create config/validators.toml")
+            
+        # Add validators to worldstate
+        for validator in ChainConfig.validators:
+            self.worldState.add_validator(validator)
         
         self.blockchain.set_initial_data(self.consensus, self.execution, self.propose_block, self.worldState, self.node_event_handler)
 
-        self.origin = ""
+        # Set genesis block proposer_index to 0
+        genesis_block = self.blockchain.get_block(0)
+        if genesis_block:
+            genesis_block.proposer_index = 0
 
+        self.origin = ""
+        
         self.chain_file = f"{self.address}_chain.json"
 
         # Bruh why :D
@@ -162,7 +172,7 @@ class Node:
     def get_block(self, height: int) -> Block | None:
         return self.blockchain.get_block(height)
 
-    def query_tx(self, query: str, field: str | None = None) -> list[dict]:
+    def query_tx(self, query: str, field: str | None = None) -> list[str]:
         return self.blockchain.query_tx(query, field)
 
     def query_block(self, query: str, field: str | None = None) -> list[str]:
