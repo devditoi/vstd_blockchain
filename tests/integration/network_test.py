@@ -9,7 +9,7 @@ from layer0.node.node import Node
 
 def start_node(port: int):
     node = Node()
-    node.debug()
+    node.log_state()
     node.set_origin(f"127.0.0.1:{port}")
     __other = RemotePeer("127.0.0.1", 5000)
     # inspect(__other)
@@ -22,7 +22,7 @@ def start_node(port: int):
 def data():
     master = Node()
     master.import_key("validator_key")
-    master.debug()
+    master.log_state()
 
     UDPProtocol(master.node_event_handler, 5000)
     master.set_origin("127.0.0.1:5000")
@@ -74,7 +74,7 @@ def test_network_check(data):
 
     # Check if a node can join the network
     node = Node()
-    node.debug()
+    node.log_state()
     node.set_origin("127.0.0.1:2710")
     __other = RemotePeer("127.0.0.1", 5000) # This is the bootstrap node
     node.node_event_handler.subscribe(__other)

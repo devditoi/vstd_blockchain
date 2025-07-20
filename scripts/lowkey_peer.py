@@ -11,7 +11,7 @@ logger = get_logger(__name__)
 if __name__ == '__main__':
     master = Node()
     # master.import_key("validator_key")
-    master.debug()
+    master.log_state()
 
     protocol = UDPProtocol(master.node_event_handler, 2710)
     master.set_origin("127.0.0.1:2710")
@@ -23,17 +23,17 @@ if __name__ == '__main__':
     pmint_key, mint_key = SignerFactory().get_signer().load("mint_key")
 
     time.sleep(30)
-    master.debug()
+    master.log_state()
     while True:
         # mint to self
         logger.info("Minting...")
         master.mint(w.address, mint_key, pmint_key)
-        master.debug()
+        master.log_state()
 
         logger.info("--------------------------------Waiting for confirm transaction...")
         currentMempool = len(master.node_event_handler.node.blockchain.mempool)
         while len(master.node_event_handler.node.blockchain.mempool) == currentMempool:
             time.sleep(1)
         logger.info("--------------------------------Done. Transaction confirmed.")
-        master.debug()
+        master.log_state()
         time.sleep(3)

@@ -31,7 +31,7 @@ app.add_middleware(
 
 # Initialize node
 master = Node()
-master.debug()
+master.log_state()
 
 # Setup P2P network
 protocol = UDPProtocol(master.node_event_handler, 9999)

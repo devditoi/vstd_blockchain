@@ -12,7 +12,7 @@ logger = get_logger(__name__)
 
 # Test 1
 # node = Node()
-# node.debug()
+# node.log_state()
 # node2 = Node()
 # # node2.sync(NodeSerializer.to_json(node))
 # node.subscribe(node2)
@@ -23,13 +23,13 @@ logger = get_logger(__name__)
 # node.mint(w1.address, privateK)
 #
 # print(NodeSyncServices.check_sync(node2, node))
-# node.debug()
-# node2.debug()
+# node.log_state()
+# node2.log_state()
 
 
 # Test 2
 # node = Node()
-# node.debug()
+# node.log_state()
 #
 # leader = Node()
 # leader.import_key("validator_key")
@@ -41,8 +41,8 @@ logger = get_logger(__name__)
 # pmint_key, mint_key = SignerFactory().get_signer().load("mint_key")
 # node.mint(wallet.address, mint_key, pmint_key)
 # #
-# # node.debug()
-# # leader.debug()
+# # node.log_state()
+# # leader.log_state()
 # #
 # # i = 0
 # # # Leader block creation in the background
@@ -54,15 +54,15 @@ logger = get_logger(__name__)
 # #     print(wallet2.get_balance())
 # #     i += 1
 # #
-# # node.debug()
-# # leader.debug()
+# # node.log_state()
+# # leader.log_state()
 # # print(wallet.get_balance())
 # # print(wallet2.get_balance())
 
 
 # Test 3
 # node = Node()
-# node.debug()
+# node.log_state()
 #
 # leader = Node()
 # leader.import_key("validator_key")
@@ -73,7 +73,7 @@ import multiprocessing
 from layer0.utils.logging_config import get_logger, setup_logging
 def start_node(port: int):
     node = Node()
-    node.debug()
+    node.log_state()
     setup_logging(
         node_address=node.address,
         console_log=True,
@@ -106,7 +106,7 @@ if __name__ == '__main__':
 
     master = Node()
     master.import_key("validator_key")
-    master.debug()
+    master.log_state()
     
     # Reconfigure logging with node address
     setup_logging(

@@ -1,9 +1,9 @@
 from layer0.node.node import Node
 
 validator = Node()
-validator.debug()
+validator.log_state()
 validator.export_key("mint_key")
 
 leader = Node()
-leader.debug()
+leader.log_state()
 leader.export_key("validator_key")

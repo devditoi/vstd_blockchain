@@ -32,3 +32,7 @@ poetry.lock
 # Test data
 chain_*_blockchain
 chain_*_transaction
+
+.opencode
+.pytest_cache
+.ruff_cache

@@ -213,3 +213,17 @@ class Node:
         # Block execution only happend after block is processed
         excecutor = TransactionProcessor(block, self.worldState)
         excecutor.process()
+    def log_state(self):
+        """Log key node state information for debugging"""
+        with self.node_event_handler.lock:  # Thread-safe peer access
+            peer_count = len(self.node_event_handler.peers)
+        chain_height = self.get_height()
+        pending_txs = len(self.get_txs())
+        
+        logger.info(
+            f"Node State: "
+            f"Peers={peer_count}, "
+            f"Height={chain_height}, "
+            f"Pending TXs={pending_txs}, "
+            f"Validator={self.isValidator}"
+        )
