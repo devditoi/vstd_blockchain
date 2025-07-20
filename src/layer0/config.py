@@ -1,6 +1,6 @@
 import toml
-from dataclasses import dataclass
-from typing import List
+from dataclasses import dataclass, field
+from typing import List, ClassVar
 
 @dataclass
 class ChainConfig:
@@ -16,13 +16,14 @@ class ChainConfig:
     MINT_KEY = "public_key.pem"
     BLOCK_HISTORY_LIMIT = 1000
     MAX_PEERS = 10
-    validators: List[str] = []
+    _DEFAULT_VALIDATORS: ClassVar[List[str]] = []
     try:
         with open('config/validators.toml', 'r') as f:
             config = toml.load(f)
-            validators = config['validators']
+            _DEFAULT_VALIDATORS = config['validators']
     except FileNotFoundError:
-        validators = []
+        _DEFAULT_VALIDATORS = []
+    validators: List[str] = field(default_factory=lambda: list(ChainConfig._DEFAULT_VALIDATORS))
 
 @dataclass
 class FeatureFlags:
