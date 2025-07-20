@@ -1,7 +1,10 @@
 from layer0.utils.ThreadUtils import defer
 from layer0.node.node_event_handler import NodeEventHandler
 from layer0.node.events.node_event import NodeEvent
-from layer0.blockchain.consensus.poa_consensus import ProofOfAuthority
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from layer0.blockchain.consensus.poa_consensus import ProofOfAuthority
 import time
 
 # from ecdsa import VerifyingKey
@@ -42,7 +45,7 @@ class Chain:
         
         self.isValidator = False
 
-        self.consensus: ProofOfAuthority | None = None
+        self.consensus: 'ProofOfAuthority | None' = None
         self.execution_callback = None
         self.broadcast_callback = None
         self.world_state = None
@@ -158,7 +161,7 @@ class Chain:
                 "signatures": sig,
                 "address": self.neh.node.address,
                 "publicKey": SignerFactory().get_signer().serialize(self.neh.node.publicKey),
-            }, self.neh.node.origin)
+            }, self.neh.node.address)
             
             # self.neh.broadcast(event)
             defer(self.neh.broadcast, 1, event)

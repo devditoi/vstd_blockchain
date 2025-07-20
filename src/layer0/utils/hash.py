@@ -23,10 +23,9 @@ class HashUtils:
 
     @staticmethod
     def get_address_ecdsa(publicKey: VerifyingKey) -> str:
-        if FeatureFlags.DEBUG:
-            logger.debug(f"ECDSA PublicKey raw: {publicKey.to_string()}")
-            logger.debug(f"ECDSA PublicKey hex: {publicKey.to_string().hex()}")
-        return HashUtils.sha256(publicKey.to_string().hex())
+        # Use compressed public key format
+        compressed_pubkey = publicKey.to_string("compressed").hex()
+        return HashUtils.sha256(compressed_pubkey)
 
     @staticmethod
     def gen_key() -> tuple[PublicKey, PrivateKey]:
