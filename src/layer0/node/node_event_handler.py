@@ -1,3 +1,4 @@
+from rich import inspect
 import logging
 from typing import Any
 from layer0.node.events.impl.chain_event.bft_block_event import BFTBlockEvent
@@ -153,6 +154,7 @@ class NodeEventHandler:
         """Worker thread that processes events from queue"""
         while True:
             event, callback = self.event_queue.get()
+            # inspect(event)
             try:
                 result = self.process_event(event)
                 if result:

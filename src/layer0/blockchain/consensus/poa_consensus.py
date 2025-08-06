@@ -14,6 +14,10 @@ class ProofOfAuthority(IConsensus):
         self.set_public_key()
 
     def is_valid(self, block: Block) -> bool:
+        # Genesis block is always valid
+        if block.index == 0:
+            return True
+        
         # Verify block signature
         return (
             self.signer.verify(block.get_string_for_signature(), block.signature, self.publicKey)
@@ -28,7 +32,9 @@ class ProofOfAuthority(IConsensus):
         # pass
 
     def is_leader(self) -> bool:
-        print(self.address, self.chain_config.validators[0])
+        # print(self.address, self.chain_config.validators[0])
+        if not self.chain_config.validators:
+            return False
         return self.address == self.chain_config.validators[0]
 
     def sign_block(self, block: Block) -> None:

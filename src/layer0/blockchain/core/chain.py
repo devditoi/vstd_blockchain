@@ -69,6 +69,7 @@ class Chain:
         # self.chain = [self.genesis_block]
         self.chain.clear()
         self.chain.add_block(self.genesis_block)
+        self.height = 1
 
     def get_tx(self, tx_hash) -> Transaction | None:
         return self.chain.get_tx(tx_hash)
@@ -161,7 +162,7 @@ class Chain:
                 "signatures": sig,
                 "address": self.neh.node.address,
                 "publicKey": SignerFactory().get_signer().serialize(self.neh.node.publicKey),
-            }, self.neh.node.address)
+            }, self.neh.node.origin)
             
             # self.neh.broadcast(event)
             defer(self.neh.broadcast, 1, event)
@@ -239,6 +240,7 @@ class Chain:
 
         # self.mempool_lock.acquire()
         self.mempool.append(transaction)
+        self.mempool_tx_id.add(transaction.hash)
         # self.mempool_lock.release()
 
         # if not self.consensus.is_leader(): # Check if leader

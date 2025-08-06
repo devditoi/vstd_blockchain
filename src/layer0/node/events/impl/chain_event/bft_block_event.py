@@ -3,7 +3,7 @@ from layer0.utils.crypto.signer import SignerFactory
 from math import floor
 from layer0.blockchain.core.block import Block
 from ecdsa import VerifyingKey
-
+from rich import inspect
 from layer0.blockchain.processor.block_processor import BlockProcessor
 from layer0.node.events.EventHandler import EventHandler
 from layer0.node.events.node_event import NodeEvent
@@ -52,11 +52,14 @@ class BFTBlockEvent(EventHandler):
             return False
         
         blockchain_instance = self.neh.node.blockchain
+    
+        inspect(event.data)
         
         sign: str = event.data["signatures"]
         address: str = event.data["address"]
         publicKey: str = event.data["publicKey"]
         pk_obj: VerifyingKey = SignerFactory().get_signer().deserialize(publicKey)
+    
         
         # is the address is indeed with the public key?
         if not SignerFactory().get_signer().address(pk_obj) == address:

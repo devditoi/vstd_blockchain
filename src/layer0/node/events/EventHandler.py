@@ -36,8 +36,10 @@ class EventFactory:
         handler = self.handlers.get(event.eventType)
 
         if handler:
-            if not is_valid_origin(event.origin):
-                print("[EventFactory] Invalid origin:", event.origin)
+            validation_result = is_valid_origin(event.origin)
+            # print(f"[DEBUG] EventFactory.handle() - origin: {event.origin}, validation: {validation_result}")
+            if not validation_result:
+                # print("[EventFactory] Invalid origin:", event.origin)
                 return False
 
             if len(handler.require_field()) > 0:

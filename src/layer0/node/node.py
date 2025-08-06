@@ -57,7 +57,7 @@ class Node:
         self.blockchain.set_initial_data(
             self.consensus,
             self.execution,
-            self.node_event_handler.propose_block,
+            self.propose_block,
             self.worldState,
             self.node_event_handler
         )

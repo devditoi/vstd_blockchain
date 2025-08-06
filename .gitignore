@@ -36,3 +36,14 @@ chain_*_transaction
 .opencode
 .pytest_cache
 .ruff_cache
+.aider*
+
+### BROKK'S CONFIGURATION ###
+.brokk/**
+/.brokk/workspace.properties
+/.brokk/sessions/
+/.brokk/dependencies/
+/.brokk/history.zip
+!.brokk/style.md
+!.brokk/review.md
+!.brokk/project.properties
