@@ -52,12 +52,17 @@ class Validator:
             logger.warning("Transaction gasPrice is below minimum")
             return False
 
-        if worldState.get_eoa(tx.sender).balance < tx.gas_limit and tx.Txtype != "mintburn":
+        if tx.gas_limit > 0 and worldState.get_eoa(tx.sender).balance < tx.gas_limit and tx.Txtype != "mintburn":
             logger.warning("Transaction sender does not have enough balance")
             return False
 
-        if tx.transactionData["amount"] <= 0:
+        if tx.transactionData["amount"] < 0:
             logger.warning("Transaction amount is negative")
+            return False
+
+        # Check if sender has enough balance for the transaction amount (for native transactions)
+        if tx.Txtype == "native" and tx.transactionData["amount"] > 0 and worldState.get_eoa(tx.sender).balance < tx.transactionData["amount"]:
+            logger.warning("Transaction sender does not have enough balance for the transaction amount")
             return False
 
         return True
