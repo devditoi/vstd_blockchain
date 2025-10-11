@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 import jsonlight
 import json
+import copy
 from typing import Any
 from layer0.utils.hash import HashUtils
 
@@ -59,8 +60,9 @@ class WorldState:
         return self.__validator
 
     def set_eoa_and_smart_contract(self, eoas: dict[str, EOA], smartContracts: dict[str, SmartContract]):
-        self.__eoas = eoas
-        self.__smartContracts = smartContracts
+        # Create deep copies of the EOA and SmartContract objects to ensure encapsulation
+        self.__eoas = copy.deepcopy(eoas)
+        self.__smartContracts = copy.deepcopy(smartContracts)
 
     def __str__(self) -> str:
         return f"WorldState(eoas={self.__eoas}, smartContracts={self.__smartContracts})"
@@ -89,15 +91,36 @@ class WorldState:
 
     def build_worldstate(self, json_string: str):
         data: Any = json.loads(json_string)
-        self.__eoas = json.loads(data["eoas"])
-        self.__smartContracts = json.loads(data["smartContracts"])
+        eoas_data = json.loads(data["eoas"])
+        smart_contracts_data = json.loads(data["smartContracts"])
+        
+        # Reconstruct EOA objects from JSON data
+        self.__eoas = {}
+        for address, eoa_data in eoas_data.items():
+            self.__eoas[address] = EOA(
+                address=eoa_data["address"],
+                balance=eoa_data["balance"],
+                nonce=eoa_data["nonce"]
+            )
+        
+        # Reconstruct SmartContract objects from JSON data
+        self.__smartContracts = {}
+        for address, sc_data in smart_contracts_data.items():
+            self.__smartContracts[address] = SmartContract(
+                address=sc_data["address"],
+                balance=sc_data["balance"],
+                nonce=sc_data["nonce"],
+                codeHash=sc_data["codeHash"],
+                storage=sc_data["storage"]
+            )
+        
         print("worldstate.py:build_worldstate: built worldstate")
 
     def get_eoa_full(self):
-        return self.__eoas.copy()
+        return copy.deepcopy(self.__eoas)
 
     def get_smart_contract_full(self):
-        return self.__smartContracts.copy()
+        return copy.deepcopy(self.__smartContracts)
 
     def get_hash(self):
         return HashUtils.sha256(self.to_json())
@@ -105,4 +128,6 @@ class WorldState:
     def clone(self):
         copy = WorldState()
         copy.set_eoa_and_smart_contract(self.get_eoa_full(), self.get_smart_contract_full())
+        # Copy validators as well
+        copy.__validator = copy.deepcopy(self.__validator)
         return copy
