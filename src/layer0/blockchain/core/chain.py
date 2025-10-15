@@ -170,7 +170,7 @@ class Chain:
         return block
 
     def finalize_block(self, block: Block):
-        logger.info(f"Block #{block.index} is finalized")
+        logger.info(f"[Block] height={block.index} hash=0x{block.hash} parent=0x{block.previous_hash} proposer=Node{block.proposer_index + 1} tx_count={len(block.data)}")
         block.finalized = True
         self.chain.add_block(block, False)
         self.height += 1

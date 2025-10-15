@@ -54,7 +54,8 @@ class WorldState:
         self.__validator = []
         
     def add_validator(self, validator: str):
-        self.__validator.append(validator)
+        if validator not in self.__validator:
+            self.__validator.append(validator)
         
     def get_validators(self) -> list[str]:
         return self.__validator
@@ -126,8 +127,8 @@ class WorldState:
         return HashUtils.sha256(self.to_json())
 
     def clone(self):
-        copy = WorldState()
-        copy.set_eoa_and_smart_contract(self.get_eoa_full(), self.get_smart_contract_full())
+        cloned = WorldState()
+        cloned.set_eoa_and_smart_contract(self.get_eoa_full(), self.get_smart_contract_full())
         # Copy validators as well
-        copy.__validator = copy.deepcopy(self.__validator)
-        return copy
+        cloned.__validator = copy.deepcopy(self.__validator)
+        return cloned

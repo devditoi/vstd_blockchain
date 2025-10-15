@@ -182,13 +182,13 @@ There is no 0x so cutting the first 2 characters mean cut the whole signature. l
 ### Problems
 - Reconfig consensus to use BFT
 - BFT confirmation
-- Because the BFT, also because the transaction process after the block is sended,
+- Because the BFT, also because the transaction process after the block is sent,
 so we need to send the receipts root to all nodes if we are validator
 leader are validator
 any node that receive > 2/3 of the receipts root can mark a block finalized
 
 ### Solutions
-- [] Implement BFT confirmation
+- [x] Implement BFT confirmation
 
 ## July 4, 2025
 
@@ -197,5 +197,13 @@ any node that receive > 2/3 of the receipts root can mark a block finalized
 - Continue implementing smart contract
 
 ### Solutions
-- [ ] Implement smart contract
+- [x] Implement smart contract
 - [ ] Implement BFT confirmation
+
+## October 15 2025
+
+### Problems
+- IDK just refactoring and cleaning up
+
+### Solutions
+- [ ] Try to fix the tests
